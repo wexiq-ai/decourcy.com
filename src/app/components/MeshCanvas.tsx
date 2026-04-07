@@ -13,6 +13,7 @@ export default function MeshCanvas() {
 
     let animId: number;
     let time = 0;
+    let lastTimestamp = 0;
 
     function resize() {
       canvas!.width = window.innerWidth;
@@ -144,7 +145,13 @@ export default function MeshCanvas() {
       return { r, g, b, opacity, e };
     }
 
-    function animate() {
+    function animate(timestamp: number) {
+      // Delta-time for smooth frame-rate-independent animation
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const dt = (timestamp - lastTimestamp) / 16.667; // normalize to ~60fps
+      lastTimestamp = timestamp;
+      time += dt;
+
       const w = canvas!.width;
       const h = canvas!.height;
       ctx!.clearRect(0, 0, w, h);
@@ -223,11 +230,10 @@ export default function MeshCanvas() {
         }
       }
 
-      time += 1;
       animId = requestAnimationFrame(animate);
     }
 
-    animate();
+    animId = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener("resize", resize);
