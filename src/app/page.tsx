@@ -13,7 +13,7 @@ export default function Home() {
             WebkitTextStroke: "0.5px rgba(255, 255, 255, 0.45)",
           }}
         >
-          D<span className="text-[0.75em]">E</span>COURCY.COM
+          D<span className="text-[0.75em]">E</span>COURCY.<span className="text-[0.75em]">COM</span>
         </h1>
       </div>
     </div>
