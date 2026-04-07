@@ -66,16 +66,16 @@ export default function MeshCanvas() {
 
     // ── Exact wexiq.ai terrain ──
     function terrainHeight(gx: number, gz: number, t: number) {
-      const scrollZ = gz - t * 0.02;
-      const scrollX = gx - t * 0.015;
-      const h1 = fbm(scrollX * 0.15, scrollZ * 0.15) * 4.0;
+      const scrollZ = gz - t * 0.03;
+      const scrollX = gx - t * 0.0225;
+      const h1 = fbm(scrollX * 0.15, scrollZ * 0.15) * 6.0;
       const h2 =
         (1.0 - Math.abs(noise(scrollX * 0.08, scrollZ * 0.12) * 2.0 - 1.0)) *
-        2.5;
+        3.75;
       const h3 =
-        Math.sin(scrollX * 0.2 + t * 0.005) *
+        Math.sin(scrollX * 0.2 + t * 0.0075) *
         Math.cos(scrollZ * 0.15) *
-        1.5;
+        2.25;
       return h1 + h2 + h3;
     }
 
