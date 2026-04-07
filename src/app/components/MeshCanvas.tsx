@@ -53,9 +53,9 @@ export default function MeshCanvas() {
       return v / total;
     }
 
-    // ── Exact wexiq.ai grid params ──
+    // ── Grid params (ROWS +33% for more vertical coverage via density) ──
     const COLS = 200;
-    const ROWS = 60;
+    const ROWS = 80;
     const GRID_X = 50;
     const GRID_Z = 14;
 
@@ -149,16 +149,6 @@ export default function MeshCanvas() {
       const h = canvas!.height;
       ctx!.clearRect(0, 0, w, h);
 
-      // ── Apply 90° clockwise rotation to entire render ──
-      // This turns the horizontal landscape into a vertical flow
-      ctx!.save();
-      ctx!.translate(w / 2, h / 2);
-      ctx!.rotate(Math.PI / 2); // 90° CW
-      // Scale uniformly so the rotated image covers the viewport
-      const coverScale = Math.max(w / h, h / w);
-      ctx!.scale(coverScale, coverScale);
-      ctx!.translate(-w / 2, -h / 2);
-
       const halfX = GRID_X / 2;
       const maxDepth = GRID_Z + 2;
 
@@ -232,8 +222,6 @@ export default function MeshCanvas() {
           }
         }
       }
-
-      ctx!.restore(); // undo rotation transform
 
       time += 1;
       animId = requestAnimationFrame(animate);
