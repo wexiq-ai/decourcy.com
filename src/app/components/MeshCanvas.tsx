@@ -60,54 +60,36 @@ export default function MeshCanvas() {
       return v / total;
     }
 
-    // 3D terrain mesh — rotated so depth flows top-to-bottom
-    const COLS = 200;
-    const ROWS = 60;
-    const GRID_X = 50; // horizontal spread
-    const GRID_Z = 14; // depth range
+    // Grid dimensions — rows flow top-to-bottom, cols span left-to-right
+    const COLS = 160;
+    const ROWS = 80;
 
-    // Camera / perspective
-    const camY = -3.5;
-    const camZ = -8;
-    const fov = 500;
-
-    function terrainHeight(gx: number, gz: number, t: number) {
-      // Scroll terrain "downward" — increase gz over time so mesh flows toward viewer
-      const scrollZ = gz - t * 0.02;
-      const scrollX = gx - t * 0.01;
-      const h1 = fbm(scrollX * 0.15, scrollZ * 0.15) * 4.0;
+    function terrainDisplacement(gx: number, gy: number, t: number) {
+      // Scroll downward over time
+      const scrollY = gy - t * 0.025;
+      const scrollX = gx - t * 0.008;
+      const h1 = fbm(scrollX * 0.12, scrollY * 0.12) * 1.0;
       const h2 =
-        (1.0 - Math.abs(noise(scrollX * 0.08, scrollZ * 0.12) * 2.0 - 1.0)) *
-        2.5;
+        (1.0 - Math.abs(noise(scrollX * 0.08, scrollY * 0.1) * 2.0 - 1.0)) *
+        0.6;
       const h3 =
-        Math.sin(scrollX * 0.2 + t * 0.005) *
-        Math.cos(scrollZ * 0.15) *
-        1.5;
+        Math.sin(scrollX * 0.18 + t * 0.004) *
+        Math.cos(scrollY * 0.12) *
+        0.4;
       return h1 + h2 + h3;
     }
 
-    function project(
-      x3d: number,
-      y3d: number,
-      z3d: number,
-      w: number,
-      h: number
+    // Green color palette based on displacement intensity
+    function colorFromDisplacement(
+      d: number,
+      rowRatio: number
     ) {
-      const dz = z3d - camZ;
-      if (dz <= 0.1) return null;
-      const scale = fov / dz;
-      return {
-        sx: w * 0.5 + x3d * scale,
-        sy: h * 0.5 + (y3d - camY) * scale,
-        scale: scale,
-        depth: dz,
-      };
-    }
+      // Normalize displacement to 0-1
+      const e = Math.min(1, Math.max(0, (d + 0.2) / 2.2));
 
-    // Green color palette based on terrain height
-    function colorFromHeight(h: number, depth: number, maxDepth: number) {
-      const e = Math.min(1, Math.max(0, (h + 1.0) / 6.5));
-      const depthFade = 1.0 - (depth / maxDepth) * 0.6;
+      // Fade at top and bottom edges
+      const edgeFade =
+        Math.min(1, rowRatio * 4) * Math.min(1, (1 - rowRatio) * 4);
 
       let r: number, g: number, b: number;
       if (e < 0.15) {
@@ -142,11 +124,11 @@ export default function MeshCanvas() {
         b = 146 + t * 60;
       }
 
-      r = Math.floor(r * depthFade);
-      g = Math.floor(g * depthFade);
-      b = Math.floor(b * depthFade);
+      r = Math.floor(r * edgeFade);
+      g = Math.floor(g * edgeFade);
+      b = Math.floor(b * edgeFade);
 
-      const opacity = (0.15 + e * 0.55) * depthFade;
+      const opacity = (0.15 + e * 0.55) * edgeFade;
       return { r, g, b, opacity, e };
     }
 
@@ -155,71 +137,81 @@ export default function MeshCanvas() {
       const h = canvas!.height;
       ctx!.clearRect(0, 0, w, h);
 
-      const halfX = GRID_X / 2;
-      const maxDepth = GRID_Z + 2;
+      // Overshoot grid beyond viewport edges so lines don't clip
+      const margin = 60;
 
-      // Build projected grid
-      const grid: (ReturnType<typeof project> & { height: number })[][] = [];
+      // Build the grid: each point gets a screen position
+      // Rows = vertical (top to bottom), Cols = horizontal (left to right)
+      // Terrain displacement shifts points horizontally (X offset)
+      const grid: { sx: number; sy: number; d: number; rowRatio: number }[][] =
+        [];
       for (let row = 0; row < ROWS; row++) {
-        const gz = (row / ROWS) * GRID_Z + 1.0;
-        const gridRow: (ReturnType<typeof project> & { height: number })[] = [];
+        const rowRatio = row / (ROWS - 1);
+        const baseY = -margin + rowRatio * (h + 2 * margin);
+        const gridRow: { sx: number; sy: number; d: number; rowRatio: number }[] = [];
         for (let col = 0; col < COLS; col++) {
-          const gx = (col / (COLS - 1)) * GRID_X - halfX;
-          const gy = -terrainHeight(gx, gz, time);
-          const p = project(gx, gy, gz, w, h);
-          if (p) {
-            gridRow.push({ ...p, height: -gy });
-          } else {
-            gridRow.push(null as unknown as typeof gridRow[0]);
-          }
+          const colRatio = col / (COLS - 1);
+          const baseX = -margin + colRatio * (w + 2 * margin);
+
+          // Normalized grid coordinates for noise
+          const gx = colRatio * 20;
+          const gy = rowRatio * 20;
+          const d = terrainDisplacement(gx, gy, time);
+
+          // Displacement offsets the point position
+          const dx = d * 25; // horizontal displacement
+          const dy = d * 12; // slight vertical displacement
+
+          gridRow.push({
+            sx: baseX + dx,
+            sy: baseY + dy,
+            d,
+            rowRatio,
+          });
         }
         grid.push(gridRow);
       }
 
-      // Draw back-to-front
+      // Draw horizontal lines (flowing bands)
       for (let row = 0; row < ROWS; row++) {
-        // Horizontal lines
         ctx!.beginPath();
         let started = false;
         for (let col = 0; col < COLS; col++) {
           const p = grid[row][col];
-          if (!p) continue;
           if (!started) {
             ctx!.moveTo(p.sx, p.sy);
             started = true;
-          } else ctx!.lineTo(p.sx, p.sy);
+          } else {
+            ctx!.lineTo(p.sx, p.sy);
+          }
         }
         if (started) {
-          const midCol = Math.floor(COLS / 2);
-          const midP = grid[row][midCol];
-          if (midP) {
-            const c = colorFromHeight(midP.height, midP.depth, maxDepth);
-            ctx!.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${c.opacity})`;
-            ctx!.lineWidth = Math.max(0.3, 0.4 + c.e * 1.2);
-            if (c.e > 0.55) {
-              ctx!.shadowColor = `rgba(34, 197, 94, ${(c.e - 0.55) * 0.6})`;
-              ctx!.shadowBlur = 4 + c.e * 8;
-            }
-            ctx!.stroke();
-            ctx!.shadowBlur = 0;
+          const midP = grid[row][Math.floor(COLS / 2)];
+          const c = colorFromDisplacement(midP.d, midP.rowRatio);
+          ctx!.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${c.opacity})`;
+          ctx!.lineWidth = Math.max(0.3, 0.4 + c.e * 1.0);
+          if (c.e > 0.55) {
+            ctx!.shadowColor = `rgba(34, 197, 94, ${(c.e - 0.55) * 0.5})`;
+            ctx!.shadowBlur = 4 + c.e * 6;
           }
+          ctx!.stroke();
+          ctx!.shadowBlur = 0;
         }
+      }
 
-        // Vertical mesh connectors
-        if (row > 0) {
-          for (let col = 0; col < COLS; col += 2) {
-            const cur = grid[row][col];
-            const prev = grid[row - 1][col];
-            if (!cur || !prev) continue;
+      // Draw vertical connectors (every other column)
+      for (let row = 1; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col += 3) {
+          const cur = grid[row][col];
+          const prev = grid[row - 1][col];
 
-            const c = colorFromHeight(cur.height, cur.depth, maxDepth);
-            ctx!.beginPath();
-            ctx!.moveTo(prev.sx, prev.sy);
-            ctx!.lineTo(cur.sx, cur.sy);
-            ctx!.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${c.opacity * 0.35})`;
-            ctx!.lineWidth = Math.max(0.2, 0.3 + c.e * 0.4);
-            ctx!.stroke();
-          }
+          const c = colorFromDisplacement(cur.d, cur.rowRatio);
+          ctx!.beginPath();
+          ctx!.moveTo(prev.sx, prev.sy);
+          ctx!.lineTo(cur.sx, cur.sy);
+          ctx!.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${c.opacity * 0.3})`;
+          ctx!.lineWidth = Math.max(0.2, 0.25 + c.e * 0.35);
+          ctx!.stroke();
         }
       }
 
@@ -236,36 +228,39 @@ export default function MeshCanvas() {
         const col = p.col;
         if (row >= grid.length || col >= (grid[0]?.length ?? 0)) continue;
         const gp = grid[row][col];
-        if (!gp) continue;
 
-        const maxD = GRID_Z + 2;
-        const depthRatio = Math.max(0, 1.0 - gp.depth / maxD);
-        const depthIntensity = 0.08 + depthRatio * 0.92;
+        // Brightness based on position (center of screen brighter)
+        const centerDist = Math.abs(gp.rowRatio - 0.5) * 2;
+        const intensity = 1.0 - centerDist * 0.6;
 
         const life = p.age / p.lifespan;
         let alpha: number;
         if (life < 0.1) alpha = life / 0.1;
         else if (life > 0.6) alpha = (1 - life) / 0.4;
         else alpha = 1;
-        alpha *= depthIntensity;
+        alpha *= intensity;
 
-        const radius = (1.5 + p.size * 1.5) * (0.5 + depthRatio * 0.5);
-        const glowSize = (8 + p.size * 6) * depthIntensity;
+        const edgeFade =
+          Math.min(1, gp.rowRatio * 4) * Math.min(1, (1 - gp.rowRatio) * 4);
+        alpha *= edgeFade;
+
+        const radius = 1.2 + p.size * 1.2;
+        const glowSize = (6 + p.size * 5) * intensity;
 
         ctx!.beginPath();
         ctx!.arc(gp.sx, gp.sy, radius, 0, Math.PI * 2);
-        ctx!.shadowColor = `rgba(187, 247, 208, ${0.9 * depthIntensity})`;
+        ctx!.shadowColor = `rgba(187, 247, 208, ${0.8 * intensity})`;
         ctx!.shadowBlur = glowSize;
-        ctx!.fillStyle = `rgba(220, 252, 231, ${alpha * 0.95})`;
+        ctx!.fillStyle = `rgba(220, 252, 231, ${alpha * 0.9})`;
         ctx!.fill();
         ctx!.shadowBlur = 0;
       }
 
       // Spawn particles
       for (let s = 0; s < 4; s++) {
-        if (Math.random() < 0.4) {
+        if (Math.random() < 0.35) {
           const row = Math.floor(Math.random() * ROWS);
-          const col = Math.floor(Math.random() * Math.floor(COLS / 2)) * 2;
+          const col = Math.floor(Math.random() * Math.floor(COLS / 3)) * 3;
           particles.push({
             row,
             col,

@@ -5,8 +5,14 @@ export default function Home() {
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#071a0e]">
       <MeshCanvas />
       <div className="relative z-10 text-center animate-fade-in">
-        <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-green-200 via-emerald-400 to-green-600 drop-shadow-lg select-none">
-          DeCourcy.com
+        <h1
+          className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[0.25em] uppercase select-none"
+          style={{
+            color: "rgba(255, 255, 255, 0.85)",
+            WebkitTextStroke: "0.5px rgba(255, 255, 255, 0.9)",
+          }}
+        >
+          D<span className="text-[0.75em]">E</span>COURCY.COM
         </h1>
       </div>
     </div>
