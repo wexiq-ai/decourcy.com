@@ -13,6 +13,13 @@ export default function MeshCanvas() {
 
     let animId: number;
     let time = 0;
+    const particles: {
+      row: number;
+      col: number;
+      age: number;
+      lifespan: number;
+      size: number;
+    }[] = [];
 
     function resize() {
       canvas!.width = window.innerWidth;
@@ -21,7 +28,7 @@ export default function MeshCanvas() {
     window.addEventListener("resize", resize);
     resize();
 
-    // Value noise
+    // ── Exact wexiq.ai noise ──
     function hash(n: number) {
       const s = Math.sin(n) * 43758.5453;
       return s - Math.floor(s);
@@ -53,28 +60,55 @@ export default function MeshCanvas() {
       return v / total;
     }
 
-    // Sparser grid for less density
-    const COLS = 80;
-    const ROWS = 40;
+    // ── Exact wexiq.ai grid params ──
+    const COLS = 200;
+    const ROWS = 60;
+    const GRID_X = 50;
+    const GRID_Z = 14;
 
-    function terrainDisplacement(gx: number, gy: number, t: number) {
-      const scrollY = gy - t * 0.03;
-      const scrollX = gx - t * 0.006;
-      // Bigger amplitudes for more undulation
-      const h1 = fbm(scrollX * 0.08, scrollY * 0.08) * 2.0;
+    // ── Exact wexiq.ai camera ──
+    const camY = -3.5;
+    const camZ = -8;
+    const fov = 500;
+
+    // ── Exact wexiq.ai terrain ──
+    function terrainHeight(gx: number, gz: number, t: number) {
+      const scrollZ = gz - t * 0.02;
+      const scrollX = gx - t * 0.015;
+      const h1 = fbm(scrollX * 0.15, scrollZ * 0.15) * 4.0;
       const h2 =
-        (1.0 - Math.abs(noise(scrollX * 0.05, scrollY * 0.07) * 2.0 - 1.0)) *
-        1.4;
+        (1.0 - Math.abs(noise(scrollX * 0.08, scrollZ * 0.12) * 2.0 - 1.0)) *
+        2.5;
       const h3 =
-        Math.sin(scrollX * 0.12 + t * 0.003) *
-        Math.cos(scrollY * 0.09) *
-        1.0;
+        Math.sin(scrollX * 0.2 + t * 0.005) *
+        Math.cos(scrollZ * 0.15) *
+        1.5;
       return h1 + h2 + h3;
     }
 
-    // Green color palette
-    function colorFromDisplacement(d: number) {
-      const e = Math.min(1, Math.max(0, (d + 0.5) / 4.5));
+    // ── Exact wexiq.ai projection ──
+    function project(
+      x3d: number,
+      y3d: number,
+      z3d: number,
+      w: number,
+      h: number
+    ) {
+      const dz = z3d - camZ;
+      if (dz <= 0.1) return null;
+      const scale = fov / dz;
+      return {
+        sx: w * 0.5 + x3d * scale,
+        sy: h * 0.5 + (y3d - camY) * scale,
+        scale,
+        depth: dz,
+      };
+    }
+
+    // ── Green color palette (same structure as wexiq blue, remapped to green) ──
+    function colorFromHeight(h: number, depth: number, maxDepth: number) {
+      const e = Math.min(1, Math.max(0, (h + 1.0) / 6.5));
+      const depthFade = 1.0 - (depth / maxDepth) * 0.6;
 
       let r: number, g: number, b: number;
       if (e < 0.15) {
@@ -109,7 +143,11 @@ export default function MeshCanvas() {
         b = 146 + t * 60;
       }
 
-      const opacity = 0.15 + e * 0.55;
+      r = Math.floor(r * depthFade);
+      g = Math.floor(g * depthFade);
+      b = Math.floor(b * depthFade);
+
+      const opacity = (0.15 + e * 0.55) * depthFade;
       return { r, g, b, opacity, e };
     }
 
@@ -118,124 +156,144 @@ export default function MeshCanvas() {
       const h = canvas!.height;
       ctx!.clearRect(0, 0, w, h);
 
-      // Trapezoid: narrow at top, wide at bottom
-      const topWidth = w * 0.15;
-      const bottomWidth = w * 0.75;
+      // ── Apply 90° clockwise rotation to entire render ──
+      // This turns the horizontal landscape into a vertical flow
+      ctx!.save();
+      ctx!.translate(w / 2, h / 2);
+      ctx!.rotate(Math.PI / 2); // 90° CW
+      // Scale uniformly so the rotated image covers the viewport
+      const coverScale = Math.max(w / h, h / w);
+      ctx!.scale(coverScale, coverScale);
+      ctx!.translate(-w / 2, -h / 2);
 
-      // Continuous downward flow: rows scroll down over time
-      // The spacing between rows in pixels
-      const totalHeight = h + 200; // extend beyond viewport top and bottom
-      const rowSpacing = totalHeight / (ROWS - 1);
+      const halfX = GRID_X / 2;
+      const maxDepth = GRID_Z + 2;
 
-      // flowOffset increases over time, pushing everything down
-      // When a row goes past the bottom, it wraps to the top
-      const flowSpeed = 0.8; // pixels per frame
-      const flowOffset = (time * flowSpeed) % rowSpacing;
-
-      // Build the grid with flowing Y positions
-      const grid: { sx: number; sy: number; d: number; rowRatio: number }[][] =
-        [];
+      // ── Exact wexiq.ai grid build ──
+      const grid: ({
+        sx: number;
+        sy: number;
+        scale: number;
+        depth: number;
+        height: number;
+      } | null)[][] = [];
       for (let row = 0; row < ROWS; row++) {
-        // Base Y position with flow offset — wraps seamlessly
-        let baseY = -100 + row * rowSpacing + flowOffset;
-        // Wrap: if a row flows past the bottom edge, it reappears at the top
-        if (baseY > h + 100) {
-          baseY -= totalHeight;
-        }
-
-        // rowRatio for the trapezoid width is based on screen position, not grid index
-        const screenRatio = Math.min(1, Math.max(0, (baseY + 100) / (h + 200)));
-
-        const ease = screenRatio * screenRatio;
-        const rowWidth = topWidth + (bottomWidth - topWidth) * ease;
-        const rowLeft = (w - rowWidth) / 2;
-
-        const gridRow: {
-          sx: number;
-          sy: number;
-          d: number;
-          rowRatio: number;
-        }[] = [];
+        const gz = (row / ROWS) * GRID_Z + 1.0;
+        const gridRow: (typeof grid)[0] = [];
         for (let col = 0; col < COLS; col++) {
-          const colRatio = col / (COLS - 1);
-          const baseX = rowLeft + colRatio * rowWidth;
-
-          // Use the row's logical position (accounting for time) for noise continuity
-          const gx = colRatio * 20;
-          const gy = ((row * rowSpacing + time * flowSpeed) / totalHeight) * 40;
-          const d = terrainDisplacement(gx, gy, time);
-
-          const displaceFactor = 15 + screenRatio * 30;
-          const dx = d * displaceFactor * 0.7;
-          const dy = d * displaceFactor * 0.35;
-
-          gridRow.push({
-            sx: baseX + dx,
-            sy: baseY + dy,
-            d,
-            rowRatio: screenRatio,
-          });
+          const gx = (col / (COLS - 1)) * GRID_X - halfX;
+          const gy = -terrainHeight(gx, gz, time);
+          const p = project(gx, gy, gz, w, h);
+          if (p) {
+            gridRow.push({ ...p, height: -gy });
+          } else {
+            gridRow.push(null);
+          }
         }
         grid.push(gridRow);
       }
 
-      // Sort rows by their Y position so we draw top-to-bottom
-      const sortedIndices = Array.from({ length: ROWS }, (_, i) => i);
-      sortedIndices.sort((a, b) => {
-        const ay = grid[a][Math.floor(COLS / 2)]?.sy ?? 0;
-        const by = grid[b][Math.floor(COLS / 2)]?.sy ?? 0;
-        return ay - by;
-      });
-
-      // Draw horizontal lines
-      for (const row of sortedIndices) {
+      // ── Exact wexiq.ai draw: back to front ──
+      for (let row = 0; row < ROWS; row++) {
+        // Horizontal lines
         ctx!.beginPath();
         let started = false;
         for (let col = 0; col < COLS; col++) {
           const p = grid[row][col];
+          if (!p) continue;
           if (!started) {
             ctx!.moveTo(p.sx, p.sy);
             started = true;
-          } else {
-            ctx!.lineTo(p.sx, p.sy);
-          }
+          } else ctx!.lineTo(p.sx, p.sy);
         }
         if (started) {
-          const midP = grid[row][Math.floor(COLS / 2)];
-          const c = colorFromDisplacement(midP.d);
-          ctx!.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${c.opacity})`;
-          ctx!.lineWidth = Math.max(0.3, 0.5 + c.e * 1.2);
-          if (c.e > 0.55) {
-            ctx!.shadowColor = `rgba(34, 197, 94, ${(c.e - 0.55) * 0.5})`;
-            ctx!.shadowBlur = 4 + c.e * 6;
+          const midCol = Math.floor(COLS / 2);
+          const midP = grid[row][midCol];
+          if (midP) {
+            const c = colorFromHeight(midP.height, midP.depth, maxDepth);
+            ctx!.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${c.opacity})`;
+            ctx!.lineWidth = Math.max(0.3, 0.4 + c.e * 1.2);
+            if (c.e > 0.55) {
+              ctx!.shadowColor = `rgba(34, 197, 94, ${(c.e - 0.55) * 0.6})`;
+              ctx!.shadowBlur = 4 + c.e * 8;
+            }
+            ctx!.stroke();
+            ctx!.shadowBlur = 0;
           }
-          ctx!.stroke();
-          ctx!.shadowBlur = 0;
+        }
+
+        // Vertical mesh connectors
+        if (row > 0) {
+          for (let col = 0; col < COLS; col += 2) {
+            const cur = grid[row][col];
+            const prev = grid[row - 1][col];
+            if (!cur || !prev) continue;
+
+            const c = colorFromHeight(cur.height, cur.depth, maxDepth);
+            ctx!.beginPath();
+            ctx!.moveTo(prev.sx, prev.sy);
+            ctx!.lineTo(cur.sx, cur.sy);
+            ctx!.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${c.opacity * 0.35})`;
+            ctx!.lineWidth = Math.max(0.2, 0.3 + c.e * 0.4);
+            ctx!.stroke();
+          }
         }
       }
 
-      // Draw vertical connectors between adjacent sorted rows
-      for (let i = 1; i < sortedIndices.length; i++) {
-        const curIdx = sortedIndices[i];
-        const prevIdx = sortedIndices[i - 1];
-        // Only connect if rows are close together (not wrapping gap)
-        const curY = grid[curIdx][Math.floor(COLS / 2)]?.sy ?? 0;
-        const prevY = grid[prevIdx][Math.floor(COLS / 2)]?.sy ?? 0;
-        if (Math.abs(curY - prevY) > rowSpacing * 2) continue;
+      // ── Exact wexiq.ai neuron dots ──
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.age++;
+        if (p.age > p.lifespan) {
+          particles.splice(i, 1);
+          continue;
+        }
 
-        for (let col = 0; col < COLS; col += 4) {
-          const cur = grid[curIdx][col];
-          const prev = grid[prevIdx][col];
+        const row = p.row;
+        const col = p.col;
+        if (row >= grid.length || col >= (grid[0]?.length ?? 0)) continue;
+        const gp = grid[row][col];
+        if (!gp) continue;
 
-          const c = colorFromDisplacement(cur.d);
-          ctx!.beginPath();
-          ctx!.moveTo(prev.sx, prev.sy);
-          ctx!.lineTo(cur.sx, cur.sy);
-          ctx!.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${c.opacity * 0.25})`;
-          ctx!.lineWidth = Math.max(0.2, 0.25 + c.e * 0.3);
-          ctx!.stroke();
+        const maxD = GRID_Z + 2;
+        const depthRatio = Math.max(0, 1.0 - gp.depth / maxD);
+        const depthIntensity = 0.08 + depthRatio * 0.92;
+
+        const life = p.age / p.lifespan;
+        let alpha: number;
+        if (life < 0.1) alpha = life / 0.1;
+        else if (life > 0.6) alpha = (1 - life) / 0.4;
+        else alpha = 1;
+        alpha *= depthIntensity;
+
+        const radius = (1.5 + p.size * 1.5) * (0.5 + depthRatio * 0.5);
+        const glowSize = (8 + p.size * 6) * depthIntensity;
+
+        ctx!.beginPath();
+        ctx!.arc(gp.sx, gp.sy, radius, 0, Math.PI * 2);
+        ctx!.shadowColor = `rgba(187, 247, 208, ${0.9 * depthIntensity})`;
+        ctx!.shadowBlur = glowSize;
+        ctx!.fillStyle = `rgba(220, 252, 231, ${alpha * 0.95})`;
+        ctx!.fill();
+        ctx!.shadowBlur = 0;
+      }
+
+      // ── Exact wexiq.ai particle spawning ──
+      for (let s = 0; s < 4; s++) {
+        if (Math.random() < 0.4) {
+          const row = Math.floor(Math.random() * ROWS);
+          const col = Math.floor(Math.random() * Math.floor(COLS / 2)) * 2;
+          particles.push({
+            row,
+            col,
+            age: 0,
+            lifespan: 30 + Math.random() * 40,
+            size: Math.random() * 0.8,
+          });
         }
       }
+
+      ctx!.restore(); // undo rotation transform
 
       time += 1;
       animId = requestAnimationFrame(animate);
@@ -253,7 +311,7 @@ export default function MeshCanvas() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 w-full h-full pointer-events-none z-0"
-      style={{ opacity: 0, animation: "fadeIn 2s ease-out 0.5s forwards" }}
+      style={{ opacity: 0, animation: "fadeIn 2s ease-out 1.5s forwards" }}
     />
   );
 }
