@@ -8,8 +8,9 @@ export default function Home() {
         <h1
           className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[0.25em] uppercase select-none"
           style={{
-            color: "rgba(255, 255, 255, 0.85)",
-            WebkitTextStroke: "0.5px rgba(255, 255, 255, 0.9)",
+            fontFamily: "var(--font-cormorant), Georgia, serif",
+            color: "#1a4a2e",
+            WebkitTextStroke: "0.5px rgba(255, 255, 255, 0.45)",
           }}
         >
           D<span className="text-[0.75em]">E</span>COURCY.COM

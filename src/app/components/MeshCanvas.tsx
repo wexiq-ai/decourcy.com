@@ -13,13 +13,6 @@ export default function MeshCanvas() {
 
     let animId: number;
     let time = 0;
-    const particles: {
-      row: number;
-      col: number;
-      age: number;
-      lifespan: number;
-      size: number;
-    }[] = [];
 
     function resize() {
       canvas!.width = window.innerWidth;
@@ -80,11 +73,7 @@ export default function MeshCanvas() {
     }
 
     // Green color palette based on displacement intensity
-    function colorFromDisplacement(
-      d: number,
-      rowRatio: number
-    ) {
-      // Normalize displacement to 0-1
+    function colorFromDisplacement(d: number, rowRatio: number) {
       const e = Math.min(1, Math.max(0, (d + 0.2) / 2.2));
 
       // Fade at top and bottom edges
@@ -137,30 +126,41 @@ export default function MeshCanvas() {
       const h = canvas!.height;
       ctx!.clearRect(0, 0, w, h);
 
-      // Overshoot grid beyond viewport edges so lines don't clip
-      const margin = 60;
+      const marginY = 60;
 
-      // Build the grid: each point gets a screen position
-      // Rows = vertical (top to bottom), Cols = horizontal (left to right)
-      // Terrain displacement shifts points horizontally (X offset)
+      // Trapezoid: narrow at top, wide at bottom — perspective funnel
+      const topWidth = w * 0.15;
+      const bottomWidth = w * 0.75;
+
+      // Build the grid
       const grid: { sx: number; sy: number; d: number; rowRatio: number }[][] =
         [];
       for (let row = 0; row < ROWS; row++) {
         const rowRatio = row / (ROWS - 1);
-        const baseY = -margin + rowRatio * (h + 2 * margin);
-        const gridRow: { sx: number; sy: number; d: number; rowRatio: number }[] = [];
+        const baseY = -marginY + rowRatio * (h + 2 * marginY);
+
+        // Width eased for smoother perspective feel
+        const ease = rowRatio * rowRatio;
+        const rowWidth = topWidth + (bottomWidth - topWidth) * ease;
+        const rowLeft = (w - rowWidth) / 2;
+
+        const gridRow: {
+          sx: number;
+          sy: number;
+          d: number;
+          rowRatio: number;
+        }[] = [];
         for (let col = 0; col < COLS; col++) {
           const colRatio = col / (COLS - 1);
-          const baseX = -margin + colRatio * (w + 2 * margin);
+          const baseX = rowLeft + colRatio * rowWidth;
 
-          // Normalized grid coordinates for noise
           const gx = colRatio * 20;
           const gy = rowRatio * 20;
           const d = terrainDisplacement(gx, gy, time);
 
-          // Displacement offsets the point position
-          const dx = d * 25; // horizontal displacement
-          const dy = d * 12; // slight vertical displacement
+          const displaceFactor = 10 + rowRatio * 20;
+          const dx = d * displaceFactor * 0.6;
+          const dy = d * displaceFactor * 0.3;
 
           gridRow.push({
             sx: baseX + dx,
@@ -199,7 +199,7 @@ export default function MeshCanvas() {
         }
       }
 
-      // Draw vertical connectors (every other column)
+      // Draw vertical connectors (every 3rd column)
       for (let row = 1; row < ROWS; row++) {
         for (let col = 0; col < COLS; col += 3) {
           const cur = grid[row][col];
@@ -212,62 +212,6 @@ export default function MeshCanvas() {
           ctx!.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${c.opacity * 0.3})`;
           ctx!.lineWidth = Math.max(0.2, 0.25 + c.e * 0.35);
           ctx!.stroke();
-        }
-      }
-
-      // Neuron dots
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.age++;
-        if (p.age > p.lifespan) {
-          particles.splice(i, 1);
-          continue;
-        }
-
-        const row = p.row;
-        const col = p.col;
-        if (row >= grid.length || col >= (grid[0]?.length ?? 0)) continue;
-        const gp = grid[row][col];
-
-        // Brightness based on position (center of screen brighter)
-        const centerDist = Math.abs(gp.rowRatio - 0.5) * 2;
-        const intensity = 1.0 - centerDist * 0.6;
-
-        const life = p.age / p.lifespan;
-        let alpha: number;
-        if (life < 0.1) alpha = life / 0.1;
-        else if (life > 0.6) alpha = (1 - life) / 0.4;
-        else alpha = 1;
-        alpha *= intensity;
-
-        const edgeFade =
-          Math.min(1, gp.rowRatio * 4) * Math.min(1, (1 - gp.rowRatio) * 4);
-        alpha *= edgeFade;
-
-        const radius = 1.2 + p.size * 1.2;
-        const glowSize = (6 + p.size * 5) * intensity;
-
-        ctx!.beginPath();
-        ctx!.arc(gp.sx, gp.sy, radius, 0, Math.PI * 2);
-        ctx!.shadowColor = `rgba(187, 247, 208, ${0.8 * intensity})`;
-        ctx!.shadowBlur = glowSize;
-        ctx!.fillStyle = `rgba(220, 252, 231, ${alpha * 0.9})`;
-        ctx!.fill();
-        ctx!.shadowBlur = 0;
-      }
-
-      // Spawn particles
-      for (let s = 0; s < 4; s++) {
-        if (Math.random() < 0.35) {
-          const row = Math.floor(Math.random() * ROWS);
-          const col = Math.floor(Math.random() * Math.floor(COLS / 3)) * 3;
-          particles.push({
-            row,
-            col,
-            age: 0,
-            lifespan: 30 + Math.random() * 40,
-            size: Math.random() * 0.8,
-          });
         }
       }
 
