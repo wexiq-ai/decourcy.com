@@ -22,7 +22,7 @@ export default function MeshCanvas() {
     window.addEventListener("resize", resize);
     resize();
 
-    // ── Exact wexiq.ai noise ──
+    // Value noise
     function hash(n: number) {
       const s = Math.sin(n) * 43758.5453;
       return s - Math.floor(s);
@@ -40,12 +40,13 @@ export default function MeshCanvas() {
       const d = hash(ix + 1 + (iy + 1) * 157.0);
       return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
     }
+    // 3 octaves instead of 5 — visually near-identical, 40% less math
     function fbm(x: number, y: number) {
       let v = 0,
         a = 1,
         f = 1,
         total = 0;
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 3; i++) {
         v += noise(x * f, y * f) * a;
         total += a;
         a *= 0.5;
@@ -54,18 +55,15 @@ export default function MeshCanvas() {
       return v / total;
     }
 
-    // ── Grid params (ROWS +33% for more vertical coverage via density) ──
     const COLS = 200;
     const ROWS = 80;
     const GRID_X = 50;
     const GRID_Z = 14;
 
-    // ── Exact wexiq.ai camera ──
     const camY = -3.5;
     const camZ = -8;
     const fov = 500;
 
-    // ── Exact wexiq.ai terrain ──
     function terrainHeight(gx: number, gz: number, t: number) {
       const scrollZ = gz - t * 0.03;
       const scrollX = gx - t * 0.0225;
@@ -80,7 +78,6 @@ export default function MeshCanvas() {
       return h1 + h2 + h3;
     }
 
-    // ── Exact wexiq.ai projection ──
     function project(
       x3d: number,
       y3d: number,
@@ -99,7 +96,7 @@ export default function MeshCanvas() {
       };
     }
 
-    // ── Green color palette (same structure as wexiq blue, remapped to green) ──
+    // Green color palette — glow simulated via brighter color, no shadowBlur
     function colorFromHeight(h: number, depth: number, maxDepth: number) {
       const e = Math.min(1, Math.max(0, (h + 1.0) / 6.5));
       const depthFade = 1.0 - (depth / maxDepth) * 0.6;
@@ -127,14 +124,14 @@ export default function MeshCanvas() {
         b = 86 + t * 30;
       } else if (e < 0.88) {
         const t = (e - 0.7) / 0.18;
-        r = 40 + t * 50;
-        g = 202 + t * 30;
-        b = 116 + t * 30;
+        r = 40 + t * 60;
+        g = 202 + t * 38;
+        b = 116 + t * 40;
       } else {
         const t = (e - 0.88) / 0.12;
-        r = 90 + t * 120;
-        g = 232 + t * 23;
-        b = 146 + t * 60;
+        r = 100 + t * 155;
+        g = 240 + t * 15;
+        b = 156 + t * 70;
       }
 
       r = Math.floor(r * depthFade);
@@ -146,9 +143,8 @@ export default function MeshCanvas() {
     }
 
     function animate(timestamp: number) {
-      // Delta-time for smooth frame-rate-independent animation
       if (!lastTimestamp) lastTimestamp = timestamp;
-      const dt = (timestamp - lastTimestamp) / 16.667; // normalize to ~60fps
+      const dt = (timestamp - lastTimestamp) / 16.667;
       lastTimestamp = timestamp;
       time += dt;
 
@@ -159,7 +155,7 @@ export default function MeshCanvas() {
       const halfX = GRID_X / 2;
       const maxDepth = GRID_Z + 2;
 
-      // ── Exact wexiq.ai grid build ──
+      // Build projected grid
       const grid: ({
         sx: number;
         sy: number;
@@ -183,7 +179,7 @@ export default function MeshCanvas() {
         grid.push(gridRow);
       }
 
-      // ── Exact wexiq.ai draw: back to front ──
+      // Draw back to front — NO shadowBlur anywhere
       for (let row = 0; row < ROWS; row++) {
         // Horizontal lines
         ctx!.beginPath();
@@ -202,19 +198,15 @@ export default function MeshCanvas() {
           if (midP) {
             const c = colorFromHeight(midP.height, midP.depth, maxDepth);
             ctx!.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${c.opacity})`;
-            ctx!.lineWidth = Math.max(0.3, 0.4 + c.e * 1.2);
-            if (c.e > 0.55) {
-              ctx!.shadowColor = `rgba(34, 197, 94, ${(c.e - 0.55) * 0.6})`;
-              ctx!.shadowBlur = 4 + c.e * 8;
-            }
+            // Brighter lines get thicker to simulate glow
+            ctx!.lineWidth = Math.max(0.3, 0.4 + c.e * 1.5);
             ctx!.stroke();
-            ctx!.shadowBlur = 0;
           }
         }
 
-        // Vertical mesh connectors
+        // Vertical mesh connectors (every 3rd col instead of every 2nd)
         if (row > 0) {
-          for (let col = 0; col < COLS; col += 2) {
+          for (let col = 0; col < COLS; col += 3) {
             const cur = grid[row][col];
             const prev = grid[row - 1][col];
             if (!cur || !prev) continue;
