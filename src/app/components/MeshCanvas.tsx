@@ -13,13 +13,6 @@ export default function MeshCanvas() {
 
     let animId: number;
     let time = 0;
-    const particles: {
-      row: number;
-      col: number;
-      age: number;
-      lifespan: number;
-      size: number;
-    }[] = [];
 
     function resize() {
       canvas!.width = window.innerWidth;
@@ -237,59 +230,6 @@ export default function MeshCanvas() {
             ctx!.lineWidth = Math.max(0.2, 0.3 + c.e * 0.4);
             ctx!.stroke();
           }
-        }
-      }
-
-      // ── Exact wexiq.ai neuron dots ──
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.age++;
-        if (p.age > p.lifespan) {
-          particles.splice(i, 1);
-          continue;
-        }
-
-        const row = p.row;
-        const col = p.col;
-        if (row >= grid.length || col >= (grid[0]?.length ?? 0)) continue;
-        const gp = grid[row][col];
-        if (!gp) continue;
-
-        const maxD = GRID_Z + 2;
-        const depthRatio = Math.max(0, 1.0 - gp.depth / maxD);
-        const depthIntensity = 0.08 + depthRatio * 0.92;
-
-        const life = p.age / p.lifespan;
-        let alpha: number;
-        if (life < 0.1) alpha = life / 0.1;
-        else if (life > 0.6) alpha = (1 - life) / 0.4;
-        else alpha = 1;
-        alpha *= depthIntensity;
-
-        const radius = (1.5 + p.size * 1.5) * (0.5 + depthRatio * 0.5);
-        const glowSize = (8 + p.size * 6) * depthIntensity;
-
-        ctx!.beginPath();
-        ctx!.arc(gp.sx, gp.sy, radius, 0, Math.PI * 2);
-        ctx!.shadowColor = `rgba(187, 247, 208, ${0.9 * depthIntensity})`;
-        ctx!.shadowBlur = glowSize;
-        ctx!.fillStyle = `rgba(220, 252, 231, ${alpha * 0.95})`;
-        ctx!.fill();
-        ctx!.shadowBlur = 0;
-      }
-
-      // ── Exact wexiq.ai particle spawning ──
-      for (let s = 0; s < 4; s++) {
-        if (Math.random() < 0.4) {
-          const row = Math.floor(Math.random() * ROWS);
-          const col = Math.floor(Math.random() * Math.floor(COLS / 2)) * 2;
-          particles.push({
-            row,
-            col,
-            age: 0,
-            lifespan: 30 + Math.random() * 40,
-            size: Math.random() * 0.8,
-          });
         }
       }
 
