@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export default function AmeriLifeMarketingStrategyPage() {
   return (
@@ -13,9 +13,7 @@ export default function AmeriLifeMarketingStrategyPage() {
         <p className="text-xs font-bold text-white/40 mb-2 uppercase tracking-wider text-center">
           A Dual-Track Approach for 2026 and Beyond
         </p>
-        <p className="text-[10px] italic text-white/25 mb-8 text-center">
-          Last updated April 8, 2026 at 10:22 AM ET
-        </p>
+        <LastUpdated />
       </FadeIn>
 
       {/* Opening Narrative */}
@@ -336,6 +334,24 @@ export default function AmeriLifeMarketingStrategyPage() {
         </FadeIn>
       </div>
     </div>
+  );
+}
+
+/* ── Last updated ── */
+
+function LastUpdated() {
+  const [timestamp, setTimestamp] = useState("");
+
+  useEffect(() => {
+    setTimestamp(process.env.BUILD_TIMESTAMP || "");
+  }, []);
+
+  if (!timestamp) return <div className="mb-8" />;
+
+  return (
+    <p className="text-[10px] italic text-white/25 mb-8 text-center">
+      Last updated {timestamp}
+    </p>
   );
 }
 
