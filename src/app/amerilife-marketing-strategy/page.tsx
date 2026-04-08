@@ -243,6 +243,17 @@ export default function AmeriLifeMarketingStrategyPage() {
                 size="sm"
               />
             </FadeIn>
+            <FadeIn><Arrow /></FadeIn>
+
+            <FadeIn>
+              <FlowBox
+                step={9}
+                label="Inbound Partnership Pipeline"
+                sublabel="Authority Positioning Drives Inquiries from Advisors, Carriers & Acquisition Targets"
+                variant="accent"
+                size="sm"
+              />
+            </FadeIn>
 
             <FadeIn>
               <NarrativeBlockSmall>
@@ -262,7 +273,7 @@ export default function AmeriLifeMarketingStrategyPage() {
         <FadeIn>
           <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] px-5 md:px-8 py-6 text-center">
             <div className="absolute -left-8 md:-left-10 top-1/2 -translate-y-1/2 w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
-              <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">11</span>
+              <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">10</span>
             </div>
             <div className="font-bold uppercase tracking-wide text-base text-white/90">
               Cross-Sell Bridge
@@ -284,7 +295,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
         <FadeIn>
           <FlowBox
-            step={12}
+            step={11}
             label="Unified Measurement & Attribution"
             sublabel="Shared KPIs • Pipeline Impact • Revenue Attribution • M&A Conversion"
             variant="accent"
