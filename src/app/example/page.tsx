@@ -77,11 +77,11 @@ function FlowBox({
     <div
       className={`${base} ${padding} ${width} border rounded text-center`}
     >
-      <div className={`font-medium ${size === "sm" ? "text-sm" : "text-base"} text-white/90`}>
+      <div className={`font-bold uppercase tracking-wide ${size === "sm" ? "text-sm" : "text-base"} text-white/90`}>
         {label}
       </div>
       {sublabel && (
-        <div className={`${size === "sm" ? "text-xs" : "text-sm"} text-white/40 mt-1`}>
+        <div className={`uppercase font-bold tracking-wider ${size === "sm" ? "text-xs" : "text-sm"} text-white/40 mt-1`}>
           {sublabel}
         </div>
       )}
