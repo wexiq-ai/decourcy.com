@@ -3,7 +3,7 @@ import MeshCanvas from "./components/MeshCanvas";
 export default function Home() {
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#071a0e]">
-      <MeshCanvas />
+      {/* <MeshCanvas /> */}
       <div className="relative z-10 text-center animate-fade-in">
         <h1
           className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[0.25em] uppercase select-none"
