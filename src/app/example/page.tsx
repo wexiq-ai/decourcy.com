@@ -2,10 +2,10 @@ export default function ExamplePage() {
   return (
     <div className="min-h-screen bg-[#071a0e] text-white px-6 py-16 flex flex-col items-center">
       {/* Page title */}
-      <h1 className="text-2xl font-semibold tracking-wide mb-2 text-white/90">
+      <h1 className="text-2xl font-bold tracking-wide mb-2 text-white/90 uppercase">
         Sample Workflow
       </h1>
-      <p className="text-sm text-white/40 mb-16">
+      <p className="text-xs font-bold text-white/40 mb-16 uppercase tracking-wider">
         A conceptual process flow — top to bottom
       </p>
 
@@ -49,13 +49,6 @@ export default function ExamplePage() {
         <FlowBox label="Deliver & Deploy" sublabel="Launch to production" variant="accent" />
       </div>
 
-      {/* Back link */}
-      <a
-        href="/"
-        className="mt-20 text-[#5b9bd5] text-sm hover:text-[#7bb3e0] transition-colors"
-      >
-        ← Back to DeCourcy.com
-      </a>
     </div>
   );
 }

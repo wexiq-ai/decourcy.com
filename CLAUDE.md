@@ -29,6 +29,12 @@ Most content will be workflow and process visualizations. Follow these rules:
 - **Box borders**: subtle lighter green or light blue depending on emphasis
 - **Labels**: white text inside boxes, keep concise
 
+## Page Typography
+
+- **Headlines**: all caps (`uppercase`), bold (`font-bold`)
+- **Subheadings**: all caps (`uppercase`), smaller font size, bold (`font-bold`), wider tracking
+- **No navigation links between pages** — every page stands alone with no back links or cross-page nav
+
 ## General Rules
 
 - No photo images — use icons, glyphs, SVG symbols, or CSS-drawn elements only
