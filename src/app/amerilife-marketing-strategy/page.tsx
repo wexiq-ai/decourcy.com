@@ -311,7 +311,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
         <FadeIn>
           <NarrativeBlock>
-            These tracks are distinct but not isolated. Health affiliate relationships surface natural cross-sell opportunities into Wealth products. Simultaneously, the Wealth platform&apos;s market credibility reinforces the Health Corporate Development (M&amp;A) pitch — prospective affiliates see an organization with strength across both verticals, not just one.
+            The Cross-Sell Bridge exists to drive organic revenue growth across both verticals. Health affiliates already have deep client relationships — surfacing Wealth product opportunities within those relationships creates new revenue without new acquisition cost. On the other side, Wealth advisors gain access to Health distribution channels, expanding their reach. The goal is a two-way referral engine that makes cross-sell a natural part of how affiliates do business, not a corporate initiative layered on top.
           </NarrativeBlock>
         </FadeIn>
 
