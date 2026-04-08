@@ -234,7 +234,7 @@ export default function AmeriLifeMarketingStrategyPage() {
             <FadeIn>
               <FlowBox
                 step={8}
-                label="Inbound Partnership Pipeline"
+                label="Inbound Advisor / Advisory Pipeline"
                 sublabel="Authority Positioning Drives Inquiries from Advisors, Carriers & Acquisition Targets"
                 variant="accent"
                 size="sm"
