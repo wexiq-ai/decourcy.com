@@ -213,6 +213,20 @@ export default function AmeriLifeMarketingStrategyPage() {
             <FadeIn>
               <FlowBox
                 step={6}
+                label="Monthly Shared Services Spotlight Series"
+                sublabel="One Corporate Function Per Month — Platform Strength Through Storytelling"
+                size="sm"
+              />
+            </FadeIn>
+
+            <FadeIn>
+              <SharedServicesList />
+            </FadeIn>
+            <FadeIn><Arrow /></FadeIn>
+
+            <FadeIn>
+              <FlowBox
+                step={7}
                 label="Search Landscape Ownership"
                 sublabel="Google • ChatGPT • Perplexity • Gemini"
                 size="sm"
@@ -222,7 +236,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
             <FadeIn>
               <FlowBox
-                step={7}
+                step={8}
                 label={`"The Power of the AmeriLife Platform"`}
                 sublabel="Authority Positioning — Anyone Researching Wealth Distribution Finds Us"
                 variant="accent"
@@ -248,7 +262,7 @@ export default function AmeriLifeMarketingStrategyPage() {
         <FadeIn>
           <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] px-5 md:px-8 py-6 text-center">
             <div className="absolute -left-8 md:-left-10 top-1/2 -translate-y-1/2 w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
-              <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">10</span>
+              <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">11</span>
             </div>
             <div className="font-bold uppercase tracking-wide text-base text-white/90">
               Cross-Sell Bridge
@@ -270,7 +284,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
         <FadeIn>
           <FlowBox
-            step={11}
+            step={12}
             label="Unified Measurement & Attribution"
             sublabel="Shared KPIs • Pipeline Impact • Revenue Attribution • M&A Conversion"
             variant="accent"
@@ -396,6 +410,32 @@ function FlowBox({
           {sublabel}
         </div>
       )}
+    </div>
+  );
+}
+
+function SharedServicesList() {
+  const services = [
+    "IT & Operations",
+    "Human Resources",
+    "Finance & Accounting",
+    "Marketing",
+    "M&A",
+    "Growth Consulting",
+  ];
+
+  return (
+    <div className="w-full border border-[#1a4a2e]/60 rounded bg-[#0a2314] px-5 py-3 mt-1">
+      <div className="text-[10px] font-bold uppercase tracking-wider text-white/30 mb-2">
+        Spotlight Rotation
+      </div>
+      <ol className="list-decimal list-inside space-y-1">
+        {services.map((name) => (
+          <li key={name} className="text-xs text-white/60 tracking-wide">
+            {name}
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
