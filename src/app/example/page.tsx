@@ -144,7 +144,7 @@ function BranchArrows({
         <svg width="12" height="8" viewBox="0 0 12 8" className="text-[#5b9bd5]/60">
           <path d="M6 8L0 0h12z" fill="currentColor" />
         </svg>
-        <span className="text-[10px] text-white/30 mt-0.5">{leftLabel}</span>
+        <span className="text-[10px] text-white/30 mt-0.5 uppercase font-bold tracking-wider">{leftLabel}</span>
       </div>
       {/* Right branch down */}
       <div className="absolute top-4 right-1/4 translate-x-1/2 flex flex-col items-center">
@@ -152,7 +152,7 @@ function BranchArrows({
         <svg width="12" height="8" viewBox="0 0 12 8" className="text-[#5b9bd5]/60">
           <path d="M6 8L0 0h12z" fill="currentColor" />
         </svg>
-        <span className="text-[10px] text-white/30 mt-0.5">{rightLabel}</span>
+        <span className="text-[10px] text-white/30 mt-0.5 uppercase font-bold tracking-wider">{rightLabel}</span>
       </div>
       {/* Spacer */}
       <div className="h-16" />
