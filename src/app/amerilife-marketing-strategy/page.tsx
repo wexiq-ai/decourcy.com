@@ -136,17 +136,6 @@ export default function AmeriLifeMarketingStrategyPage() {
                 size="sm"
               />
             </FadeIn>
-            <FadeIn><Arrow /></FadeIn>
-
-            <FadeIn>
-              <FlowBox
-                step={9}
-                label="M&A Pipeline Acceleration"
-                sublabel="Unaffiliated Shops See Proof of Thriving Affiliates → Inbound Interest"
-                variant="accent"
-                size="sm"
-              />
-            </FadeIn>
 
             <FadeIn>
               <NarrativeBlockSmall>
@@ -229,17 +218,6 @@ export default function AmeriLifeMarketingStrategyPage() {
                 size="sm"
               />
             </FadeIn>
-            <FadeIn><Arrow /></FadeIn>
-
-            <FadeIn>
-              <FlowBox
-                step={8}
-                label="Inbound Advisor / Advisory Pipeline"
-                sublabel="Authority Positioning Drives Inquiries from Advisors, Carriers & Acquisition Targets"
-                variant="accent"
-                size="sm"
-              />
-            </FadeIn>
 
             <FadeIn>
               <NarrativeBlockSmall>
@@ -274,13 +252,42 @@ export default function AmeriLifeMarketingStrategyPage() {
           </NarrativeBlock>
         </FadeIn>
 
-        {/* ── SECTION 3: Cross-Sell Bridge ── */}
+        {/* ── SHARED: Pipeline Acceleration ── */}
         <FadeIn><Arrow /></FadeIn>
 
         <FadeIn>
           <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] px-5 md:px-8 py-6 text-center">
             <div className="absolute -left-8 md:-left-10 top-1/2 -translate-y-1/2 w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
               <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">10</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+              <div>
+                <div className="font-bold uppercase tracking-wide text-xs md:text-sm text-white/90">
+                  M&A Pipeline Acceleration
+                </div>
+                <div className="uppercase font-bold tracking-wider text-[10px] md:text-xs text-white/40 mt-1">
+                  Health — Unaffiliated Shops See Thriving Affiliates → Inbound Interest
+                </div>
+              </div>
+              <div>
+                <div className="font-bold uppercase tracking-wide text-xs md:text-sm text-white/90">
+                  Inbound Advisor / Advisory Pipeline
+                </div>
+                <div className="uppercase font-bold tracking-wider text-[10px] md:text-xs text-white/40 mt-1">
+                  Wealth — Authority Positioning Drives Inquiries from Advisors & Carriers
+                </div>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+
+        {/* ── SECTION 3: Cross-Sell Bridge ── */}
+        <FadeIn><Arrow /></FadeIn>
+
+        <FadeIn>
+          <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] px-5 md:px-8 py-6 text-center">
+            <div className="absolute -left-8 md:-left-10 top-1/2 -translate-y-1/2 w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
+              <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">11</span>
             </div>
             <div className="font-bold uppercase tracking-wide text-base text-white/90">
               Cross-Sell Bridge
@@ -302,7 +309,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
         <FadeIn>
           <FlowBox
-            step={11}
+            step={12}
             label="Unified Measurement & Attribution"
             sublabel="Shared KPIs • Pipeline Impact • Revenue Attribution • M&A Conversion"
             variant="accent"
