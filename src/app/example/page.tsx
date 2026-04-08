@@ -1,59 +1,109 @@
+"use client";
+
+import { useEffect, useRef, type ReactNode } from "react";
+
 export default function ExamplePage() {
   return (
     <div className="min-h-screen bg-[#071a0e] text-white px-6 py-16 flex flex-col items-center">
       {/* Page title */}
-      <h1 className="text-2xl font-bold tracking-wide mb-2 text-white/90 uppercase">
-        Sample Workflow
-      </h1>
-      <p className="text-xs font-bold text-white/40 mb-16 uppercase tracking-wider">
-        A conceptual process flow — top to bottom
-      </p>
+      <FadeIn>
+        <h1 className="text-2xl font-bold tracking-wide mb-2 text-white/90 uppercase">
+          Sample Workflow
+        </h1>
+        <p className="text-xs font-bold text-white/40 mb-16 uppercase tracking-wider">
+          A conceptual process flow — top to bottom
+        </p>
+      </FadeIn>
 
       {/* Flow container */}
       <div className="flex flex-col items-center gap-0 w-full max-w-md">
         {/* Step 1 */}
-        <FlowBox step={1} label="Client Request" sublabel="Intake form submitted" />
-        <Arrow />
+        <FadeIn>
+          <FlowBox step={1} label="Client Request" sublabel="Intake form submitted" />
+        </FadeIn>
+        <FadeIn><Arrow /></FadeIn>
 
         {/* Step 2 */}
-        <FlowBox step={2} label="Initial Review" sublabel="Scope & feasibility check" />
-        <Arrow />
+        <FadeIn>
+          <FlowBox step={2} label="Initial Review" sublabel="Scope & feasibility check" />
+        </FadeIn>
+        <FadeIn><Arrow /></FadeIn>
 
         {/* Step 3 — decision split */}
-        <FlowBox
-          step={3}
-          label="Approved?"
-          sublabel="Decision gate"
-          variant="accent"
-        />
-        <BranchArrows leftLabel="No" rightLabel="Yes" />
+        <FadeIn>
+          <FlowBox
+            step={3}
+            label="Approved?"
+            sublabel="Decision gate"
+            variant="accent"
+          />
+        </FadeIn>
+        <FadeIn><BranchArrows leftLabel="No" rightLabel="Yes" /></FadeIn>
 
         {/* Step 4 — simultaneous branches */}
-        <GroupBox step={4}>
-          <div className="grid grid-cols-2 gap-8 w-full">
-            <div className="flex flex-col items-center gap-0">
-              <FlowBox label="Request Revisions" sublabel="Return to client" size="sm" />
-              <ArrowUp />
+        <FadeIn>
+          <GroupBox step={4}>
+            <div className="grid grid-cols-2 gap-8 w-full">
+              <div className="flex flex-col items-center gap-0">
+                <FlowBox label="Request Revisions" sublabel="Return to client" size="sm" />
+                <ArrowUp />
+              </div>
+              <div className="flex flex-col items-center gap-0">
+                <FlowBox label="Begin Build" sublabel="Assign resources" size="sm" />
+              </div>
             </div>
-            <div className="flex flex-col items-center gap-0">
-              <FlowBox label="Begin Build" sublabel="Assign resources" size="sm" />
-            </div>
-          </div>
-        </GroupBox>
-        <Arrow />
+          </GroupBox>
+        </FadeIn>
+        <FadeIn><Arrow /></FadeIn>
 
         {/* Step 5 */}
-        <FlowBox step={5} label="Development" sublabel="Iterative build & review" />
-        <TwoWayArrow />
+        <FadeIn>
+          <FlowBox step={5} label="Development" sublabel="Iterative build & review" />
+        </FadeIn>
+        <FadeIn><TwoWayArrow /></FadeIn>
 
         {/* Step 6 */}
-        <FlowBox step={6} label="Client Feedback" sublabel="Review & approval cycle" />
-        <Arrow />
+        <FadeIn>
+          <FlowBox step={6} label="Client Feedback" sublabel="Review & approval cycle" />
+        </FadeIn>
+        <FadeIn><Arrow /></FadeIn>
 
         {/* Step 7 */}
-        <FlowBox step={7} label="Deliver & Deploy" sublabel="Launch to production" variant="accent" />
+        <FadeIn>
+          <FlowBox step={7} label="Deliver & Deploy" sublabel="Launch to production" variant="accent" />
+        </FadeIn>
       </div>
 
+    </div>
+  );
+}
+
+/* ── Scroll fade-in ── */
+
+function FadeIn({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("fade-in-visible");
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="fade-in-hidden w-full flex flex-col items-center">
+      {children}
     </div>
   );
 }
