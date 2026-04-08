@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 
 export default function AmeriLifeMarketingStrategyPage() {
   return (
-    <div className="min-h-screen bg-[#071a0e] text-white px-6 py-16 flex flex-col items-center">
+    <div className="min-h-screen bg-[#071a0e] text-white pl-12 pr-4 md:px-6 py-16 flex flex-col items-center">
       {/* Page Header */}
       <FadeIn>
         <h1 className="text-2xl md:text-3xl font-bold tracking-wide mb-2 text-white/90 uppercase text-center">
@@ -236,9 +236,9 @@ export default function AmeriLifeMarketingStrategyPage() {
         </FadeIn>
 
         <FadeIn>
-          <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] px-8 py-6 text-center">
-            <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
-              <span className="text-[11px] font-bold text-[#5b9bd5]/70">9</span>
+          <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] px-5 md:px-8 py-6 text-center">
+            <div className="absolute -left-8 md:-left-10 top-1/2 -translate-y-1/2 w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
+              <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">9</span>
             </div>
             <div className="font-bold uppercase tracking-wide text-base text-white/90">
               Cross-Sell Bridge
@@ -348,8 +348,8 @@ function ColumnHeader({ label, sublabel }: { label: string; sublabel: string }) 
 
 function StepIcon({ step }: { step: number }) {
   return (
-    <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
-      <span className="text-[11px] font-bold text-[#5b9bd5]/70">{step}</span>
+    <div className="absolute -left-8 md:-left-10 top-1/2 -translate-y-1/2 w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
+      <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">{step}</span>
     </div>
   );
 }
@@ -371,18 +371,18 @@ function FlowBox({
     variant === "accent"
       ? "border-[#5b9bd5]/50 bg-[#0d2b18]"
       : "border-[#1a4a2e] bg-[#0d2b18]";
-  const padding = size === "sm" ? "px-5 py-3" : "px-8 py-4";
+  const padding = size === "sm" ? "px-3 md:px-5 py-3" : "px-4 md:px-8 py-4";
 
   return (
     <div
       className={`relative ${base} ${padding} w-full border rounded text-center`}
     >
       {step && <StepIcon step={step} />}
-      <div className={`font-bold uppercase tracking-wide ${size === "sm" ? "text-sm" : "text-base"} text-white/90`}>
+      <div className={`font-bold uppercase tracking-wide ${size === "sm" ? "text-xs md:text-sm" : "text-sm md:text-base"} text-white/90`}>
         {label}
       </div>
       {sublabel && (
-        <div className={`uppercase font-bold tracking-wider ${size === "sm" ? "text-xs" : "text-sm"} text-white/40 mt-1`}>
+        <div className={`uppercase font-bold tracking-wider ${size === "sm" ? "text-[10px] md:text-xs" : "text-xs md:text-sm"} text-white/40 mt-1`}>
           {sublabel}
         </div>
       )}
