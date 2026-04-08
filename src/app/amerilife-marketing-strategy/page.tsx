@@ -110,6 +110,16 @@ export default function AmeriLifeMarketingStrategyPage() {
             <FadeIn>
               <FlowBox
                 step={6}
+                label="Monthly Affiliate Spotlight Series"
+                sublabel="One Featured Affiliate Per Month — Consistent, Structured Storytelling"
+                size="sm"
+              />
+            </FadeIn>
+            <FadeIn><Arrow /></FadeIn>
+
+            <FadeIn>
+              <FlowBox
+                step={7}
                 label="Multi-Channel Distribution"
                 sublabel="AmeriLife.com • Social • Affiliate Co-Promotion"
                 size="sm"
@@ -119,7 +129,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
             <FadeIn>
               <FlowBox
-                step={7}
+                step={8}
                 label={`"AmeriLife Is the Partner of Choice"`}
                 sublabel="Brand Platform Theme — Every Piece of Content Ladders Here"
                 variant="accent"
@@ -130,7 +140,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
             <FadeIn>
               <FlowBox
-                step={8}
+                step={9}
                 label="M&A Pipeline Acceleration"
                 sublabel="Unaffiliated Shops See Proof of Thriving Affiliates → Inbound Interest"
                 variant="accent"
@@ -238,7 +248,7 @@ export default function AmeriLifeMarketingStrategyPage() {
         <FadeIn>
           <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] px-5 md:px-8 py-6 text-center">
             <div className="absolute -left-8 md:-left-10 top-1/2 -translate-y-1/2 w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
-              <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">9</span>
+              <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">10</span>
             </div>
             <div className="font-bold uppercase tracking-wide text-base text-white/90">
               Cross-Sell Bridge
@@ -260,7 +270,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
         <FadeIn>
           <FlowBox
-            step={10}
+            step={11}
             label="Unified Measurement & Attribution"
             sublabel="Shared KPIs • Pipeline Impact • Revenue Attribution • M&A Conversion"
             variant="accent"
