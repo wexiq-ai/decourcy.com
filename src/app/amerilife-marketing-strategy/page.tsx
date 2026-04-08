@@ -87,7 +87,7 @@ export default function AmeriLifeMarketingStrategyPage() {
               <FlowBox
                 step={4}
                 label="Storytelling Through Their Eyes"
-                sublabel="Their Technology Story • Their Culture • Their Growth"
+                sublabel="Their Technology Story • Their Culture • Their Growth • Their Recruiting & Service Advantage"
                 size="sm"
               />
             </FadeIn>
