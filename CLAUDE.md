@@ -27,7 +27,10 @@ Most content will be workflow and process visualizations. Follow these rules:
 - **Arrow color**: light blue accent (`#5b9bd5`) for contrast against green boxes
 - **Box fill**: darker green shades from the palette above
 - **Box borders**: subtle lighter green or light blue depending on emphasis
-- **Labels**: white text inside boxes, keep concise
+- **Labels**: white text inside boxes, keep concise, all caps and bold
+- **Step numbering**: each step gets a circled number icon positioned to the left of its box (blue border circle, blue number, dark background fill)
+- **Simultaneous steps**: wrap parallel branches in a dashed-border group box with lighter shading (`#0a2314`, border `#5b9bd5/20`), sharing a single step number
+- **Decision branches**: Yes/No labels on branch arrows, uppercase bold
 
 ## Page Typography
 
