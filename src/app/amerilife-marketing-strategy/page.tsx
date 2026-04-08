@@ -212,6 +212,16 @@ export default function AmeriLifeMarketingStrategyPage() {
             <FadeIn>
               <FlowBox
                 step={7}
+                label="Thought Leadership Activation"
+                sublabel="Industry Publications • Conference Speaking • Analyst Engagement • Carrier Communications"
+                size="sm"
+              />
+            </FadeIn>
+            <FadeIn><Arrow /></FadeIn>
+
+            <FadeIn>
+              <FlowBox
+                step={8}
                 label={`"The Power of the AmeriLife Platform"`}
                 sublabel="Authority Positioning — Anyone Researching Wealth Distribution Finds Us"
                 variant="accent"
