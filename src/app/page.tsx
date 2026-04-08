@@ -8,7 +8,7 @@ export default function Home() {
         <h1
           className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[0.25em] uppercase select-none"
           style={{
-            fontFamily: "var(--font-playfair), Georgia, serif",
+            fontFamily: "var(--font-baskerville), Georgia, serif",
             color: "#1a4a2e",
             WebkitTextStroke: "0.5px rgba(255, 255, 255, 0.45)",
           }}
@@ -20,7 +20,7 @@ export default function Home() {
         href="mailto:wedecourcy@gmail.com"
         className="fixed bottom-6 left-1/2 -translate-x-1/2 z-10 text-white/30 text-[0.8rem] tracking-[0.05em] no-underline"
         style={{
-          fontFamily: "var(--font-playfair), Georgia, serif",
+          fontFamily: "var(--font-baskerville), Georgia, serif",
           opacity: 0,
           animation: "fadeIn 1.5s ease-out 4.5s forwards",
         }}
