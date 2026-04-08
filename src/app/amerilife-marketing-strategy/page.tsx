@@ -67,7 +67,7 @@ export default function AmeriLifeMarketingStrategyPage() {
               <FlowBox
                 step={2}
                 label="Affiliate Selection & Prioritization"
-                sublabel="Top Affiliates by EBITDA — One Per Month, H2 2026"
+                sublabel="Top Affiliates by EBITDA — One Per Month, Starting H2 2026"
                 size="sm"
               />
             </FadeIn>
@@ -452,7 +452,7 @@ function AffiliateList() {
   return (
     <div className="w-full border border-[#1a4a2e]/60 rounded bg-[#0a2314] px-5 py-3 mt-1">
       <div className="text-[10px] font-bold uppercase tracking-wider text-white/30 mb-2">
-        Priority Visit Order
+        Initial Priority — H2 2026 & Beyond
       </div>
       <ol className="list-decimal list-inside space-y-1">
         {affiliates.map((name) => (
