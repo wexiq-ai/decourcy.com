@@ -213,20 +213,6 @@ export default function AmeriLifeMarketingStrategyPage() {
             <FadeIn>
               <FlowBox
                 step={6}
-                label="Monthly Shared Services Spotlight Series"
-                sublabel="One Corporate Function Per Month — Platform Strength Through Storytelling"
-                size="sm"
-              />
-            </FadeIn>
-
-            <FadeIn>
-              <SharedServicesList />
-            </FadeIn>
-            <FadeIn><Arrow /></FadeIn>
-
-            <FadeIn>
-              <FlowBox
-                step={7}
                 label="Search Landscape Ownership"
                 sublabel="Google • ChatGPT • Perplexity • Gemini"
                 size="sm"
@@ -236,7 +222,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
             <FadeIn>
               <FlowBox
-                step={8}
+                step={7}
                 label={`"The Power of the AmeriLife Platform"`}
                 sublabel="Authority Positioning — Anyone Researching Wealth Distribution Finds Us"
                 variant="accent"
@@ -247,7 +233,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
             <FadeIn>
               <FlowBox
-                step={9}
+                step={8}
                 label="Inbound Partnership Pipeline"
                 sublabel="Authority Positioning Drives Inquiries from Advisors, Carriers & Acquisition Targets"
                 variant="accent"
@@ -263,12 +249,33 @@ export default function AmeriLifeMarketingStrategyPage() {
           </div>
         </div>
 
-        {/* ── SECTION 3: Cross-Sell Bridge ── */}
+        {/* ── SHARED: Monthly Shared Services Spotlight ── */}
         <FadeIn>
           <div className="w-full mt-12">
             <Arrow />
           </div>
         </FadeIn>
+
+        <FadeIn>
+          <FlowBox
+            step={9}
+            label="Monthly Shared Services Spotlight Series"
+            sublabel="One Corporate Function Per Month — Platform Strength Through Storytelling"
+          />
+        </FadeIn>
+
+        <FadeIn>
+          <SharedServicesList />
+        </FadeIn>
+
+        <FadeIn>
+          <NarrativeBlock>
+            This series serves both tracks. Each spotlight deepens the platform narrative for Wealth while simultaneously giving Health affiliates proof that AmeriLife&apos;s shared services are real, operational, and growing — reinforcing the value proposition for current and prospective affiliates alike.
+          </NarrativeBlock>
+        </FadeIn>
+
+        {/* ── SECTION 3: Cross-Sell Bridge ── */}
+        <FadeIn><Arrow /></FadeIn>
 
         <FadeIn>
           <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] px-5 md:px-8 py-6 text-center">
