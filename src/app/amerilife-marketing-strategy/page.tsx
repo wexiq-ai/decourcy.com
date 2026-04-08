@@ -18,7 +18,7 @@ export default function AmeriLifeMarketingStrategyPage() {
       {/* Opening Narrative */}
       <FadeIn>
         <NarrativeBlock>
-          AmeriLife&apos;s competitive advantage isn&apos;t a centralized technology platform — it&apos;s an entrepreneur-focused operating model powered by elite recruiters and rainmakers. Each affiliate business owns its own value proposition. This marketing strategy honors that reality by deploying two distinct approaches aligned to core distribution functions: a bottoms-up strategy for Health and a top-down strategy for Wealth. Together, they position AmeriLife for accelerated growth across both verticals.
+          AmeriLife&apos;s competitive advantage shows up differently depending on the vertical. In Health, it&apos;s an entrepreneur-focused model where each affiliate owns its own identity and value proposition. In Wealth, it&apos;s the collective strength of the platform itself — relationships, contracts, capital access, and shared services that no single entity could replicate alone. This marketing strategy honors both realities by deploying two distinct approaches: a bottoms-up strategy for Health and a top-down strategy for Wealth. Together, they position AmeriLife for accelerated growth across both verticals.
         </NarrativeBlock>
       </FadeIn>
 
