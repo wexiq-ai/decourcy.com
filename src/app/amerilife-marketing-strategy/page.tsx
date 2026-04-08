@@ -14,7 +14,7 @@ export default function AmeriLifeMarketingStrategyPage() {
           A Dual-Track Approach for 2026 and Beyond
         </p>
         <p className="text-[10px] italic text-white/25 mb-8 text-center">
-          Last updated April 8, 2026 at 10:15 AM ET
+          Last updated April 8, 2026 at 10:22 AM ET
         </p>
       </FadeIn>
 
