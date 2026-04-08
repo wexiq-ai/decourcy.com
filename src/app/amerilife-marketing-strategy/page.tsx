@@ -10,8 +10,11 @@ export default function AmeriLifeMarketingStrategyPage() {
         <h1 className="text-2xl md:text-3xl font-bold tracking-wide mb-2 text-white/90 uppercase text-center">
           AmeriLife Health & Wealth Marketing Strategy
         </h1>
-        <p className="text-xs font-bold text-white/40 mb-8 uppercase tracking-wider text-center">
+        <p className="text-xs font-bold text-white/40 mb-2 uppercase tracking-wider text-center">
           A Dual-Track Approach for 2026 and Beyond
+        </p>
+        <p className="text-[10px] italic text-white/25 mb-8 text-center">
+          Last updated April 8, 2026 at 10:15 AM ET
         </p>
       </FadeIn>
 
