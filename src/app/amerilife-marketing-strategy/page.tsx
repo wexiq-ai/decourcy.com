@@ -62,7 +62,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
             <FadeIn>
               <NarrativeBlockSmall>
-                The Health strategy flips the traditional corporate marketing playbook. Instead of telling affiliates&apos; stories for them, AmeriLife Corporate Marketing becomes a platform that tells affiliate stories through their own eyes and point of view. The goal: position AmeriLife as the partner of choice for unaffiliated health insurance shops evaluating which organization to join. This approach directly serves AmeriLife&apos;s M&amp;A pipeline.
+                The Health strategy flips the traditional corporate marketing playbook. Instead of telling affiliates&apos; stories for them, AmeriLife Corporate Marketing becomes a platform that tells affiliate stories through their own eyes and point of view. The goal: position AmeriLife as the partner of choice for unaffiliated health insurance shops evaluating which organization to join. This approach directly serves AmeriLife&apos;s Corporate Development (M&amp;A) pipeline.
               </NarrativeBlockSmall>
             </FadeIn>
 
@@ -276,7 +276,7 @@ export default function AmeriLifeMarketingStrategyPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
               <div>
                 <div className="font-bold uppercase tracking-wide text-xs md:text-sm text-white/90">
-                  M&A Pipeline Acceleration
+                  Corporate Development (M&A) Pipeline Acceleration
                 </div>
                 <div className="uppercase font-bold tracking-wider text-[10px] md:text-xs text-white/40 mt-1">
                   Health — Unaffiliated Shops See Thriving Affiliates → Inbound Interest
@@ -313,7 +313,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
         <FadeIn>
           <NarrativeBlock>
-            These tracks are distinct but not isolated. Health affiliate relationships surface natural cross-sell opportunities into Wealth products. Simultaneously, the Wealth platform&apos;s market credibility reinforces the Health M&amp;A pitch — prospective affiliates see an organization with strength across both verticals, not just one.
+            These tracks are distinct but not isolated. Health affiliate relationships surface natural cross-sell opportunities into Wealth products. Simultaneously, the Wealth platform&apos;s market credibility reinforces the Health Corporate Development (M&amp;A) pitch — prospective affiliates see an organization with strength across both verticals, not just one.
           </NarrativeBlock>
         </FadeIn>
 
@@ -324,14 +324,14 @@ export default function AmeriLifeMarketingStrategyPage() {
           <FlowBox
             step={12}
             label="Unified Measurement & Attribution"
-            sublabel="Shared KPIs • Pipeline Impact • Revenue Attribution • M&A Conversion"
+            sublabel="Shared KPIs • Pipeline Impact • Revenue Attribution • Corporate Development (M&A) Conversion"
             variant="accent"
           />
         </FadeIn>
 
         <FadeIn>
           <NarrativeBlock>
-            Both tracks report into a unified measurement framework. Health success is measured by M&amp;A pipeline velocity and affiliate acquisition cost. Wealth success is measured by search landscape share-of-voice and inbound partnership inquiries. Together, they tell a single story: AmeriLife&apos;s marketing is an engine for enterprise growth.
+            Both tracks report into a unified measurement framework. Health success is measured by Corporate Development (M&amp;A) pipeline velocity and affiliate acquisition cost. Wealth success is measured by search landscape share-of-voice and inbound partnership inquiries. Together, they tell a single story: AmeriLife&apos;s marketing is an engine for enterprise growth.
           </NarrativeBlock>
         </FadeIn>
       </div>
@@ -454,11 +454,11 @@ function FlowBox({
 
 function SharedServicesList() {
   const services = [
-    "IT & Operations",
+    "Ops+IT",
     "Human Resources",
     "Finance & Accounting",
     "Marketing",
-    "M&A",
+    "Corporate Development (M&A)",
     "Growth Consulting",
   ];
 
