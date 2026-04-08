@@ -476,6 +476,9 @@ function SharedServicesList() {
     "Marketing",
     "Corporate Development (M&A)",
     "Growth Consulting",
+    "Health Distribution",
+    "Wealth Distribution",
+    "Worksite",
   ];
 
   return (
