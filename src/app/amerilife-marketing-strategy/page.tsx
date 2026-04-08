@@ -60,7 +60,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
             <FadeIn>
               <NarrativeBlockSmall>
-                The Health strategy flips the traditional corporate marketing playbook. Rather than associating field success with the larger enterprise, AmeriLife Corporate Marketing becomes a platform that tells affiliate stories through their own eyes and point of view — letting the affiliates own their narrative. The goal: position AmeriLife as the partner of choice for unaffiliated health insurance shops evaluating which organization to join. This approach directly serves AmeriLife&apos;s Corporate Development (M&amp;A) pipeline.
+                The Health strategy flips the traditional corporate marketing playbook. Instead of telling generic, top-level stories that cloud our true strengths, AmeriLife Corporate Marketing becomes a platform that tells affiliate stories through their own eyes and point of view — letting the affiliates own their narrative. The goal: position AmeriLife as the partner of choice for unaffiliated health insurance shops evaluating which organization to join. This approach directly serves AmeriLife&apos;s Corporate Development (M&amp;A) pipeline.
               </NarrativeBlockSmall>
             </FadeIn>
 
