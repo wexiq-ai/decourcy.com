@@ -472,7 +472,7 @@ function SharedServicesList() {
   const services = [
     "Ops+IT",
     "Human Resources",
-    "Finance & Accounting",
+    "FP&A",
     "Marketing",
     "Corporate Development (M&A)",
     "Growth Consulting",
