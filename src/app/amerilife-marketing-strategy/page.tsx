@@ -30,7 +30,7 @@ export default function AmeriLifeMarketingStrategyPage() {
           <FlowBox
             step={1}
             label="Strategic Foundation"
-            sublabel="Cross-Functional Alignment — Marketing, Operations & IT"
+            sublabel="Cross-Functional Alignment — Health Distribution, Wealth Distribution, Marketing, Operations & IT"
             variant="accent"
           />
         </FadeIn>
