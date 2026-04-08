@@ -37,10 +37,10 @@ export default function ExamplePage() {
             </div>
             <div className="flex flex-col items-center gap-0">
               <FlowBox label="Begin Build" sublabel="Assign resources" size="sm" />
-              <Arrow />
             </div>
           </div>
         </GroupBox>
+        <Arrow />
 
         {/* Step 5 */}
         <FlowBox step={5} label="Development" sublabel="Iterative build & review" />
@@ -106,7 +106,7 @@ function FlowBox({
 
 function GroupBox({ step, children }: { step: number; children: React.ReactNode }) {
   return (
-    <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] p-4">
+    <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] p-4 mb-2">
       <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
         <span className="text-[11px] font-bold text-[#5b9bd5]/70">{step}</span>
       </div>
