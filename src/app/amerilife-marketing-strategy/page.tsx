@@ -71,6 +71,10 @@ export default function AmeriLifeMarketingStrategyPage() {
                 size="sm"
               />
             </FadeIn>
+
+            <FadeIn>
+              <AffiliateList />
+            </FadeIn>
             <FadeIn><Arrow /></FadeIn>
 
             <FadeIn>
@@ -382,6 +386,32 @@ function FlowBox({
           {sublabel}
         </div>
       )}
+    </div>
+  );
+}
+
+function AffiliateList() {
+  const affiliates = [
+    "Senior Market Advisors",
+    "Jack Schroeder and Associates",
+    "AmeriLife Marketing Group",
+    "Pinnacle Financial Services Group",
+    "Career",
+    "Health Administration",
+  ];
+
+  return (
+    <div className="w-full border border-[#1a4a2e]/60 rounded bg-[#0a2314] px-5 py-3 mt-1">
+      <div className="text-[10px] font-bold uppercase tracking-wider text-white/30 mb-2">
+        Priority Visit Order
+      </div>
+      <ol className="list-decimal list-inside space-y-1">
+        {affiliates.map((name) => (
+          <li key={name} className="text-xs text-white/60 tracking-wide">
+            {name}
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
