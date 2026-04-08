@@ -285,7 +285,7 @@ export default function AmeriLifeMarketingStrategyPage() {
                   Inbound Advisor / Advisory Pipeline
                 </div>
                 <div className="uppercase font-bold tracking-wider text-[10px] md:text-xs text-white/40 mt-1">
-                  Wealth — Authority Positioning Drives Inquiries from Advisors & Carriers
+                  Wealth — Authority Positioning Drives Inquiries from Advisors & Advisories
                 </div>
               </div>
             </div>
