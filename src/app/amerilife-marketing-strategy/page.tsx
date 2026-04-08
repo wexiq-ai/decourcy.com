@@ -30,14 +30,14 @@ export default function AmeriLifeMarketingStrategyPage() {
           <FlowBox
             step={1}
             label="Strategic Foundation"
-            sublabel="Cross-Functional Alignment — Health Distribution, Wealth Distribution, Marketing, Operations, IT & Corporate Development (M&A)"
+            sublabel="Cross-Functional Alignment — Health Distribution, Wealth Distribution, Marketing, Ops+IT & Corporate Development (M&A)"
             variant="accent"
           />
         </FadeIn>
 
         <FadeIn>
           <NarrativeBlock>
-            This strategy begins with the alignment work already underway between Health Distribution, Wealth Distribution, Marketing, Operations, IT, and Corporate Development (M&amp;A) leadership. Neither track operates in isolation — both rely on shared infrastructure, coordinated messaging, and collaborative execution across all six functions.
+            This strategy begins with the alignment work already underway between Health Distribution, Wealth Distribution, Marketing, Ops+IT, and Corporate Development (M&amp;A) leadership. Neither track operates in isolation — both rely on shared infrastructure, coordinated messaging, and collaborative execution across all five functions.
           </NarrativeBlock>
         </FadeIn>
 
