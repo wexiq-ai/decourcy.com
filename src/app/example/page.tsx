@@ -12,41 +12,46 @@ export default function ExamplePage() {
       {/* Flow container */}
       <div className="flex flex-col items-center gap-0 w-full max-w-md">
         {/* Step 1 */}
-        <FlowBox label="Client Request" sublabel="Intake form submitted" />
+        <FlowBox step={1} label="Client Request" sublabel="Intake form submitted" />
         <Arrow />
 
         {/* Step 2 */}
-        <FlowBox label="Initial Review" sublabel="Scope & feasibility check" />
+        <FlowBox step={2} label="Initial Review" sublabel="Scope & feasibility check" />
         <Arrow />
 
         {/* Step 3 — decision split */}
         <FlowBox
+          step={3}
           label="Approved?"
           sublabel="Decision gate"
           variant="accent"
         />
         <BranchArrows leftLabel="No" rightLabel="Yes" />
 
-        {/* Branches */}
-        <div className="grid grid-cols-2 gap-8 w-full">
-          <div className="flex flex-col items-center gap-0">
-            <FlowBox label="Request Revisions" sublabel="Return to client" size="sm" />
-            <ArrowUp />
+        {/* Step 4 — simultaneous branches */}
+        <GroupBox step={4}>
+          <div className="grid grid-cols-2 gap-8 w-full">
+            <div className="flex flex-col items-center gap-0">
+              <FlowBox label="Request Revisions" sublabel="Return to client" size="sm" />
+              <ArrowUp />
+            </div>
+            <div className="flex flex-col items-center gap-0">
+              <FlowBox label="Begin Build" sublabel="Assign resources" size="sm" />
+              <Arrow />
+            </div>
           </div>
-          <div className="flex flex-col items-center gap-0">
-            <FlowBox label="Begin Build" sublabel="Assign resources" size="sm" />
-            <Arrow />
-          </div>
-        </div>
+        </GroupBox>
 
-        {/* Continue right branch */}
-        <FlowBox label="Development" sublabel="Iterative build & review" />
+        {/* Step 5 */}
+        <FlowBox step={5} label="Development" sublabel="Iterative build & review" />
         <TwoWayArrow />
-        <FlowBox label="Client Feedback" sublabel="Review & approval cycle" />
+
+        {/* Step 6 */}
+        <FlowBox step={6} label="Client Feedback" sublabel="Review & approval cycle" />
         <Arrow />
 
-        {/* Final */}
-        <FlowBox label="Deliver & Deploy" sublabel="Launch to production" variant="accent" />
+        {/* Step 7 */}
+        <FlowBox step={7} label="Deliver & Deploy" sublabel="Launch to production" variant="accent" />
       </div>
 
     </div>
@@ -55,28 +60,38 @@ export default function ExamplePage() {
 
 /* ── Flow components ── */
 
+function StepIcon({ step }: { step: number }) {
+  return (
+    <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
+      <span className="text-[11px] font-bold text-[#5b9bd5]/70">{step}</span>
+    </div>
+  );
+}
+
 function FlowBox({
   label,
   sublabel,
   variant = "default",
   size = "md",
+  step,
 }: {
   label: string;
   sublabel?: string;
   variant?: "default" | "accent";
   size?: "sm" | "md";
+  step?: number;
 }) {
   const base =
     variant === "accent"
       ? "border-[#5b9bd5]/50 bg-[#0d2b18]"
       : "border-[#1a4a2e] bg-[#0d2b18]";
   const padding = size === "sm" ? "px-5 py-3" : "px-8 py-4";
-  const width = size === "sm" ? "w-full" : "w-full";
 
   return (
     <div
-      className={`${base} ${padding} ${width} border rounded text-center`}
+      className={`relative ${base} ${padding} w-full border rounded text-center`}
     >
+      {step && <StepIcon step={step} />}
       <div className={`font-bold uppercase tracking-wide ${size === "sm" ? "text-sm" : "text-base"} text-white/90`}>
         {label}
       </div>
@@ -85,6 +100,17 @@ function FlowBox({
           {sublabel}
         </div>
       )}
+    </div>
+  );
+}
+
+function GroupBox({ step, children }: { step: number; children: React.ReactNode }) {
+  return (
+    <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] p-4">
+      <div className="absolute -left-10 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
+        <span className="text-[11px] font-bold text-[#5b9bd5]/70">{step}</span>
+      </div>
+      {children}
     </div>
   );
 }
