@@ -37,7 +37,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
         <FadeIn>
           <NarrativeBlock>
-            This strategy begins with the alignment work already underway between marketing, operations, and IT leadership. Neither track operates in isolation — both rely on shared infrastructure, coordinated messaging, and collaborative execution across functions.
+            This strategy begins with the alignment work already underway between Health Distribution, Wealth Distribution, Marketing, Operations, and IT leadership. Neither track operates in isolation — both rely on shared infrastructure, coordinated messaging, and collaborative execution across all five functions.
           </NarrativeBlock>
         </FadeIn>
 
