@@ -397,7 +397,6 @@ function AffiliateList() {
     "AmeriLife Marketing Group",
     "Pinnacle Financial Services Group",
     "Career",
-    "Health Administration",
   ];
 
   return (
