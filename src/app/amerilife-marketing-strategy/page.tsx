@@ -122,7 +122,7 @@ export default function AmeriLifeMarketingStrategyPage() {
               <FlowBox
                 step={7}
                 label="Multi-Channel Distribution"
-                sublabel="AmeriLife.com • Social • Affiliate Co-Promotion"
+                sublabel="AmeriLife.com/blog • Social • Affiliate Co-Promotion"
                 size="sm"
               />
             </FadeIn>
@@ -174,7 +174,7 @@ export default function AmeriLifeMarketingStrategyPage() {
               <FlowBox
                 step={3}
                 label="Zero-Click SEO Domination"
-                sublabel="Featured Snippets • Knowledge Panels • AI Overviews"
+                sublabel="AmeriLife.com/blog • Featured Snippets • Knowledge Panels • AI Overviews"
                 size="sm"
               />
             </FadeIn>
