@@ -38,9 +38,16 @@ Most content will be workflow and process visualizations. Follow these rules:
 - **Subheadings**: all caps (`uppercase`), smaller font size, bold (`font-bold`), wider tracking
 - **No navigation links between pages** — every page stands alone with no back links or cross-page nav
 
+## Animations
+
+- **Scroll fade-in**: all flow elements use Intersection Observer to fade in (opacity 0→1, translateY 16px→0, 0.6s ease-out) as they enter the viewport at 10% threshold
+- **Above the fold**: elements visible in the initial viewport trigger immediately on load — no delayed appearance
+- Use the `FadeIn` wrapper component for all flow page content
+
 ## General Rules
 
 - No photo images — use icons, glyphs, SVG symbols, or CSS-drawn elements only
 - Keep layouts clean and minimal
 - Pages should feel technical and modern, not decorative
 - Consistent spacing and alignment across all workflow elements
+- Automatically update this style guide when new patterns are established during iteration
