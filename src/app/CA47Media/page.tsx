@@ -272,7 +272,7 @@ export default function CA47MediaPage() {
             priority={1}
             name="The Bill Handel Show"
             host="Bill Handel (attorney/legal journalist, 30+ yr. KFI veteran)"
-            airtime="Mon\u2013Fri 6\u20139 AM"
+            airtime="Mon–Fri 6–9 AM"
             peak="Morning Drive"
             email="bhandel@kfiam640.com"
             website="kfiam640.iheart.com/featured/bill-handel"
@@ -285,7 +285,7 @@ export default function CA47MediaPage() {
             priority={1}
             name="GET BENT! with John Kobylt"
             host={'John Kobylt (legendary "John & Ken" co-host)'}
-            airtime="Mon\u2013Fri 3\u20136 PM"
+            airtime="Mon–Fri 3–6 PM"
             peak="Afternoon Drive"
             email="johnkobylt@kfiam640.com"
             website="kfiam640.iheart.com/featured/john-kobylt"
@@ -299,7 +299,7 @@ export default function CA47MediaPage() {
             priority={2}
             name="Gary &amp; Shannon"
             host="Gary Hoffmann &amp; Shannon Farren"
-            airtime="Mon\u2013Fri 9 AM\u201312 PM"
+            airtime="Mon–Fri 9 AM–12 PM"
             peak="Midday"
             email="gary@kfiam640.com"
             website="kfiam640.iheart.com/featured/gary-and-shannon"
@@ -312,7 +312,7 @@ export default function CA47MediaPage() {
             priority={2}
             name="Monks &amp; Merrill Show"
             host="Michael Monks &amp; Chris Merrill"
-            airtime="Mon\u2013Fri 12\u20133 PM"
+            airtime="Mon–Fri 12–3 PM"
             peak="Midday"
             website="kfiam640.iheart.com"
             notes="NEW — Launched Feb 17, 2026. Replaced John Kobylt's midday slot. Merrill is a longtime KFI voice. Early opportunity to build relationships with new hosts eager for guests."
@@ -325,7 +325,7 @@ export default function CA47MediaPage() {
             priority={2}
             name="Later with Mo&rsquo; Kelly"
             host="Mo' Kelly (Maurice Kelly)"
-            airtime="Mon\u2013Fri 6\u201310 PM"
+            airtime="Mon–Fri 6–10 PM"
             peak="Evening"
             email="mokelly@kfiam640.com"
             website="kfiam640.iheart.com/featured/mo-kelly"
@@ -354,7 +354,7 @@ export default function CA47MediaPage() {
             pd="Luis Segura"
             website="kabc.com"
             contact="compliance@kabc.com"
-            keyStats={["6,600\u20137,900W (directional)", "OC-native host covers district-level politics"]}
+            keyStats={["6,600–7,900W (directional)", "OC-native host covers district-level politics"]}
           />
         </FadeIn>
 
@@ -363,7 +363,7 @@ export default function CA47MediaPage() {
             priority={1}
             name="The John Phillips Show"
             host="John Phillips — OC Native, CNN Political Commentator, OC Register Columnist"
-            airtime="Mon\u2013Fri 12\u20133 PM"
+            airtime="Mon–Fri 12–3 PM"
             peak="Midday/Afternoon"
             email="jphillips@kabc.com"
             website="kabc.com/thejohnphillipsshow"
@@ -376,7 +376,7 @@ export default function CA47MediaPage() {
             priority={2}
             name="The Armstrong &amp; Getty Show"
             host="Jack Armstrong &amp; Joe Getty (syndicated from Sacramento)"
-            airtime="Mon\u2013Fri 6\u20139 AM"
+            airtime="Mon–Fri 6–9 AM"
             peak="Morning Drive"
             email="armstrongandgetty@kabc.com"
             website="kabc.com/armstrongandgetty"
@@ -389,7 +389,7 @@ export default function CA47MediaPage() {
             priority={3}
             name="Mottek on Money"
             host="Frank Mottek &amp; Randy Wang"
-            airtime="Mon\u2013Fri 5\u20137 PM"
+            airtime="Mon–Fri 5–7 PM"
             peak="Evening"
             website="kabc.com/shows/mottek-on-money"
             notes="Business/financial focus. Relevant if campaign is highlighting economic policy positions (housing costs, small business, cost of living in OC). Lower priority but opens business community reach."
@@ -429,7 +429,7 @@ export default function CA47MediaPage() {
             peak="Drive Times"
             email="feedback@knxnews.com"
             website="audacy.com/knxnews"
-            notes="KNX does not have traditional interview talk shows — it is an all-news rolling format. However, it regularly features short interviews (2\u20134 min) with elected officials, candidates, and political spokespersons integrated into news cycles. Campaign should pitch specific news pegs (legislation, endorsements, events) for news integration."
+            notes="KNX does not have traditional interview talk shows — it is an all-news rolling format. However, it regularly features short interviews (2–4 min) with elected officials, candidates, and political spokespersons integrated into news cycles. Campaign should pitch specific news pegs (legislation, endorsements, events) for news integration."
           />
         </FadeIn>
 
@@ -463,7 +463,7 @@ export default function CA47MediaPage() {
             priority={1}
             name="AirTalk with Larry Mantle"
             host="Larry Mantle (longest-running daily talk show in LA — on air since April 1, 1985); Fridays: Austin Cross"
-            airtime="Mon\u2013Fri 9\u201311 AM"
+            airtime="Mon–Fri 9–11 AM"
             peak="Late Morning"
             email="atcomments@laist.com"
             phone="(866) 893-5722"
@@ -502,7 +502,7 @@ export default function CA47MediaPage() {
             priority={1}
             name="Press Play with Madeleine Brand"
             host="Madeleine Brand (30+ year NPR veteran, Columbia J-School)"
-            airtime="Mon\u2013Fri 12 PM &amp; 7 PM + daily podcast"
+            airtime="Mon–Fri 12 PM &amp; 7 PM + daily podcast"
             peak="Midday"
             email="info@kcrw.org"
             website="kcrw.com/shows/press-play"
@@ -565,7 +565,7 @@ export default function CA47MediaPage() {
             priority={3}
             name="Democracy Now!"
             host="Amy Goodman &amp; Juan Gonz&aacute;lez (nationally syndicated)"
-            airtime="Mon\u2013Fri (weekday mornings)"
+            airtime="Mon–Fri (weekday mornings)"
             peak="Niche/Progressive"
             email="info@kpfk.org"
             website="democracynow.org"
@@ -701,7 +701,7 @@ export default function CA47MediaPage() {
             <CautionCard name="John Kobylt (KFI, GET BENT!)" caution="High risk, high reward. Combative style; prepare for adversarial questions. Do not book without full prep." />
             <CautionCard name="Armstrong &amp; Getty (KABC)" caution="Syndicated from Sacramento — may not have deep OC context. Confirm producers have CA-47 briefing materials before interview." />
             <CautionCard name="KEIB (1150 AM)" caution="No local booking possible. All national syndication. Do not waste outreach resources here." />
-            <CautionCard name="KPFK (90.7)" caution="Station underwent management upheaval 2023\u20132025. Confirm show schedule is current at kpfk.org before pitching." />
+            <CautionCard name="KPFK (90.7)" caution="Station underwent management upheaval 2023–2025. Confirm show schedule is current at kpfk.org before pitching." />
           </div>
         </FadeIn>
 
