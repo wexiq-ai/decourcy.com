@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export default function CA47MediaPage() {
   return (
@@ -23,6 +23,7 @@ export default function CA47MediaPage() {
           <p className="text-[10px] text-white/20 mt-2 uppercase tracking-wider">
             Prepared: April 2026 &bull; Market: Los Angeles&ndash;Orange County MSA (#2 in nation) &bull; District: CA-47 / Cook PVI D+3
           </p>
+          <LastUpdated />
         </div>
       </FadeIn>
 
@@ -665,6 +666,22 @@ www.troutmanforamerica.com`}
 /* ══════════════════════════════════════════════ */
 /* COMPONENTS                                    */
 /* ══════════════════════════════════════════════ */
+
+function LastUpdated() {
+  const [timestamp, setTimestamp] = useState("");
+
+  useEffect(() => {
+    setTimestamp(process.env.BUILD_TIMESTAMP || "");
+  }, []);
+
+  if (!timestamp) return <div className="mb-8" />;
+
+  return (
+    <p className="text-[10px] italic text-white/25 mb-8 text-center mt-3">
+      Last updated {timestamp}
+    </p>
+  );
+}
 
 function FadeIn({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
