@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export default function CA47MediaPage() {
   return (
-    <div className="min-h-screen bg-[#071a0e] text-white px-4 md:px-6 py-16 flex flex-col items-center">
+    <div className="min-h-screen bg-[#071a0e] text-white px-4 md:px-6 py-16 flex flex-col items-center overflow-x-hidden">
       {/* Page Header */}
       <FadeIn>
         <div className="text-center mb-2">
@@ -37,7 +37,7 @@ export default function CA47MediaPage() {
         </div>
       </FadeIn>
 
-      <div className="flex flex-col items-center gap-0 w-full max-w-4xl">
+      <div className="flex flex-col items-center gap-0 w-full max-w-4xl overflow-hidden">
 
         {/* Stats Row */}
         <FadeIn>
@@ -1030,7 +1030,7 @@ function ShowCard({
       </div>
       <p className="text-[11px] text-white/40 mb-2" dangerouslySetInnerHTML={{ __html: host }} />
       <p className="text-xs leading-relaxed text-white/55 mb-3">{notes}</p>
-      <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[11px]">
+      <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-[11px] min-w-0 overflow-hidden">
         <div className="flex gap-1.5">
           <span className="text-white/25 font-bold uppercase text-[9px]">Air</span>
           <span className="text-white/50">{airtime}</span>
@@ -1179,7 +1179,7 @@ function TemplateCard({
       <div className="text-[10px] text-white/30 mb-3">
         Subject: <span className="text-white/50">{subject}</span>
       </div>
-      <div className="text-xs leading-[1.8] text-white/55 whitespace-pre-wrap">
+      <div className="text-xs leading-[1.8] text-white/55 whitespace-pre-wrap break-words overflow-hidden">
         {lines.map((line, i) => (
           <span key={i}>
             {renderLine(line)}

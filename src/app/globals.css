@@ -4,10 +4,15 @@
   --font-display: var(--font-baskerville);
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   background: #071a0e;
   color: #fff;
   font-family: var(--font-sans), system-ui, sans-serif;
+  overflow-x: hidden;
 }
 
 @keyframes fadeIn {
