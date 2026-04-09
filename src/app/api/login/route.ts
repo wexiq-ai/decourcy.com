@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const PAGE_PASSWORDS: Record<string, string> = {
   "/amerilife-marketing-strategy": "ovitas2026",
-  "/CA47Media": "troutman2026",
+  "/ca47media": "troutman2026",
 };
 
 const DEFAULT_PASSWORD = "ovitas2026";
@@ -10,7 +10,7 @@ const DEFAULT_PASSWORD = "ovitas2026";
 export async function POST(request: NextRequest) {
   const { password, page } = await request.json();
 
-  const normalizedPage = page || "/";
+  const normalizedPage = (page || "/").toLowerCase();
   const expected = PAGE_PASSWORDS[normalizedPage] || DEFAULT_PASSWORD;
 
   if (password === expected) {
