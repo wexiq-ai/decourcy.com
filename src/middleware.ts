@@ -5,10 +5,11 @@ export function middleware(request: NextRequest) {
   const cookieName = `auth_${pagePath.replace(/\//g, "_")}`;
   const auth = request.cookies.get(cookieName)?.value;
 
-  // Also accept the legacy cookie for backwards compatibility
+  // Accept legacy cookie only for the original amerilife page
   const legacyAuth = request.cookies.get("site_auth")?.value;
+  const isLegacyPage = pagePath === "/amerilife-marketing-strategy";
 
-  if (auth === "authenticated" || legacyAuth === "authenticated") {
+  if (auth === "authenticated" || (isLegacyPage && legacyAuth === "authenticated")) {
     return NextResponse.next();
   }
 
