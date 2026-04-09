@@ -297,8 +297,8 @@ export default function CA47MediaPage() {
         <FadeIn>
           <ShowCard
             priority={2}
-            name="Gary &amp; Shannon"
-            host="Gary Hoffmann &amp; Shannon Farren"
+            name="Gary & Shannon"
+            host="Gary Hoffmann & Shannon Farren"
             airtime="Mon–Fri 9 AM–12 PM"
             peak="Midday"
             email="gary@kfiam640.com"
@@ -310,8 +310,8 @@ export default function CA47MediaPage() {
         <FadeIn>
           <ShowCard
             priority={2}
-            name="Monks &amp; Merrill Show"
-            host="Michael Monks &amp; Chris Merrill"
+            name="Monks & Merrill Show"
+            host="Michael Monks & Chris Merrill"
             airtime="Mon–Fri 12–3 PM"
             peak="Midday"
             website="kfiam640.iheart.com"
@@ -323,7 +323,7 @@ export default function CA47MediaPage() {
         <FadeIn>
           <ShowCard
             priority={2}
-            name="Later with Mo&rsquo; Kelly"
+            name="Later with Mo' Kelly"
             host="Mo' Kelly (Maurice Kelly)"
             airtime="Mon–Fri 6–10 PM"
             peak="Evening"
@@ -374,8 +374,8 @@ export default function CA47MediaPage() {
         <FadeIn>
           <ShowCard
             priority={2}
-            name="The Armstrong &amp; Getty Show"
-            host="Jack Armstrong &amp; Joe Getty (syndicated from Sacramento)"
+            name="The Armstrong & Getty Show"
+            host="Jack Armstrong & Joe Getty (syndicated from Sacramento)"
             airtime="Mon–Fri 6–9 AM"
             peak="Morning Drive"
             email="armstrongandgetty@kabc.com"
@@ -388,7 +388,7 @@ export default function CA47MediaPage() {
           <ShowCard
             priority={3}
             name="Mottek on Money"
-            host="Frank Mottek &amp; Randy Wang"
+            host="Frank Mottek & Randy Wang"
             airtime="Mon–Fri 5–7 PM"
             peak="Evening"
             website="kabc.com/shows/mottek-on-money"
@@ -502,7 +502,7 @@ export default function CA47MediaPage() {
             priority={1}
             name="Press Play with Madeleine Brand"
             host="Madeleine Brand (30+ year NPR veteran, Columbia J-School)"
-            airtime="Mon–Fri 12 PM &amp; 7 PM + daily podcast"
+            airtime="Mon–Fri 12 PM & 7 PM + daily podcast"
             peak="Midday"
             email="info@kcrw.org"
             website="kcrw.com/shows/press-play"
@@ -513,7 +513,7 @@ export default function CA47MediaPage() {
         <FadeIn>
           <ShowCard
             priority={2}
-            name="Left, Right &amp; Center"
+            name="Left, Right & Center"
             host="Panel format — rotating hosts/panelists"
             airtime="Weekly (Fridays)"
             peak="Moderate (Weekly)"
@@ -564,7 +564,7 @@ export default function CA47MediaPage() {
           <ShowCard
             priority={3}
             name="Democracy Now!"
-            host="Amy Goodman &amp; Juan Gonz&aacute;lez (nationally syndicated)"
+            host="Amy Goodman & Juan González (nationally syndicated)"
             airtime="Mon–Fri (weekday mornings)"
             peak="Niche/Progressive"
             email="info@kpfk.org"
@@ -699,7 +699,7 @@ export default function CA47MediaPage() {
         <FadeIn>
           <div className="w-full space-y-2 mb-6">
             <CautionCard name="John Kobylt (KFI, GET BENT!)" caution="High risk, high reward. Combative style; prepare for adversarial questions. Do not book without full prep." />
-            <CautionCard name="Armstrong &amp; Getty (KABC)" caution="Syndicated from Sacramento — may not have deep OC context. Confirm producers have CA-47 briefing materials before interview." />
+            <CautionCard name="Armstrong & Getty (KABC)" caution="Syndicated from Sacramento — may not have deep OC context. Confirm producers have CA-47 briefing materials before interview." />
             <CautionCard name="KEIB (1150 AM)" caution="No local booking possible. All national syndication. Do not waste outreach resources here." />
             <CautionCard name="KPFK (90.7)" caution="Station underwent management upheaval 2023–2025. Confirm show schedule is current at kpfk.org before pitching." />
           </div>
