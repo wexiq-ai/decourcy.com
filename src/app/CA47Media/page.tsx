@@ -289,7 +289,7 @@ export default function CA47MediaPage() {
             peak="Afternoon Drive"
             email="johnkobylt@kfiam640.com"
             website="kfiam640.iheart.com/featured/john-kobylt"
-            notes="Highly populist, combative, anti-establishment. Kobylt's audience is large and engaged \u2014 many are OC residents. Will challenge guests aggressively. High reward / high risk. Preparation essential. KTLA does live TV segments from studio."
+            notes="Highly populist, combative, anti-establishment. Kobylt's audience is large and engaged — many are OC residents. Will challenge guests aggressively. High reward / high risk. Preparation essential. KTLA does live TV segments from studio."
             caution
           />
         </FadeIn>
@@ -315,7 +315,7 @@ export default function CA47MediaPage() {
             airtime="Mon\u2013Fri 12\u20133 PM"
             peak="Midday"
             website="kfiam640.iheart.com"
-            notes="NEW \u2014 Launched Feb 17, 2026. Replaced John Kobylt's midday slot. Merrill is a longtime KFI voice. Early opportunity to build relationships with new hosts eager for guests."
+            notes="NEW — Launched Feb 17, 2026. Replaced John Kobylt's midday slot. Merrill is a longtime KFI voice. Early opportunity to build relationships with new hosts eager for guests."
             badge="NEW FEB '26"
           />
         </FadeIn>
@@ -362,12 +362,12 @@ export default function CA47MediaPage() {
           <ShowCard
             priority={1}
             name="The John Phillips Show"
-            host="John Phillips \u2014 OC Native, CNN Political Commentator, OC Register Columnist"
+            host="John Phillips — OC Native, CNN Political Commentator, OC Register Columnist"
             airtime="Mon\u2013Fri 12\u20133 PM"
             peak="Midday/Afternoon"
             email="jphillips@kabc.com"
             website="kabc.com/thejohnphillipsshow"
-            notes="CRITICAL TARGET. Phillips is an Orange County native who explicitly covers OC politics, regularly references CA-47, and writes for the Orange County Register. He has deep relationships in OC political circles. Conservative-leaning but a journalist \u2014 will host candidates from all parties. His audience is exactly the persuadable OC voters this campaign needs to reach. Appeared on CNN. Podcast: ~6,000+ episodes."
+            notes="CRITICAL TARGET. Phillips is an Orange County native who explicitly covers OC politics, regularly references CA-47, and writes for the Orange County Register. He has deep relationships in OC political circles. Conservative-leaning but a journalist — will host candidates from all parties. His audience is exactly the persuadable OC voters this campaign needs to reach. Appeared on CNN. Podcast: ~6,000+ episodes."
           />
         </FadeIn>
 
@@ -429,7 +429,7 @@ export default function CA47MediaPage() {
             peak="Drive Times"
             email="feedback@knxnews.com"
             website="audacy.com/knxnews"
-            notes="KNX does not have traditional interview talk shows \u2014 it is an all-news rolling format. However, it regularly features short interviews (2\u20134 min) with elected officials, candidates, and political spokespersons integrated into news cycles. Campaign should pitch specific news pegs (legislation, endorsements, events) for news integration."
+            notes="KNX does not have traditional interview talk shows — it is an all-news rolling format. However, it regularly features short interviews (2\u20134 min) with elected officials, candidates, and political spokespersons integrated into news cycles. Campaign should pitch specific news pegs (legislation, endorsements, events) for news integration."
           />
         </FadeIn>
 
@@ -454,7 +454,7 @@ export default function CA47MediaPage() {
             phone="(626) 583-5100"
             website="laist.com"
             contact="atcomments@laist.com"
-            keyStats={["527K+ weekly listeners", "Nonprofit \u2014 no political ads (earned media = max credibility)", "Rebranded from KPCC to LAist 89.3 (Feb 2023)"]}
+            keyStats={["527K+ weekly listeners", "Nonprofit — no political ads (earned media = max credibility)", "Rebranded from KPCC to LAist 89.3 (Feb 2023)"]}
           />
         </FadeIn>
 
@@ -462,7 +462,7 @@ export default function CA47MediaPage() {
           <ShowCard
             priority={1}
             name="AirTalk with Larry Mantle"
-            host="Larry Mantle (longest-running daily talk show in LA \u2014 on air since April 1, 1985); Fridays: Austin Cross"
+            host="Larry Mantle (longest-running daily talk show in LA — on air since April 1, 1985); Fridays: Austin Cross"
             airtime="Mon\u2013Fri 9\u201311 AM"
             peak="Late Morning"
             email="atcomments@laist.com"
@@ -506,7 +506,7 @@ export default function CA47MediaPage() {
             peak="Midday"
             email="info@kcrw.org"
             website="kcrw.com/shows/press-play"
-            notes="Daily news and culture show covering national, international, and local SoCal stories. Covers California politics, housing, environment, social policy. Educated, progressive-leaning audience. Strong podcast following that extends beyond radio broadcast hours. Brand is a respected journalist \u2014 prepare substantive policy positions."
+            notes="Daily news and culture show covering national, international, and local SoCal stories. Covers California politics, housing, environment, social policy. Educated, progressive-leaning audience. Strong podcast following that extends beyond radio broadcast hours. Brand is a respected journalist — prepare substantive policy positions."
           />
         </FadeIn>
 
@@ -514,7 +514,7 @@ export default function CA47MediaPage() {
           <ShowCard
             priority={2}
             name="Left, Right &amp; Center"
-            host="Panel format \u2014 rotating hosts/panelists"
+            host="Panel format — rotating hosts/panelists"
             airtime="Weekly (Fridays)"
             peak="Moderate (Weekly)"
             email="info@kcrw.org"
@@ -534,7 +534,7 @@ export default function CA47MediaPage() {
         <FadeIn>
           <StationHeader
             callSign="KPFK 90.7 FM"
-            tagline="Pacifica Radio \u2014 Progressive Community Radio"
+            tagline="Pacifica Radio — Progressive Community Radio"
             owner="Pacifica Foundation"
             studio="Burbank (temporary) / North Hollywood"
             format="Progressive News, Talk, Culture"
@@ -551,7 +551,7 @@ export default function CA47MediaPage() {
           <ShowCard
             priority={2}
             name="Background Briefing with Ian Masters"
-            host="Ian Masters \u2014 journalist, policy advocate, 30+ years in public affairs broadcasting"
+            host="Ian Masters — journalist, policy advocate, 30+ years in public affairs broadcasting"
             airtime="Tuesdays (confirm at kpfk.org)"
             peak="Niche/Engaged"
             email="info@kpfk.org"
@@ -578,7 +578,7 @@ export default function CA47MediaPage() {
             priority={3}
             name="The Signal"
             host="Dino (public affairs, labor, democracy, international affairs)"
-            airtime="Weekly \u2014 check schedule at kpfk.org"
+            airtime="Weekly — check schedule at kpfk.org"
             peak="Niche"
             email="info@kpfk.org"
             website="kpfk.org"
@@ -597,7 +597,7 @@ export default function CA47MediaPage() {
         <FadeIn>
           <StationHeader
             callSign="KEIB AM 1150"
-            tagline={'"The Patriot" \u2014 100% Syndicated Conservative Talk'}
+            tagline={'"The Patriot" — 100% Syndicated Conservative Talk'}
             owner="iHeartMedia"
             studio="Burbank, CA"
             format="Conservative Talk (Fully Syndicated)"
@@ -666,10 +666,10 @@ export default function CA47MediaPage() {
           <div className="w-full space-y-2 mb-6">
             <FramingCard station="KFI (640)" framing="Populist, OC-focused. Lean into quality of life: traffic, crime, cost of living, local government accountability. The independent candidacy pitch: a representative who works for OC residents, not for party bosses in DC." />
             <FramingCard station="KABC (790)" framing="Conservative / independent OC voter. Fiscal issues, business climate, law enforcement, immigration (balanced tone). Lead with: the two-party system is broken, and OC voters deserve someone accountable to them." />
-            <FramingCard station="LAist 89.3" framing="Policy depth expected. Bring data. Discuss housing, climate, healthcare, civil rights \u2014 with substance. Position the independent candidacy as a rejection of partisan dysfunction." />
+            <FramingCard station="LAist 89.3" framing="Policy depth expected. Bring data. Discuss housing, climate, healthcare, civil rights — with substance. Position the independent candidacy as a rejection of partisan dysfunction." />
             <FramingCard station="KCRW (89.9)" framing="Educated progressives. National policy + local impact. Environment, social equity, arts/culture policy. The broken two-party system message resonates strongly with this audience." />
             <FramingCard station="KPFK (90.7)" framing="Activist base. Lead with worker rights, climate, civil liberties, anti-corporate themes. The independent candidacy is a direct challenge to the entrenched power structure." />
-            <FramingCard station="KNX (1070/97.1)" framing="Neutral news hooks only. No advocacy \u2014 only newsworthy events, endorsements, legislation. Pitch the independent candidacy as news: a credible alternative in a competitive swing district." />
+            <FramingCard station="KNX (1070/97.1)" framing="Neutral news hooks only. No advocacy — only newsworthy events, endorsements, legislation. Pitch the independent candidacy as news: a credible alternative in a competitive swing district." />
           </div>
         </FadeIn>
 
@@ -699,7 +699,7 @@ export default function CA47MediaPage() {
         <FadeIn>
           <div className="w-full space-y-2 mb-6">
             <CautionCard name="John Kobylt (KFI, GET BENT!)" caution="High risk, high reward. Combative style; prepare for adversarial questions. Do not book without full prep." />
-            <CautionCard name="Armstrong &amp; Getty (KABC)" caution="Syndicated from Sacramento \u2014 may not have deep OC context. Confirm producers have CA-47 briefing materials before interview." />
+            <CautionCard name="Armstrong &amp; Getty (KABC)" caution="Syndicated from Sacramento — may not have deep OC context. Confirm producers have CA-47 briefing materials before interview." />
             <CautionCard name="KEIB (1150 AM)" caution="No local booking possible. All national syndication. Do not waste outreach resources here." />
             <CautionCard name="KPFK (90.7)" caution="Station underwent management upheaval 2023\u20132025. Confirm show schedule is current at kpfk.org before pitching." />
           </div>
