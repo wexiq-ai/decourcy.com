@@ -116,7 +116,7 @@ function loginHTML(pagePath: string) {
   <div class="container">
     <h1>D<span class="sm">E</span>COURCY.<span class="sm">COM</span></h1>
     <form id="loginForm">
-      <input type="password" id="pw" placeholder="Password" autofocus />
+      <input type="password" id="pw" placeholder="Password" autofocus autocapitalize="off" autocorrect="off" autocomplete="off" />
       <button type="submit">Enter</button>
       <div class="error" id="err"></div>
     </form>
