@@ -102,11 +102,151 @@ export default function CA47MediaPage() {
         </FadeIn>
 
         {/* ══════════════════════════════════════════════ */}
-        {/* STATION PROFILES                              */}
+        {/* PRIORITY TARGET SUMMARY (CROSS-STATION)       */}
         {/* ══════════════════════════════════════════════ */}
 
         <FadeIn>
-          <SectionHeader label="Station Profiles &amp; Show Listings" />
+          <SectionHeader label="Priority Targets at a Glance" />
+        </FadeIn>
+
+        <FadeIn>
+          <NarrativeBlock>
+            The following ranks all 14 identified shows by priority across all stations. Start at the top and work down.
+          </NarrativeBlock>
+        </FadeIn>
+
+        <FadeIn>
+          <PriorityGroup level={1} label="Must-Book — Highest Impact for CA-47">
+            <PrioritySummaryRow
+              name="AirTalk with Larry Mantle"
+              station="LAist 89.3 (KPCC)"
+              airtime="Mon–Fri 9–11 AM"
+              why="Gold standard. 40 years interviewing presidents, senators, governors. Covers OC politics explicitly. Noncommercial = max credibility."
+              email="atcomments@laist.com"
+            />
+            <PrioritySummaryRow
+              name="The John Phillips Show"
+              station="KABC 790 AM"
+              airtime="Mon–Fri 12–3 PM"
+              why="OC native host, OC Register columnist, CNN commentator. Covers CA-47 district-level politics. Exact persuasion audience."
+              email="jphillips@kabc.com"
+            />
+            <PrioritySummaryRow
+              name="The Bill Handel Show"
+              station="KFI 640 AM"
+              airtime="Mon–Fri 6–9 AM"
+              why="Largest local morning talk audience in the nation. 50,000W transmitter in La Mirada (directly in CA-47)."
+              email="bhandel@kfiam640.com"
+            />
+            <PrioritySummaryRow
+              name="Press Play with Madeleine Brand"
+              station="KCRW 89.9 FM"
+              airtime="Mon–Fri 12 PM & 7 PM + podcast"
+              why="Daily deep-interview show. Highest-educated, highest-income listener base in SoCal. Strong podcast second life."
+              email="info@kcrw.org"
+            />
+            <PrioritySummaryRow
+              name="GET BENT! with John Kobylt"
+              station="KFI 640 AM"
+              airtime="Mon–Fri 3–6 PM"
+              why="Afternoon drive — large, engaged OC audience. Populist, anti-establishment. High reward / high risk."
+              email="johnkobylt@kfiam640.com"
+              caution="Combative host — do not book without full prep."
+            />
+          </PriorityGroup>
+        </FadeIn>
+
+        <FadeIn>
+          <PriorityGroup level={2} label="Strong Secondary — Build Momentum">
+            <PrioritySummaryRow
+              name="Gary & Shannon"
+              station="KFI 640 AM"
+              airtime="Mon–Fri 9 AM–12 PM"
+              why="Broad appeal, less combative. Good for candidate accessibility stories."
+              email="gary@kfiam640.com"
+            />
+            <PrioritySummaryRow
+              name="Monks & Merrill Show"
+              station="KFI 640 AM"
+              airtime="Mon–Fri 12–3 PM"
+              why="NEW (Feb 2026). Hosts eager for guests — early relationship opportunity."
+              badge="NEW"
+            />
+            <PrioritySummaryRow
+              name="Later with Mo' Kelly"
+              station="KFI 640 AM"
+              airtime="Mon–Fri 6–10 PM"
+              why="Moderate/balanced. Social justice, community issues. Reaches younger OC voters."
+              email="mokelly@kfiam640.com"
+            />
+            <PrioritySummaryRow
+              name="The Armstrong & Getty Show"
+              station="KABC 790 AM"
+              airtime="Mon–Fri 6–9 AM"
+              why="Morning drive, conservative but less combative. Syndicated from Sacramento."
+              email="armstrongandgetty@kabc.com"
+            />
+            <PrioritySummaryRow
+              name="KNX Newsroom"
+              station="KNX 1070 / 97.1 FM"
+              airtime="24/7"
+              why="All-news — no interview slots, but 50,000W AM+FM reach. Pitch newsworthy hooks for repeated news cycle coverage."
+              email="feedback@knxnews.com"
+            />
+            <PrioritySummaryRow
+              name="Background Briefing with Ian Masters"
+              station="KPFK 90.7 FM"
+              airtime="Tuesdays (confirm at kpfk.org)"
+              why="Deep-dive political interviews. Returned to prime hours Jan 2025. Base activation."
+              email="info@kpfk.org"
+            />
+            <PrioritySummaryRow
+              name="Left, Right & Center"
+              station="KCRW 89.9 FM"
+              airtime="Weekly (Fridays)"
+              why="Multi-perspective panel format — ideal for independent candidate positioning."
+              email="info@kcrw.org"
+            />
+          </PriorityGroup>
+        </FadeIn>
+
+        <FadeIn>
+          <PriorityGroup level={3} label="Supplemental — Niche Audiences">
+            <PrioritySummaryRow
+              name="Mottek on Money"
+              station="KABC 790 AM"
+              airtime="Mon–Fri 5–7 PM"
+              why="Business/financial focus. Relevant for economic policy angles (housing, cost of living)."
+            />
+            <PrioritySummaryRow
+              name="Democracy Now!"
+              station="KPFK 90.7 FM"
+              airtime="Mon–Fri mornings"
+              why="Nationally syndicated progressive news. Activated progressive base. Pitch via democracynow.org/contact."
+            />
+            <PrioritySummaryRow
+              name="The Signal"
+              station="KPFK 90.7 FM"
+              airtime="Weekly (check kpfk.org)"
+              why="Labor, immigration, democracy. Coalition-building content."
+            />
+          </PriorityGroup>
+        </FadeIn>
+
+        <FadeIn>
+          <div className="w-full border border-red-400/15 bg-red-900/5 rounded px-4 py-3 mb-6">
+            <p className="text-[10px] text-red-300/50 leading-relaxed">
+              <strong className="text-red-300/70">Not Viable:</strong> KEIB AM 1150 (&ldquo;The Patriot&rdquo;) &mdash; 100% nationally syndicated (Beck, Hannity, Bongino). No local interview slots. Do not target.
+            </p>
+          </div>
+        </FadeIn>
+
+        {/* ══════════════════════════════════════════════ */}
+        {/* STATION PROFILES (DETAILED)                   */}
+        {/* ══════════════════════════════════════════════ */}
+
+        <FadeIn>
+          <SectionHeader label="Station Profiles &amp; Show Detail" />
         </FadeIn>
 
         {/* ── KFI AM 640 ── */}
@@ -918,6 +1058,73 @@ function ShowCard({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function PriorityGroup({
+  level,
+  label,
+  children,
+}: {
+  level: number;
+  label: string;
+  children: ReactNode;
+}) {
+  const styles: Record<number, { border: string; badge: string }> = {
+    1: { border: "border-[#5b9bd5]/30", badge: "bg-[#5b9bd5] text-[#071a0e]" },
+    2: { border: "border-[#5b9bd5]/15", badge: "bg-[#5b9bd5]/20 text-[#5b9bd5]" },
+    3: { border: "border-white/8", badge: "bg-white/8 text-white/45" },
+  };
+  const s = styles[level] || styles[3];
+
+  return (
+    <div className={`w-full border ${s.border} rounded-lg mb-4`}>
+      <div className="px-4 py-3 border-b border-inherit flex items-center gap-2.5">
+        <span className={`text-[9px] font-bold uppercase tracking-[0.1em] px-2 py-0.5 rounded ${s.badge}`}>
+          Priority {level}
+        </span>
+        <span className="text-xs font-bold uppercase tracking-wide text-white/70">{label}</span>
+      </div>
+      <div className="divide-y divide-white/5">{children}</div>
+    </div>
+  );
+}
+
+function PrioritySummaryRow({
+  name,
+  station,
+  airtime,
+  why,
+  email,
+  caution,
+  badge,
+}: {
+  name: string;
+  station: string;
+  airtime: string;
+  why: string;
+  email?: string;
+  caution?: string;
+  badge?: string;
+}) {
+  return (
+    <div className="px-4 py-3 hover:bg-white/[0.02] transition-colors">
+      <div className="flex items-baseline gap-2 flex-wrap mb-1">
+        <span className="text-sm font-bold text-white/85">{name}</span>
+        <span className="text-[10px] text-white/30">{station}</span>
+        {badge && <span className="text-[8px] font-bold uppercase tracking-wider text-[#5b9bd5]/60 bg-[#5b9bd5]/10 px-1.5 py-0.5 rounded">{badge}</span>}
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-[10px] text-white/35 mb-1.5">
+        <span>{airtime}</span>
+        {email && (
+          <a href={`mailto:${email}`} className="text-[#5b9bd5]/60 hover:text-[#7bb3e0] transition-colors">{email}</a>
+        )}
+      </div>
+      <p className="text-xs text-white/50 leading-relaxed">{why}</p>
+      {caution && (
+        <p className="text-[10px] text-yellow-300/50 mt-1 italic">{caution}</p>
+      )}
     </div>
   );
 }
