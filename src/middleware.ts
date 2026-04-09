@@ -1,29 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const auth = request.cookies.get("site_auth")?.value;
+  const pagePath = request.nextUrl.pathname;
+  const cookieName = `auth_${pagePath.replace(/\//g, "_")}`;
+  const auth = request.cookies.get(cookieName)?.value;
 
-  if (auth === "authenticated") {
+  // Also accept the legacy cookie for backwards compatibility
+  const legacyAuth = request.cookies.get("site_auth")?.value;
+
+  if (auth === "authenticated" || legacyAuth === "authenticated") {
     return NextResponse.next();
   }
 
   // Allow the login API route through
-  if (request.nextUrl.pathname === "/api/login") {
+  if (pagePath === "/api/login") {
     return NextResponse.next();
   }
 
-  // Redirect to login page (rendered inline to avoid redirect loops)
-  return new NextResponse(loginHTML(), {
+  return new NextResponse(loginHTML(pagePath), {
     status: 401,
     headers: { "Content-Type": "text/html" },
   });
 }
 
 export const config = {
-  matcher: ["/amerilife-marketing-strategy"],
+  matcher: ["/amerilife-marketing-strategy", "/CA47Media"],
 };
 
-function loginHTML() {
+function loginHTML(pagePath: string) {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -123,7 +127,7 @@ function loginHTML() {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: pw }),
+        body: JSON.stringify({ password: pw, page: "${pagePath}" }),
       });
       if (res.ok) {
         window.location.reload();
