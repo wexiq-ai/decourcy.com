@@ -176,7 +176,7 @@ export default function CA47MediaPage() {
               name="Later with Mo' Kelly"
               station="KFI 640 AM"
               airtime="Mon–Fri 6–10 PM"
-              why="Moderate/balanced. Social justice, community issues. Reaches younger OC voters."
+              why="Moderate and balanced. Social justice, community issues. Reaches younger OC voters."
               email="mokelly@kfiam640.com"
             />
             <PrioritySummaryRow
@@ -222,7 +222,7 @@ export default function CA47MediaPage() {
               name="Democracy Now!"
               station="KPFK 90.7 FM"
               airtime="Mon–Fri mornings"
-              why="Nationally syndicated progressive news. Activated progressive base. Pitch via democracynow.org/contact."
+              why="Nationally syndicated progressive news. Activates the progressive base. Pitch via democracynow.org/contact."
             />
             <PrioritySummaryRow
               name="The Signal"
@@ -665,7 +665,7 @@ export default function CA47MediaPage() {
         <FadeIn>
           <div className="w-full space-y-2 mb-6">
             <FramingCard station="KFI (640)" framing="Populist, OC-focused. Lean into quality of life: traffic, crime, cost of living, local government accountability. The independent candidacy pitch: a representative who works for OC residents, not for party bosses in DC." />
-            <FramingCard station="KABC (790)" framing="Conservative / independent OC voter. Fiscal issues, business climate, law enforcement, immigration (balanced tone). Lead with: the two-party system is broken, and OC voters deserve someone accountable to them." />
+            <FramingCard station="KABC (790)" framing="Conservative / independent OC voter. Fiscal issues, business climate, law enforcement, immigration (balanced tone). Lead with the message that the two-party system is broken and OC voters deserve someone accountable to them." />
             <FramingCard station="LAist 89.3" framing="Policy depth expected. Bring data. Discuss housing, climate, healthcare, civil rights — with substance. Position the independent candidacy as a rejection of partisan dysfunction." />
             <FramingCard station="KCRW (89.9)" framing="Educated progressives. National policy + local impact. Environment, social equity, arts/culture policy. The broken two-party system message resonates strongly with this audience." />
             <FramingCard station="KPFK (90.7)" framing="Activist base. Lead with worker rights, climate, civil liberties, anti-corporate themes. The independent candidacy is a direct challenge to the entrenched power structure." />
