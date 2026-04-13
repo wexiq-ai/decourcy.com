@@ -4,12 +4,13 @@ import { useEffect, useRef, useState, useCallback } from "react";
 
 // ─── CONSTANTS ────────────────────────────────────────────────
 
-const GW = 384;
-const GH = 216;
-const GROUND_Y = 190;
-const GRAVITY = 0.35;
-const JUMP_VEL = -6.5;
-const MAX_FALL = 7;
+const GW = 768;
+const GH = 432;
+const GROUND_Y = 380;
+const GRAVITY = 0.7;
+const JUMP_VEL = -13;
+const MAX_FALL = 14;
+const SP = 2; // sprite scale
 const LEVEL_LEN = 6000;
 const BOSS_X = 5100;
 const BARN_X = LEVEL_LEN - 80;
@@ -480,9 +481,9 @@ const BOSS_SPEECHES = [
 // ─── CHARACTER CONFIGS ────────────────────────────────────────
 
 const CHAR_CFG: Record<CharId, { anger: number; ammo: number; speed: number; pierce: boolean }> = {
-  tony: { anger: 133, ammo: 67,  speed: 2.0, pierce: false },
-  ovi:  { anger: 100, ammo: 10,  speed: 2.66, pierce: false },
-  bill: { anger: 100, ammo: 100, speed: 2.0, pierce: true },
+  tony: { anger: 133, ammo: 67,  speed: 4.0, pierce: false },
+  ovi:  { anger: 100, ammo: 10,  speed: 5.32, pierce: false },
+  bill: { anger: 100, ammo: 100, speed: 4.0, pierce: true },
 };
 
 // ─── PHYSICS ──────────────────────────────────────────────────
@@ -511,7 +512,7 @@ function initGame(charId: CharId): GState {
   const ch = CHARS[charId];
   return {
     player: {
-      body: { x: 50, y: GROUND_Y - ch.h, vx: 0, vy: 0, w: ch.w, h: ch.h, grounded: true },
+      body: { x: 100, y: GROUND_Y - ch.h * SP, vx: 0, vy: 0, w: ch.w * SP, h: ch.h * SP, grounded: true },
       charId, anger: cfg.anger, maxAnger: cfg.anger,
       ammo: cfg.ammo, maxAmmo: cfg.ammo,
       speed: cfg.speed, facing: 1, animTimer: 0, animFrame: 0,
@@ -539,8 +540,8 @@ function update(gs: GState, inp: Input): string | null {
     const f = gs.meteor.frame;
     // Meteor flies in
     if (f < 60) {
-      gs.meteor.x = GW + 50 - f * 3;
-      gs.meteor.y = -20 + f * 2.5;
+      gs.meteor.x = GW + 100 - f * 6;
+      gs.meteor.y = -40 + f * 5;
     }
     // Impact
     if (f === 60) {
@@ -576,9 +577,9 @@ function update(gs: GState, inp: Input): string | null {
     p.shootCd = 12;
     gs.bullets.push({
       body: {
-        x: p.body.x + (p.facing === 1 ? p.body.w : -5),
-        y: p.body.y + p.body.h / 2 - 2,
-        vx: p.facing * 4, vy: 0, w: 5, h: 5, grounded: false,
+        x: p.body.x + (p.facing === 1 ? p.body.w : -10),
+        y: p.body.y + p.body.h / 2 - 5,
+        vx: p.facing * 8, vy: 0, w: 10, h: 10, grounded: false,
       },
       alive: true, dmg: 1, pierce: p.pierce,
     });
@@ -609,8 +610,8 @@ function update(gs: GState, inp: Input): string | null {
     for (let i = 0; i < sp.n; i++) {
       gs.enemies.push({
         body: {
-          x: sp.x + i * 20 + GW, y: GROUND_Y - 14,
-          vx: 0, vy: 0, w: 10, h: 10, grounded: true,
+          x: sp.x + i * 40 + GW, y: GROUND_Y - 28,
+          vx: 0, vy: 0, w: 20, h: 20, grounded: true,
         },
         hp: 2, alive: true, flashTimer: 0,
       });
@@ -622,7 +623,7 @@ function update(gs: GState, inp: Input): string | null {
   while (gs.puIdx < PU_SPAWNS.length && gs.camera + GW > PU_SPAWNS[gs.puIdx].x - 50) {
     const pu = PU_SPAWNS[gs.puIdx];
     gs.powerups.push({
-      body: { x: pu.x, y: GROUND_Y - 30, vx: 0, vy: 0, w: 8, h: 10, grounded: false },
+      body: { x: pu.x, y: GROUND_Y - 60, vx: 0, vy: 0, w: 16, h: 20, grounded: false },
       type: pu.t, alive: true, bob: Math.random() * Math.PI * 2,
     });
     gs.puIdx++;
@@ -632,8 +633,8 @@ function update(gs: GState, inp: Input): string | null {
   if (!gs.boss && !gs.bossDefeated && p.body.x > BOSS_X - GW * 0.5) {
     gs.boss = {
       body: {
-        x: BOSS_X + GW * 0.3, y: GROUND_Y - 96,
-        vx: 0, vy: 0, w: 24, h: 96, grounded: true,
+        x: BOSS_X + GW * 0.3, y: GROUND_Y - 192,
+        vx: 0, vy: 0, w: 48, h: 192, grounded: true,
       },
       hp: 25, maxHp: 25, alive: true, entered: false,
       speechTimer: 120, speechIdx: 0,
@@ -646,9 +647,9 @@ function update(gs: GState, inp: Input): string | null {
     if (!e.alive) continue;
     const dx = p.body.x - e.body.x;
     const dist = Math.abs(dx);
-    if (dist < 200) {
-      e.body.vx = Math.sign(dx) * 0.8;
-      if (p.body.y < e.body.y - 10 && e.body.grounded && Math.random() < 0.015) {
+    if (dist < 400) {
+      e.body.vx = Math.sign(dx) * 1.6;
+      if (p.body.y < e.body.y - 20 && e.body.grounded && Math.random() < 0.015) {
         e.body.vy = JUMP_VEL * 0.7;
         e.body.grounded = false;
       }
@@ -705,8 +706,8 @@ function update(gs: GState, inp: Input): string | null {
   if (gs.boss && gs.boss.alive) {
     const boss = gs.boss;
     // Move toward player slowly
-    if (boss.body.x > p.body.x + 50) boss.body.vx = -0.3;
-    else if (boss.body.x < p.body.x - 10) boss.body.vx = 0.3;
+    if (boss.body.x > p.body.x + 100) boss.body.vx = -0.6;
+    else if (boss.body.x < p.body.x - 20) boss.body.vx = 0.6;
     else boss.body.vx = 0;
     boss.body.x += boss.body.vx;
 
@@ -724,8 +725,8 @@ function update(gs: GState, inp: Input): string | null {
       boss.attackTimer = 70 + Math.floor(Math.random() * 40);
       gs.enemies.push({
         body: {
-          x: boss.body.x - 10, y: boss.body.y + 40,
-          vx: 0, vy: 0, w: 10, h: 10, grounded: false,
+          x: boss.body.x - 20, y: boss.body.y + 80,
+          vx: 0, vy: 0, w: 20, h: 20, grounded: false,
         },
         hp: 1, alive: true, flashTimer: 0,
       });
@@ -802,10 +803,10 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
   // Clouds
   ctx.fillStyle = "rgba(255,255,255,0.3)";
   for (let i = 0; i < 6; i++) {
-    const cx = ((i * 120 + 50) - cam * 0.05) % (GW + 80) - 40;
-    const cy = 15 + (i % 3) * 12;
-    ctx.fillRect(cx, cy, 30 + (i % 2) * 15, 6);
-    ctx.fillRect(cx + 5, cy - 3, 20, 4);
+    const cx = ((i * 240 + 100) - cam * 0.05) % (GW + 160) - 80;
+    const cy = 30 + (i % 3) * 24;
+    ctx.fillRect(cx, cy, 60 + (i % 2) * 30, 12);
+    ctx.fillRect(cx + 10, cy - 6, 40, 8);
   }
 
   // Far background (buildings/trees based on progress)
@@ -813,14 +814,14 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
     // Office buildings
     ctx.fillStyle = "#3a3a5e";
     for (let i = 0; i < 8; i++) {
-      const bx = ((i * 80) - cam * 0.15) % (GW + 100) - 50;
-      const bh = 30 + (i % 3) * 20;
-      ctx.fillRect(bx, GROUND_Y - bh - 30, 35, bh);
+      const bx = ((i * 160) - cam * 0.15) % (GW + 200) - 100;
+      const bh = 60 + (i % 3) * 40;
+      ctx.fillRect(bx, GROUND_Y - bh - 60, 70, bh);
       // Windows
       ctx.fillStyle = "#ffcc44";
-      for (let wy = 0; wy < bh - 10; wy += 8) {
-        for (let wx = 4; wx < 30; wx += 8) {
-          if (Math.random() > 0.3) ctx.fillRect(bx + wx, GROUND_Y - bh - 28 + wy, 4, 4);
+      for (let wy = 0; wy < bh - 20; wy += 16) {
+        for (let wx = 8; wx < 60; wx += 16) {
+          if (Math.random() > 0.3) ctx.fillRect(bx + wx, GROUND_Y - bh - 56 + wy, 8, 8);
         }
       }
       ctx.fillStyle = "#3a3a5e";
@@ -829,14 +830,14 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
     // Trees
     ctx.fillStyle = "#2d5a27";
     for (let i = 0; i < 10; i++) {
-      const tx = ((i * 70 + 20) - cam * 0.2) % (GW + 80) - 40;
+      const tx = ((i * 140 + 40) - cam * 0.2) % (GW + 160) - 80;
       // Trunk
       ctx.fillStyle = "#5a3a1a";
-      ctx.fillRect(tx + 6, GROUND_Y - 40, 4, 15);
+      ctx.fillRect(tx + 12, GROUND_Y - 80, 8, 30);
       // Canopy
       ctx.fillStyle = "#2d5a27";
-      ctx.fillRect(tx, GROUND_Y - 50, 16, 12);
-      ctx.fillRect(tx + 2, GROUND_Y - 55, 12, 8);
+      ctx.fillRect(tx, GROUND_Y - 100, 32, 24);
+      ctx.fillRect(tx + 4, GROUND_Y - 110, 24, 16);
     }
   }
 
@@ -845,27 +846,27 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
   ctx.fillRect(0, GROUND_Y, GW, GH - GROUND_Y);
   // Ground detail line
   ctx.fillStyle = progress < 0.4 ? "#5a5a5a" : "#6a8a3a";
-  ctx.fillRect(0, GROUND_Y, GW, 2);
+  ctx.fillRect(0, GROUND_Y, GW, 4);
 
   // Barn (when close)
-  if (cam + GW > BARN_X - 50 && !gs.meteor.active || (gs.meteor.active && gs.meteor.frame < 60)) {
+  if (cam + GW > BARN_X - 100 && !gs.meteor.active || (gs.meteor.active && gs.meteor.frame < 60)) {
     const barnScreenX = BARN_X - cam;
-    drawSprite(ctx, BARN_SPRITE, barnScreenX, GROUND_Y - 28, 1);
+    drawSprite(ctx, BARN_SPRITE, barnScreenX, GROUND_Y - 56, SP);
     // "RETIREMENT" sign
-    const tw = textWidth("RETIREMENT", 1);
-    drawText(ctx, "RETIREMENT", barnScreenX + 16 - tw / 2, GROUND_Y - 34, "#ffffff", 1);
+    const tw = textWidth("RETIREMENT", SP);
+    drawText(ctx, "RETIREMENT", barnScreenX + 32 - tw / 2, GROUND_Y - 66, "#ffffff", SP);
   }
 
   // Powerups
   for (const pu of gs.powerups) {
     if (!pu.alive) continue;
     const px = pu.body.x - cam;
-    const py = pu.body.y + Math.sin(pu.bob) * 3;
-    if (px < -20 || px > GW + 20) continue;
+    const py = pu.body.y + Math.sin(pu.bob) * 6;
+    if (px < -40 || px > GW + 40) continue;
     if (pu.type === "meeting") {
-      drawSprite(ctx, MEETING_SPRITE, px, py, 1);
+      drawSprite(ctx, MEETING_SPRITE, px, py, SP);
     } else {
-      drawSprite(ctx, POOP_BIG, px, py, 1);
+      drawSprite(ctx, POOP_BIG, px, py, SP);
     }
   }
 
@@ -873,9 +874,9 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
   for (const e of gs.enemies) {
     if (!e.alive && e.flashTimer <= 0) continue;
     const ex = e.body.x - cam;
-    if (ex < -20 || ex > GW + 20) continue;
+    if (ex < -40 || ex > GW + 40) continue;
     if (e.flashTimer > 0 && e.flashTimer % 2 === 0) continue; // flash
-    drawSprite(ctx, PP_SPRITE, ex, e.body.y, 1);
+    drawSprite(ctx, PP_SPRITE, ex, e.body.y, SP);
   }
 
   // Player
@@ -883,13 +884,13 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
   if (p.invTimer <= 0 || p.invTimer % 4 < 2) { // blink when invincible
     const ch = CHARS[p.charId];
     const sprite = p.body.vx !== 0 ? (p.animFrame === 0 ? ch.idle : ch.run) : ch.idle;
-    drawSprite(ctx, sprite, p.body.x - cam, p.body.y, 1, p.facing === -1);
+    drawSprite(ctx, sprite, p.body.x - cam, p.body.y, SP, p.facing === -1);
   }
 
   // Bullets
   for (const b of gs.bullets) {
     if (!b.alive) continue;
-    drawSprite(ctx, POOP_SMALL, b.body.x - cam, b.body.y, 1);
+    drawSprite(ctx, POOP_SMALL, b.body.x - cam, b.body.y, SP);
   }
 
   // Boss
@@ -899,20 +900,20 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
     if (boss.flashTimer > 0 && boss.flashTimer % 2 === 0) {
       // Flash red
     } else {
-      drawBoss(ctx, bx, boss.body.y);
+      drawBoss(ctx, bx, boss.body.y, SP);
     }
     // Speech bubble
     if (boss.speechTimer > 30) {
       const speech = BOSS_SPEECHES[boss.speechIdx];
-      const tw2 = textWidth(speech, 1);
-      const bubW = tw2 + 6;
-      const bubX = bx + 12 - bubW / 2;
-      const bubY = boss.body.y - 14;
+      const tw2 = textWidth(speech, SP);
+      const bubW = tw2 + 12;
+      const bubX = bx + 24 - bubW / 2;
+      const bubY = boss.body.y - 28;
       ctx.fillStyle = "#ffffff";
-      ctx.fillRect(bubX, bubY, bubW, 10);
+      ctx.fillRect(bubX, bubY, bubW, 20);
       ctx.fillStyle = "#ffffff";
-      ctx.fillRect(bx + 10, bubY + 10, 3, 3);
-      drawText(ctx, speech, bubX + 3, bubY + 2, "#000000", 1);
+      ctx.fillRect(bx + 20, bubY + 20, 6, 6);
+      drawText(ctx, speech, bubX + 6, bubY + 4, "#000000", SP);
     }
   }
 
@@ -925,22 +926,22 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
       const my = gs.meteor.y;
       // Meteor body
       ctx.fillStyle = "#ff4400";
-      ctx.fillRect(mx, my, 8, 8);
+      ctx.fillRect(mx, my, 16, 16);
       ctx.fillStyle = "#ffaa00";
-      ctx.fillRect(mx + 1, my + 1, 6, 6);
+      ctx.fillRect(mx + 2, my + 2, 12, 12);
       ctx.fillStyle = "#ffffff";
-      ctx.fillRect(mx + 2, my + 2, 3, 3);
+      ctx.fillRect(mx + 4, my + 4, 6, 6);
       // Trail
       ctx.fillStyle = "rgba(255,100,0,0.5)";
       for (let t = 1; t < 8; t++) {
-        ctx.fillRect(mx + t * 4, my - t * 3, 4 + t, 3 + t);
+        ctx.fillRect(mx + t * 8, my - t * 6, 8 + t * 2, 6 + t * 2);
       }
     }
     if (mf >= 60 && mf < 120) {
       // Explosion at barn
-      const expX = BARN_X + 16 - cam;
-      const expY = GROUND_Y - 14;
-      const radius = (mf - 60) * 1.5;
+      const expX = BARN_X + 32 - cam;
+      const expY = GROUND_Y - 28;
+      const radius = (mf - 60) * 3;
       ctx.fillStyle = `rgba(255,${150 - (mf - 60) * 2},0,${1 - (mf - 60) / 80})`;
       ctx.beginPath();
       ctx.arc(expX, expY, radius, 0, Math.PI * 2);
@@ -955,9 +956,9 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
       // Crater
       const craterX = BARN_X - cam;
       ctx.fillStyle = "#2a1a0a";
-      ctx.fillRect(craterX - 10, GROUND_Y - 5, 60, 20);
+      ctx.fillRect(craterX - 20, GROUND_Y - 10, 120, 40);
       ctx.fillStyle = "#1a0a00";
-      ctx.fillRect(craterX, GROUND_Y - 2, 40, 12);
+      ctx.fillRect(craterX, GROUND_Y - 4, 80, 24);
     }
   }
 
@@ -971,34 +972,34 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
 
   // HUD (not affected by shake)
   // Anger bar
-  drawText(ctx, "ANGER", 4, 4, "#ffffff", 1);
+  drawText(ctx, "ANGER", 8, 8, "#ffffff", SP);
   ctx.fillStyle = "#1a1a1a";
-  ctx.fillRect(4, 12, 60, 6);
+  ctx.fillRect(8, 24, 120, 12);
   const angerPct = gs.player.anger / gs.player.maxAnger;
   ctx.fillStyle = angerPct > 0.5 ? "#33ff33" : angerPct > 0.25 ? "#ffcc00" : "#ff3333";
-  ctx.fillRect(4, 12, 60 * angerPct, 6);
+  ctx.fillRect(8, 24, 120 * angerPct, 12);
   ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 0.5;
-  ctx.strokeRect(4, 12, 60, 6);
+  ctx.lineWidth = 1;
+  ctx.strokeRect(8, 24, 120, 12);
 
   // Ammo
-  drawText(ctx, "AMMO", GW - 50, 4, "#ffffff", 1);
-  drawText(ctx, `${gs.player.ammo}`, GW - 50, 12, "#ffaa00", 1);
-  drawSprite(ctx, POOP_SMALL, GW - 18, 10, 1);
+  drawText(ctx, "AMMO", GW - 100, 8, "#ffffff", SP);
+  drawText(ctx, `${gs.player.ammo}`, GW - 100, 24, "#ffaa00", SP);
+  drawSprite(ctx, POOP_SMALL, GW - 36, 20, SP);
 
   // Kill count
-  drawText(ctx, `KO:${gs.killCount}`, 4, 22, "#aaaaaa", 1);
+  drawText(ctx, `KO:${gs.killCount}`, 8, 44, "#aaaaaa", SP);
 
   // Meteor text
   if (gs.meteor.active && gs.meteor.frame >= 120) {
     const txt = "RETIREMENT DENIED";
-    const tw3 = textWidth(txt, 2);
-    drawText(ctx, txt, GW / 2 - tw3 / 2, GH / 2 - 20, "#ff4444", 2);
+    const tw3 = textWidth(txt, 4);
+    drawText(ctx, txt, GW / 2 - tw3 / 2, GH / 2 - 40, "#ff4444", 4);
 
     if (gs.meteor.frame >= 140) {
       const txt2 = "THE UNIVERSE HAS SPOKEN";
-      const tw4 = textWidth(txt2, 1);
-      drawText(ctx, txt2, GW / 2 - tw4 / 2, GH / 2 + 5, "#ffffff", 1);
+      const tw4 = textWidth(txt2, SP);
+      drawText(ctx, txt2, GW / 2 - tw4 / 2, GH / 2 + 10, "#ffffff", SP);
     }
   }
 
@@ -1006,80 +1007,64 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
   if (gs.gameOver && !gs.meteor.active) {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fillRect(0, 0, GW, GH);
-    const tw5 = textWidth("GAME OVER", 2);
-    drawText(ctx, "GAME OVER", GW / 2 - tw5 / 2, GH / 2 - 20, "#ff4444", 2);
-    const tw6 = textWidth(gs.gameOverReason, 1);
-    drawText(ctx, gs.gameOverReason, GW / 2 - tw6 / 2, GH / 2 + 5, "#ffffff", 1);
+    const tw5 = textWidth("GAME OVER", 4);
+    drawText(ctx, "GAME OVER", GW / 2 - tw5 / 2, GH / 2 - 40, "#ff4444", 4);
+    const tw6 = textWidth(gs.gameOverReason, SP);
+    drawText(ctx, gs.gameOverReason, GW / 2 - tw6 / 2, GH / 2 + 10, "#ffffff", SP);
   }
 }
 
 // ─── BOSS RENDERING ───────────────────────────────────────────
 
-function drawBoss(ctx: CanvasRenderingContext2D, x: number, y: number) {
-  // Lori: 24x96 px, caucasian, medium-length blonde hair, business attire
+function drawBoss(ctx: CanvasRenderingContext2D, x: number, y: number, s: number = 1) {
+  // Lori: 24x96 px at scale s, caucasian, medium-length blonde hair, business attire
+  const r = (bx: number, by: number, bw: number, bh: number) =>
+    ctx.fillRect(x + bx * s, y + by * s, bw * s, bh * s);
 
   // Hair (blonde, medium-length)
-  ctx.fillStyle = P[15]; // blonde
-  ctx.fillRect(x + 4, y, 16, 8);
-  ctx.fillRect(x + 3, y + 2, 18, 6);
-  ctx.fillRect(x + 2, y + 6, 20, 10); // hair flowing down
+  ctx.fillStyle = P[15];
+  r(4, 0, 16, 8); r(3, 2, 18, 6); r(2, 6, 20, 10);
 
   // Face
-  ctx.fillStyle = P[6]; // light skin
-  ctx.fillRect(x + 6, y + 8, 12, 12);
-  // Eyes
-  ctx.fillStyle = P[10]; // black
-  ctx.fillRect(x + 8, y + 12, 2, 2);
-  ctx.fillRect(x + 14, y + 12, 2, 2);
-  // Mouth (angry)
-  ctx.fillStyle = P[2]; // red
-  ctx.fillRect(x + 9, y + 17, 6, 1);
+  ctx.fillStyle = P[6];
+  r(6, 8, 12, 12);
+  ctx.fillStyle = P[10];
+  r(8, 12, 2, 2); r(14, 12, 2, 2);
+  ctx.fillStyle = P[2];
+  r(9, 17, 6, 1);
 
   // Neck
   ctx.fillStyle = P[6];
-  ctx.fillRect(x + 9, y + 20, 6, 3);
+  r(9, 20, 6, 3);
 
-  // Blazer (dark blue)
-  ctx.fillStyle = P[16]; // dark blue
-  ctx.fillRect(x + 4, y + 23, 16, 30);
-  // Blazer lapels
-  ctx.fillStyle = P[1]; // darker navy
-  ctx.fillRect(x + 6, y + 23, 3, 15);
-  ctx.fillRect(x + 15, y + 23, 3, 15);
-  // Blouse underneath
-  ctx.fillStyle = P[4]; // white
-  ctx.fillRect(x + 9, y + 23, 6, 15);
-  // Button
+  // Blazer
+  ctx.fillStyle = P[16];
+  r(4, 23, 16, 30);
+  ctx.fillStyle = P[1];
+  r(6, 23, 3, 15); r(15, 23, 3, 15);
+  ctx.fillStyle = P[4];
+  r(9, 23, 6, 15);
   ctx.fillStyle = P[10];
-  ctx.fillRect(x + 11, y + 30, 2, 2);
-  ctx.fillRect(x + 11, y + 35, 2, 2);
+  r(11, 30, 2, 2); r(11, 35, 2, 2);
 
   // Arms
   ctx.fillStyle = P[16];
-  ctx.fillRect(x + 1, y + 25, 4, 20);
-  ctx.fillRect(x + 19, y + 25, 4, 20);
-  // Hands
+  r(1, 25, 4, 20); r(19, 25, 4, 20);
   ctx.fillStyle = P[6];
-  ctx.fillRect(x + 1, y + 45, 4, 4);
-  ctx.fillRect(x + 19, y + 45, 4, 4);
+  r(1, 45, 4, 4); r(19, 45, 4, 4);
 
   // Skirt
-  ctx.fillStyle = P[13]; // dark gray
-  ctx.fillRect(x + 4, y + 53, 16, 20);
-  ctx.fillRect(x + 3, y + 60, 18, 13);
+  ctx.fillStyle = P[13];
+  r(4, 53, 16, 20); r(3, 60, 18, 13);
 
   // Legs
-  ctx.fillStyle = P[6]; // skin
-  ctx.fillRect(x + 6, y + 73, 4, 16);
-  ctx.fillRect(x + 14, y + 73, 4, 16);
+  ctx.fillStyle = P[6];
+  r(6, 73, 4, 16); r(14, 73, 4, 16);
 
-  // Shoes (heels)
-  ctx.fillStyle = P[10]; // black
-  ctx.fillRect(x + 5, y + 89, 6, 3);
-  ctx.fillRect(x + 13, y + 89, 6, 3);
-  // Heel
-  ctx.fillRect(x + 5, y + 92, 2, 4);
-  ctx.fillRect(x + 17, y + 92, 2, 4);
+  // Shoes
+  ctx.fillStyle = P[10];
+  r(5, 89, 6, 3); r(13, 89, 6, 3);
+  r(5, 92, 2, 4); r(17, 92, 2, 4);
 }
 
 // ─── REACT COMPONENT ─────────────────────────────────────────
@@ -1358,7 +1343,7 @@ export default function QuestForRetirementPage() {
       {overReason === "OUT OF ANGER!" && (
         <p className="text-white/50 text-sm mb-4 text-center max-w-sm">
           You ran out of anger. Without rage, there is no fuel.
-          Back to the cubicle.
+          Back to the office (or, if you&apos;re Bill, the cubicle).
         </p>
       )}
 
