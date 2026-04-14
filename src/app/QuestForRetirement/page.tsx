@@ -4,17 +4,18 @@ import { useEffect, useRef, useState, useCallback } from "react";
 
 // ─── CONSTANTS ────────────────────────────────────────────────
 
-const GW = 768;
-const GH = 432;
-const GROUND_Y = 380;
-const GRAVITY = 0.7;
-const JUMP_VEL = -13;
-const MAX_FALL = 14;
-const SP = 2; // sprite scale
-const LEVEL_LEN = 6000;
-const BOSS_X = 5100;
-const BARN_X = LEVEL_LEN - 80;
-const METEOR_TRIGGER_DIST = 100;
+const GW = 1536;
+const GH = 960;
+const GROUND_Y = 860;
+const GRAVITY = 2.8;
+const JUMP_VEL = -52;
+const MAX_FALL = 56;
+const SP = 8; // sprite scale (8x base pixel art)
+const HUD_SC = 9; // HUD text scale (independent of sprite scale)
+const LEVEL_LEN = 24000;
+const BOSS_X = 20400;
+const BARN_X = LEVEL_LEN - 320;
+const METEOR_TRIGGER_DIST = 800;
 
 type CharId = "tony" | "ovi" | "bill";
 type Phase = "select" | "playing" | "gameover";
@@ -455,19 +456,19 @@ interface Input {
 // ─── SPAWN DATA ───────────────────────────────────────────────
 
 const ENEMY_SPAWNS = [
-  { x: 400, n: 1 }, { x: 700, n: 1 }, { x: 1000, n: 2 }, { x: 1400, n: 1 },
-  { x: 1700, n: 2 }, { x: 2000, n: 2 }, { x: 2300, n: 3 }, { x: 2600, n: 2 },
-  { x: 2900, n: 3 }, { x: 3200, n: 2 }, { x: 3500, n: 3 }, { x: 3800, n: 4 },
-  { x: 4100, n: 3 }, { x: 4400, n: 4 }, { x: 4700, n: 5 },
+  { x: 1600, n: 1 }, { x: 2800, n: 1 }, { x: 4000, n: 2 }, { x: 5600, n: 1 },
+  { x: 6800, n: 2 }, { x: 8000, n: 2 }, { x: 9200, n: 3 }, { x: 10400, n: 2 },
+  { x: 11600, n: 3 }, { x: 12800, n: 2 }, { x: 14000, n: 3 }, { x: 15200, n: 4 },
+  { x: 16400, n: 3 }, { x: 17600, n: 4 }, { x: 18800, n: 5 },
 ];
 
 const PU_SPAWNS = [
-  { x: 500, t: "bullshit" as const }, { x: 900, t: "meeting" as const },
-  { x: 1300, t: "bullshit" as const }, { x: 1800, t: "meeting" as const },
-  { x: 2200, t: "bullshit" as const }, { x: 2700, t: "meeting" as const },
-  { x: 3100, t: "bullshit" as const }, { x: 3600, t: "meeting" as const },
-  { x: 4000, t: "bullshit" as const }, { x: 4500, t: "meeting" as const },
-  { x: 4900, t: "bullshit" as const },
+  { x: 2000, t: "bullshit" as const }, { x: 3600, t: "meeting" as const },
+  { x: 5200, t: "bullshit" as const }, { x: 7200, t: "meeting" as const },
+  { x: 8800, t: "bullshit" as const }, { x: 10800, t: "meeting" as const },
+  { x: 12400, t: "bullshit" as const }, { x: 14400, t: "meeting" as const },
+  { x: 16000, t: "bullshit" as const }, { x: 18000, t: "meeting" as const },
+  { x: 19600, t: "bullshit" as const },
 ];
 
 const BOSS_SPEECHES = [
@@ -481,9 +482,9 @@ const BOSS_SPEECHES = [
 // ─── CHARACTER CONFIGS ────────────────────────────────────────
 
 const CHAR_CFG: Record<CharId, { anger: number; ammo: number; speed: number; pierce: boolean }> = {
-  tony: { anger: 133, ammo: 67,  speed: 4.0, pierce: false },
-  ovi:  { anger: 100, ammo: 10,  speed: 5.32, pierce: false },
-  bill: { anger: 100, ammo: 100, speed: 4.0, pierce: true },
+  tony: { anger: 133, ammo: 67,  speed: 16.0, pierce: false },
+  ovi:  { anger: 100, ammo: 10,  speed: 21.28, pierce: false },
+  bill: { anger: 100, ammo: 100, speed: 10.72, pierce: true },
 };
 
 // ─── PHYSICS ──────────────────────────────────────────────────
@@ -512,7 +513,7 @@ function initGame(charId: CharId): GState {
   const ch = CHARS[charId];
   return {
     player: {
-      body: { x: 100, y: GROUND_Y - ch.h * SP, vx: 0, vy: 0, w: ch.w * SP, h: ch.h * SP, grounded: true },
+      body: { x: 400, y: GROUND_Y - ch.h * SP, vx: 0, vy: 0, w: ch.w * SP, h: ch.h * SP, grounded: true },
       charId, anger: cfg.anger, maxAnger: cfg.anger,
       ammo: cfg.ammo, maxAmmo: cfg.ammo,
       speed: cfg.speed, facing: 1, animTimer: 0, animFrame: 0,
@@ -533,26 +534,27 @@ function initGame(charId: CharId): GState {
 function update(gs: GState, inp: Input): string | null {
   gs.frameCount++;
 
-  // Meteor sequence
+  // Meteor sequence (slowed down: 180 approach, impact, 120 explosion, display, game over at 420)
   if (gs.meteor.active) {
     gs.inputLocked = true;
+    gs.player.body.vx = 0;
     gs.meteor.frame++;
     const f = gs.meteor.frame;
-    // Meteor flies in
-    if (f < 60) {
-      gs.meteor.x = GW + 100 - f * 6;
-      gs.meteor.y = -40 + f * 5;
+    // Meteor flies in slowly
+    if (f < 180) {
+      gs.meteor.x = GW + 400 - f * 4;
+      gs.meteor.y = -160 + f * 4;
     }
     // Impact
-    if (f === 60) {
-      gs.shake = 30;
+    if (f === 180) {
+      gs.shake = 60;
       gs.flash = 1.0;
     }
-    if (f > 60 && f < 120) {
-      gs.flash = Math.max(0, gs.flash - 0.02);
+    if (f > 180 && f < 300) {
+      gs.flash = Math.max(0, gs.flash - 0.01);
       gs.shake = Math.max(0, gs.shake - 0.5);
     }
-    if (f >= 150) {
+    if (f >= 420) {
       gs.gameOver = true;
       gs.gameOverReason = "RETIREMENT DENIED";
       return gs.gameOverReason;
@@ -577,9 +579,9 @@ function update(gs: GState, inp: Input): string | null {
     p.shootCd = 12;
     gs.bullets.push({
       body: {
-        x: p.body.x + (p.facing === 1 ? p.body.w : -10),
-        y: p.body.y + p.body.h / 2 - 5,
-        vx: p.facing * 8, vy: 0, w: 10, h: 10, grounded: false,
+        x: p.body.x + (p.facing === 1 ? p.body.w : -40),
+        y: p.body.y + p.body.h / 2 - 20,
+        vx: p.facing * 32, vy: 0, w: 40, h: 40, grounded: false,
       },
       alive: true, dmg: 1, pierce: p.pierce,
     });
@@ -605,13 +607,13 @@ function update(gs: GState, inp: Input): string | null {
   gs.camera = Math.max(0, gs.camera);
 
   // Spawn enemies
-  while (gs.spawnIdx < ENEMY_SPAWNS.length && gs.camera + GW > ENEMY_SPAWNS[gs.spawnIdx].x - 100) {
+  while (gs.spawnIdx < ENEMY_SPAWNS.length && gs.camera + GW > ENEMY_SPAWNS[gs.spawnIdx].x - 400) {
     const sp = ENEMY_SPAWNS[gs.spawnIdx];
     for (let i = 0; i < sp.n; i++) {
       gs.enemies.push({
         body: {
-          x: sp.x + i * 40 + GW, y: GROUND_Y - 28,
-          vx: 0, vy: 0, w: 20, h: 20, grounded: true,
+          x: sp.x + i * 160 + GW, y: GROUND_Y - 112,
+          vx: 0, vy: 0, w: 80, h: 80, grounded: true,
         },
         hp: 2, alive: true, flashTimer: 0,
       });
@@ -620,10 +622,10 @@ function update(gs: GState, inp: Input): string | null {
   }
 
   // Spawn powerups
-  while (gs.puIdx < PU_SPAWNS.length && gs.camera + GW > PU_SPAWNS[gs.puIdx].x - 50) {
+  while (gs.puIdx < PU_SPAWNS.length && gs.camera + GW > PU_SPAWNS[gs.puIdx].x - 200) {
     const pu = PU_SPAWNS[gs.puIdx];
     gs.powerups.push({
-      body: { x: pu.x, y: GROUND_Y - 60, vx: 0, vy: 0, w: 16, h: 20, grounded: false },
+      body: { x: pu.x, y: GROUND_Y - 240, vx: 0, vy: 0, w: 64, h: 80, grounded: false },
       type: pu.t, alive: true, bob: Math.random() * Math.PI * 2,
     });
     gs.puIdx++;
@@ -633,8 +635,8 @@ function update(gs: GState, inp: Input): string | null {
   if (!gs.boss && !gs.bossDefeated && p.body.x > BOSS_X - GW * 0.5) {
     gs.boss = {
       body: {
-        x: BOSS_X + GW * 0.3, y: GROUND_Y - 192,
-        vx: 0, vy: 0, w: 48, h: 192, grounded: true,
+        x: BOSS_X + GW * 0.3, y: GROUND_Y - 768,
+        vx: 0, vy: 0, w: 192, h: 768, grounded: true,
       },
       hp: 25, maxHp: 25, alive: true, entered: false,
       speechTimer: 120, speechIdx: 0,
@@ -647,9 +649,9 @@ function update(gs: GState, inp: Input): string | null {
     if (!e.alive) continue;
     const dx = p.body.x - e.body.x;
     const dist = Math.abs(dx);
-    if (dist < 400) {
-      e.body.vx = Math.sign(dx) * 1.6;
-      if (p.body.y < e.body.y - 20 && e.body.grounded && Math.random() < 0.015) {
+    if (dist < 1600) {
+      e.body.vx = Math.sign(dx) * 6.4;
+      if (p.body.y < e.body.y - 80 && e.body.grounded && Math.random() < 0.015) {
         e.body.vy = JUMP_VEL * 0.7;
         e.body.grounded = false;
       }
@@ -677,7 +679,7 @@ function update(gs: GState, inp: Input): string | null {
     if (!b.alive) continue;
     b.body.x += b.body.vx;
     // Off screen
-    if (b.body.x < gs.camera - 20 || b.body.x > gs.camera + GW + 20) b.alive = false;
+    if (b.body.x < gs.camera - 80 || b.body.x > gs.camera + GW + 80) b.alive = false;
     // Hit enemies
     for (const e of gs.enemies) {
       if (!e.alive) continue;
@@ -706,8 +708,8 @@ function update(gs: GState, inp: Input): string | null {
   if (gs.boss && gs.boss.alive) {
     const boss = gs.boss;
     // Move toward player slowly
-    if (boss.body.x > p.body.x + 100) boss.body.vx = -0.6;
-    else if (boss.body.x < p.body.x - 20) boss.body.vx = 0.6;
+    if (boss.body.x > p.body.x + 400) boss.body.vx = -2.4;
+    else if (boss.body.x < p.body.x - 80) boss.body.vx = 2.4;
     else boss.body.vx = 0;
     boss.body.x += boss.body.vx;
 
@@ -725,8 +727,8 @@ function update(gs: GState, inp: Input): string | null {
       boss.attackTimer = 70 + Math.floor(Math.random() * 40);
       gs.enemies.push({
         body: {
-          x: boss.body.x - 20, y: boss.body.y + 80,
-          vx: 0, vy: 0, w: 20, h: 20, grounded: false,
+          x: boss.body.x - 80, y: boss.body.y + 320,
+          vx: 0, vy: 0, w: 80, h: 80, grounded: false,
         },
         hp: 1, alive: true, flashTimer: 0,
       });
@@ -749,7 +751,7 @@ function update(gs: GState, inp: Input): string | null {
   for (const pu of gs.powerups) {
     if (!pu.alive) continue;
     pu.bob += 0.05;
-    if (collides(p.body, { ...pu.body, y: pu.body.y + Math.sin(pu.bob) * 3 })) {
+    if (collides(p.body, { ...pu.body, y: pu.body.y + Math.sin(pu.bob) * 12 })) {
       pu.alive = false;
       if (pu.type === "meeting") {
         p.anger = Math.min(p.maxAnger, p.anger + 30);
@@ -773,8 +775,8 @@ function update(gs: GState, inp: Input): string | null {
   gs.powerups = gs.powerups.filter(pu => pu.alive);
 
   // Prevent going past barn without boss defeated
-  if (!gs.bossDefeated && p.body.x > BOSS_X + 100) {
-    p.body.x = BOSS_X + 100;
+  if (!gs.bossDefeated && p.body.x > BOSS_X + 400) {
+    p.body.x = BOSS_X + 400;
   }
 
   if (gs.shake > 0) gs.shake -= 0.5;
@@ -849,20 +851,22 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
   ctx.fillRect(0, GROUND_Y, GW, 4);
 
   // Barn (when close)
-  if (cam + GW > BARN_X - 100 && !gs.meteor.active || (gs.meteor.active && gs.meteor.frame < 60)) {
+  if (cam + GW > BARN_X - 400 && !gs.meteor.active || (gs.meteor.active && gs.meteor.frame < 180)) {
     const barnScreenX = BARN_X - cam;
-    drawSprite(ctx, BARN_SPRITE, barnScreenX, GROUND_Y - 56, SP);
+    const barnH = BARN_SPRITE.length * SP;
+    const barnW = BARN_SPRITE[0].length * SP;
+    drawSprite(ctx, BARN_SPRITE, barnScreenX, GROUND_Y - barnH, SP);
     // "RETIREMENT" sign
     const tw = textWidth("RETIREMENT", SP);
-    drawText(ctx, "RETIREMENT", barnScreenX + 32 - tw / 2, GROUND_Y - 66, "#ffffff", SP);
+    drawText(ctx, "RETIREMENT", barnScreenX + barnW / 2 - tw / 2, GROUND_Y - barnH - 10 * SP, "#ffffff", SP);
   }
 
   // Powerups
   for (const pu of gs.powerups) {
     if (!pu.alive) continue;
     const px = pu.body.x - cam;
-    const py = pu.body.y + Math.sin(pu.bob) * 6;
-    if (px < -40 || px > GW + 40) continue;
+    const py = pu.body.y + Math.sin(pu.bob) * 24;
+    if (px < -160 || px > GW + 160) continue;
     if (pu.type === "meeting") {
       drawSprite(ctx, MEETING_SPRITE, px, py, SP);
     } else {
@@ -874,7 +878,7 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
   for (const e of gs.enemies) {
     if (!e.alive && e.flashTimer <= 0) continue;
     const ex = e.body.x - cam;
-    if (ex < -40 || ex > GW + 40) continue;
+    if (ex < -160 || ex > GW + 160) continue;
     if (e.flashTimer > 0 && e.flashTimer % 2 === 0) continue; // flash
     drawSprite(ctx, PP_SPRITE, ex, e.body.y, SP);
   }
@@ -905,60 +909,61 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
     // Speech bubble
     if (boss.speechTimer > 30) {
       const speech = BOSS_SPEECHES[boss.speechIdx];
-      const tw2 = textWidth(speech, SP);
-      const bubW = tw2 + 12;
-      const bubX = bx + 24 - bubW / 2;
-      const bubY = boss.body.y - 28;
+      const tw2 = textWidth(speech, HUD_SC);
+      const bubW = tw2 + 32;
+      const bubH = 5 * HUD_SC + 20;
+      const bubX = bx + 96 - bubW / 2;
+      const bubY = boss.body.y - bubH - 16;
       ctx.fillStyle = "#ffffff";
-      ctx.fillRect(bubX, bubY, bubW, 20);
+      ctx.fillRect(bubX, bubY, bubW, bubH);
       ctx.fillStyle = "#ffffff";
-      ctx.fillRect(bx + 20, bubY + 20, 6, 6);
-      drawText(ctx, speech, bubX + 6, bubY + 4, "#000000", SP);
+      ctx.fillRect(bx + 88, bubY + bubH, 12, 12);
+      drawText(ctx, speech, bubX + 16, bubY + 10, "#000000", HUD_SC);
     }
   }
 
   // Meteor
   if (gs.meteor.active) {
     const mf = gs.meteor.frame;
-    if (mf < 60) {
-      // Meteor approaching
+    if (mf < 180) {
+      // Meteor approaching (slow, dramatic)
       const mx = gs.meteor.x - cam;
       const my = gs.meteor.y;
-      // Meteor body
+      // Meteor body (large)
       ctx.fillStyle = "#ff4400";
-      ctx.fillRect(mx, my, 16, 16);
+      ctx.fillRect(mx, my, 64, 64);
       ctx.fillStyle = "#ffaa00";
-      ctx.fillRect(mx + 2, my + 2, 12, 12);
+      ctx.fillRect(mx + 8, my + 8, 48, 48);
       ctx.fillStyle = "#ffffff";
-      ctx.fillRect(mx + 4, my + 4, 6, 6);
+      ctx.fillRect(mx + 16, my + 16, 24, 24);
       // Trail
       ctx.fillStyle = "rgba(255,100,0,0.5)";
-      for (let t = 1; t < 8; t++) {
-        ctx.fillRect(mx + t * 8, my - t * 6, 8 + t * 2, 6 + t * 2);
+      for (let t = 1; t < 12; t++) {
+        ctx.fillRect(mx + t * 16, my - t * 12, 16 + t * 4, 12 + t * 4);
       }
     }
-    if (mf >= 60 && mf < 120) {
+    if (mf >= 180 && mf < 300) {
       // Explosion at barn
-      const expX = BARN_X + 32 - cam;
-      const expY = GROUND_Y - 28;
-      const radius = (mf - 60) * 3;
-      ctx.fillStyle = `rgba(255,${150 - (mf - 60) * 2},0,${1 - (mf - 60) / 80})`;
+      const expX = BARN_X + 128 - cam;
+      const expY = GROUND_Y - 112;
+      const radius = (mf - 180) * 4;
+      ctx.fillStyle = `rgba(255,${150 - (mf - 180) * 1.2},0,${1 - (mf - 180) / 150})`;
       ctx.beginPath();
       ctx.arc(expX, expY, radius, 0, Math.PI * 2);
       ctx.fill();
       // White core
-      ctx.fillStyle = `rgba(255,255,255,${0.8 - (mf - 60) / 80})`;
+      ctx.fillStyle = `rgba(255,255,255,${0.8 - (mf - 180) / 150})`;
       ctx.beginPath();
       ctx.arc(expX, expY, radius * 0.4, 0, Math.PI * 2);
       ctx.fill();
     }
-    if (mf >= 100) {
+    if (mf >= 260) {
       // Crater
       const craterX = BARN_X - cam;
       ctx.fillStyle = "#2a1a0a";
-      ctx.fillRect(craterX - 20, GROUND_Y - 10, 120, 40);
+      ctx.fillRect(craterX - 80, GROUND_Y - 40, 480, 160);
       ctx.fillStyle = "#1a0a00";
-      ctx.fillRect(craterX, GROUND_Y - 4, 80, 24);
+      ctx.fillRect(craterX, GROUND_Y - 16, 320, 96);
     }
   }
 
@@ -972,34 +977,34 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
 
   // HUD (not affected by shake)
   // Anger bar
-  drawText(ctx, "ANGER", 8, 8, "#ffffff", SP);
+  drawText(ctx, "ANGER", 12, 12, "#ffffff", HUD_SC);
   ctx.fillStyle = "#1a1a1a";
-  ctx.fillRect(8, 24, 120, 12);
+  ctx.fillRect(12, 62, 250, 24);
   const angerPct = gs.player.anger / gs.player.maxAnger;
   ctx.fillStyle = angerPct > 0.5 ? "#33ff33" : angerPct > 0.25 ? "#ffcc00" : "#ff3333";
-  ctx.fillRect(8, 24, 120 * angerPct, 12);
+  ctx.fillRect(12, 62, 250 * angerPct, 24);
   ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(8, 24, 120, 12);
+  ctx.lineWidth = 2;
+  ctx.strokeRect(12, 62, 250, 24);
 
   // Ammo
-  drawText(ctx, "AMMO", GW - 100, 8, "#ffffff", SP);
-  drawText(ctx, `${gs.player.ammo}`, GW - 100, 24, "#ffaa00", SP);
-  drawSprite(ctx, POOP_SMALL, GW - 36, 20, SP);
+  drawText(ctx, "AMMO", GW - 320, 12, "#ffffff", HUD_SC);
+  drawText(ctx, `${gs.player.ammo}`, GW - 320, 62, "#ffaa00", HUD_SC);
+  drawSprite(ctx, POOP_SMALL, GW - 160, 52, HUD_SC);
 
   // Kill count
-  drawText(ctx, `KO:${gs.killCount}`, 8, 44, "#aaaaaa", SP);
+  drawText(ctx, `KO:${gs.killCount}`, 12, 96, "#aaaaaa", HUD_SC);
 
   // Meteor text
-  if (gs.meteor.active && gs.meteor.frame >= 120) {
+  if (gs.meteor.active && gs.meteor.frame >= 300) {
     const txt = "RETIREMENT DENIED";
-    const tw3 = textWidth(txt, 4);
-    drawText(ctx, txt, GW / 2 - tw3 / 2, GH / 2 - 40, "#ff4444", 4);
+    const tw3 = textWidth(txt, 12);
+    drawText(ctx, txt, GW / 2 - tw3 / 2, GH / 2 - 80, "#ff4444", 12);
 
-    if (gs.meteor.frame >= 140) {
+    if (gs.meteor.frame >= 340) {
       const txt2 = "THE UNIVERSE HAS SPOKEN";
-      const tw4 = textWidth(txt2, SP);
-      drawText(ctx, txt2, GW / 2 - tw4 / 2, GH / 2 + 10, "#ffffff", SP);
+      const tw4 = textWidth(txt2, HUD_SC);
+      drawText(ctx, txt2, GW / 2 - tw4 / 2, GH / 2 + 30, "#ffffff", HUD_SC);
     }
   }
 
@@ -1007,10 +1012,10 @@ function render(ctx: CanvasRenderingContext2D, gs: GState) {
   if (gs.gameOver && !gs.meteor.active) {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fillRect(0, 0, GW, GH);
-    const tw5 = textWidth("GAME OVER", 4);
-    drawText(ctx, "GAME OVER", GW / 2 - tw5 / 2, GH / 2 - 40, "#ff4444", 4);
-    const tw6 = textWidth(gs.gameOverReason, SP);
-    drawText(ctx, gs.gameOverReason, GW / 2 - tw6 / 2, GH / 2 + 10, "#ffffff", SP);
+    const tw5 = textWidth("GAME OVER", 12);
+    drawText(ctx, "GAME OVER", GW / 2 - tw5 / 2, GH / 2 - 80, "#ff4444", 12);
+    const tw6 = textWidth(gs.gameOverReason, HUD_SC);
+    drawText(ctx, gs.gameOverReason, GW / 2 - tw6 / 2, GH / 2 + 30, "#ffffff", HUD_SC);
   }
 }
 
@@ -1101,7 +1106,7 @@ export default function QuestForRetirementPage() {
 
     // Size display canvas
     const resizeCanvas = () => {
-      const maxW = Math.min(window.innerWidth - 16, 960);
+      const maxW = Math.min(window.innerWidth - 16, 1400);
       const maxH = window.innerHeight - 16;
       const aspect = GW / GH;
       let w = maxW;
@@ -1248,7 +1253,7 @@ export default function QuestForRetirementPage() {
         >
           RETIREMENT QUEST
         </h1>
-        <p className="text-white/50 text-xs sm:text-sm mb-6">Choose your warrior</p>
+        <p className="text-white/50 text-xs sm:text-sm mb-6">Choose your wage slave</p>
 
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-8">
           {(["tony", "ovi", "bill"] as CharId[]).map((id) => {
@@ -1256,7 +1261,7 @@ export default function QuestForRetirementPage() {
             const labels: Record<CharId, { name: string; title: string; desc: string }> = {
               tony: { name: "TONY", title: "MAX ANGER", desc: "+33% HP, -33% Ammo" },
               ovi:  { name: "OVI",  title: "MAX SPEED", desc: "+33% Speed, -90% Ammo" },
-              bill: { name: "BILL", title: "MAX BULLSHIT", desc: "Piercing shots" },
+              bill: { name: "BILL", title: "MAX BULLSHIT", desc: "Piercing shots, -33% Speed" },
             };
             const l = labels[id];
             return (
@@ -1274,7 +1279,7 @@ export default function QuestForRetirementPage() {
                 <div className="w-full space-y-1 text-[10px]">
                   <StatBar label="ANGER" value={cfg.anger} max={133} color="#ff4444" />
                   <StatBar label="AMMO" value={cfg.ammo} max={100} color="#ffaa00" />
-                  <StatBar label="SPEED" value={Math.round(cfg.speed * 50)} max={133} color="#33ff33" />
+                  <StatBar label="SPEED" value={Math.round(cfg.speed / 16.0 * 100)} max={133} color="#33ff33" />
                 </div>
               </button>
             );
@@ -1282,20 +1287,87 @@ export default function QuestForRetirementPage() {
         </div>
 
         {/* Controls */}
-        <div className="border border-white/20 rounded-sm p-4 max-w-md w-full">
-          <p className="text-center text-xs text-white/60 mb-2 uppercase tracking-wider">Controls</p>
-          <div className="grid grid-cols-2 gap-4 text-[10px] text-white/80">
+        <div className="border border-white/20 rounded-sm p-4 max-w-lg w-full">
+          <p className="text-center text-xs text-white/60 mb-3 uppercase tracking-wider">Controls</p>
+          <div className="grid grid-cols-2 gap-6">
             <div>
-              <p className="text-white/40 mb-1">DESKTOP</p>
-              <p>Arrow Keys / WASD - Move</p>
-              <p>Up / W - Jump</p>
-              <p>Space - Shoot</p>
+              <p className="text-white/40 mb-2 text-[10px] uppercase tracking-wider">Desktop</p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-0.5">
+                    <KeyCap label="&#x2190;" />
+                    <KeyCap label="&#x2192;" />
+                  </div>
+                  <span className="text-[10px] text-white/70">Move left / right</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <KeyCap label="&#x2191;" />
+                  <span className="text-[10px] text-white/70">Jump</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <KeyCap label="SPACE" wide />
+                  <span className="text-[10px] text-white/70">Shoot</span>
+                </div>
+              </div>
+              <p className="text-white/30 text-[8px] mt-2">WASD also works</p>
             </div>
             <div>
-              <p className="text-white/40 mb-1">MOBILE</p>
-              <p>Left side - Move left</p>
-              <p>Right side - Move right + Shoot</p>
-              <p>Swipe up - Jump</p>
+              <p className="text-white/40 mb-2 text-[10px] uppercase tracking-wider">Mobile</p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-5 border border-white/30 rounded-sm bg-white/5 flex items-center justify-center">
+                    <span className="text-[8px] text-white/60">L</span>
+                  </div>
+                  <span className="text-[10px] text-white/70">Tap left side &#x2192; move left</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-5 border border-white/30 rounded-sm bg-white/5 flex items-center justify-center">
+                    <span className="text-[8px] text-white/60">R</span>
+                  </div>
+                  <span className="text-[10px] text-white/70">Tap right side &#x2192; move + shoot</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-5 border border-white/30 rounded-sm bg-white/5 flex items-center justify-center">
+                    <span className="text-[8px] text-white/60">&#x2191;</span>
+                  </div>
+                  <span className="text-[10px] text-white/70">Swipe up &#x2192; jump</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Items & Obstacles */}
+        <div className="border border-white/20 rounded-sm p-4 max-w-lg w-full mt-4">
+          <p className="text-center text-xs text-white/60 mb-3 uppercase tracking-wider">Items &amp; Obstacles</p>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <SpriteIcon sprite={PP_SPRITE} w={12} h={14} />
+              <div>
+                <p className="text-[11px] text-[#ff6b35] font-bold">POWERPOINT</p>
+                <p className="text-[10px] text-white/60">Enemy. Shoot to destroy. Drains anger through discouragement.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <SpriteIcon sprite={MEETING_SPRITE} w={8} h={10} />
+              <div>
+                <p className="text-[11px] text-[#33ff33] font-bold">MEETING</p>
+                <p className="text-[10px] text-white/60">Powerup. Reminds you of all you hate.  Restores anger (HP).</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <SpriteIcon sprite={POOP_BIG} w={8} h={8} />
+              <div>
+                <p className="text-[11px] text-[#ffaa00] font-bold">MORE BULLSHIT</p>
+                <p className="text-[10px] text-white/60">Powerup. Refills ammo. Because bullshit is your ammo.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <SpriteIcon sprite={POOP_SMALL} w={5} h={5} />
+              <div>
+                <p className="text-[11px] text-[#c4956a] font-bold">BULLSHIT</p>
+                <p className="text-[10px] text-white/60">Your projectile. Fire with Space / right-side tap.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -1310,7 +1382,7 @@ export default function QuestForRetirementPage() {
       <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center p-1 sm:p-2">
         <canvas
           ref={canvasRef}
-          className="block max-w-4xl w-full border border-white/10"
+          className="block max-w-6xl w-full border border-white/10"
           style={{ imageRendering: "pixelated" }}
         />
       </div>
@@ -1401,6 +1473,43 @@ function StatBar({ label, value, max, color }: { label: string; value: number; m
       <div className="flex-1 h-2 bg-white/10 rounded-sm overflow-hidden">
         <div className="h-full rounded-sm" style={{ width: `${pct}%`, backgroundColor: color }} />
       </div>
+    </div>
+  );
+}
+
+function SpriteIcon({ sprite, w, h }: { sprite: number[][]; w: number; h: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d")!;
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const scale = Math.min(Math.floor(36 / h), Math.floor(36 / w), 4);
+    const ox = (canvas.width - w * scale) / 2;
+    const oy = (canvas.height - h * scale) / 2;
+    drawSprite(ctx, sprite, ox, oy, scale);
+  }, [sprite, w, h]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={40}
+      height={40}
+      className="block shrink-0"
+      style={{ imageRendering: "pixelated" }}
+    />
+  );
+}
+
+function KeyCap({ label, wide }: { label: string; wide?: boolean }) {
+  return (
+    <div
+      className={`${wide ? "px-3" : "w-6"} h-5 border border-white/40 rounded-sm bg-white/5
+                  flex items-center justify-center shadow-[0_2px_0_0_rgba(255,255,255,0.15)]`}
+    >
+      <span className="text-[9px] text-white/80 font-bold leading-none">{label}</span>
     </div>
   );
 }
