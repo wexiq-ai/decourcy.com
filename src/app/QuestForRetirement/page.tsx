@@ -1238,7 +1238,7 @@ export default function QuestForRetirementPage() {
 
   if (phase === "select") {
     return (
-      <div className="min-h-screen bg-[#1a1a2e] flex flex-col items-center justify-center p-4 font-mono text-white">
+      <div className="min-h-screen bg-[#1a1a2e] flex flex-col items-center pt-8 pb-20 px-4 font-mono text-white">
         {/* Landscape prompt for mobile */}
         <div className="sm:hidden mb-4 text-center">
           <p className="text-yellow-400 text-xs animate-pulse">
