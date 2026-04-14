@@ -91,10 +91,14 @@ export default function AmeriLifeMarketingStrategyPage() {
             <FadeIn>
               <FlowBox
                 step={4}
-                label="Storytelling Through Their Eyes"
+                label="Agency-Specific Agent Recruiting Video"
                 sublabel="Their Technology Story • Their Culture • Their Growth • Their Recruiting & Service Advantage"
                 size="sm"
               />
+            </FadeIn>
+
+            <FadeIn>
+              <RecruitingVideoDetail />
             </FadeIn>
             <FadeIn><Arrow /></FadeIn>
 
@@ -519,6 +523,34 @@ function AffiliateList() {
           </li>
         ))}
       </ol>
+    </div>
+  );
+}
+
+function RecruitingVideoDetail() {
+  const items = [
+    "Affiliate principals and leaders on camera, not stock footage or AI voiceover",
+    "Real locations, real tools, real team culture",
+    `Answers the question agents are asking: "Why should I join [Affiliate]?"`,
+    "SEO-optimized title, description, and metadata",
+    "Companion affiliate landing page for lead capture",
+    "Deployed pre-AEP, during contracting season",
+    "Potential tier-one exclusive deliverable (strengthens tiered service model)",
+  ];
+
+  return (
+    <div className="w-full border border-[#1a4a2e]/60 rounded bg-[#0a2314] px-5 py-3 mt-1">
+      <div className="text-[10px] font-bold uppercase tracking-wider text-white/30 mb-2">
+        One Custom Video Per Top-5 Affiliate
+      </div>
+      <ul className="space-y-1">
+        {items.map((item) => (
+          <li key={item} className="text-xs text-white/60 tracking-wide flex items-start gap-2">
+            <span className="text-[#5b9bd5]/60 mt-0.5 shrink-0">&bull;</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
