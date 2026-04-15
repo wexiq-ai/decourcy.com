@@ -1140,25 +1140,58 @@ function DayView({
 }) {
   const dayEvents = eventsOnDay(events, cursor);
 
+  // Split multi-day items out of the primary list — they're ALSO active today
+  // but the reader is here for what's happening specifically on this date, so
+  // single-day items come first and multi-day items drop to a secondary block.
+  const isMultiDay = (ev: CalendarEvent) =>
+    Boolean(ev.endDate && ev.endDate !== ev.startDate);
+
   // Sort: all-day first, then any timed events by start time, then the rest.
-  const sorted = [...dayEvents].sort((a, b) => {
-    const aAllDay = a.allDay || !a.startTime;
-    const bAllDay = b.allDay || !b.startTime;
-    if (aAllDay && !bAllDay) return -1;
-    if (!aAllDay && bAllDay) return 1;
-    if (a.startTime && b.startTime) return a.startTime < b.startTime ? -1 : 1;
-    return 0;
-  });
+  const sortByTime = (list: CalendarEvent[]) =>
+    [...list].sort((a, b) => {
+      const aAllDay = a.allDay || !a.startTime;
+      const bAllDay = b.allDay || !b.startTime;
+      if (aAllDay && !bAllDay) return -1;
+      if (!aAllDay && bAllDay) return 1;
+      if (a.startTime && b.startTime) return a.startTime < b.startTime ? -1 : 1;
+      return 0;
+    });
+
+  const singleDay = sortByTime(dayEvents.filter((ev) => !isMultiDay(ev)));
+  const multiDay = sortByTime(dayEvents.filter(isMultiDay));
 
   return (
     <div className="flex flex-col gap-6">
-      {sorted.length > 0 && (
+      {singleDay.length > 0 && (
         <div>
           <SectionHeader>
-            {sorted.length} item{sorted.length === 1 ? "" : "s"} on {longDayLabel(cursor)}
+            {singleDay.length} item{singleDay.length === 1 ? "" : "s"} on {longDayLabel(cursor)}
           </SectionHeader>
           <div className="flex flex-col gap-2">
-            {sorted.map((ev) => (
+            {singleDay.map((ev) => (
+              <EventCard
+                key={ev.id}
+                event={ev}
+                expanded={expandedId === ev.id}
+                onToggle={() => setExpandedId(expandedId === ev.id ? null : ev.id)}
+                allEvents={events}
+                setExpandedId={setExpandedId}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {multiDay.length > 0 && (
+        <div>
+          <SectionHeader>
+            Also active — multi-day item{multiDay.length === 1 ? "" : "s"}
+          </SectionHeader>
+          <p className="text-[11px] uppercase tracking-[0.14em] text-white/40 mb-2 -mt-1">
+            Spans more than one day · listed here because {longDayLabel(cursor)} falls inside the range
+          </p>
+          <div className="flex flex-col gap-2">
+            {multiDay.map((ev) => (
               <EventCard
                 key={ev.id}
                 event={ev}
