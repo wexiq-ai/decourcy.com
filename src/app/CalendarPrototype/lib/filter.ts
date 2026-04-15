@@ -50,12 +50,27 @@ export function eventScope(ev: CalendarEvent): EventScope {
   return "year";
 }
 
+// An event is "theme-typed" if its sourceType explicitly calls it out as a
+// theme (Weekly Theme, Monthly Theme). Such events always belong in the
+// themes banner regardless of span — a weekly theme is NOT a same-day
+// action, even though its span would otherwise scope-classify as "week".
+//
+// Items with a multi-day span but a non-theme sourceType ("Event",
+// "Content", etc.) stay in day cells — a 6-day incentive trip or a
+// weekly-publishing-window article is something happening on each of
+// those days, not a descriptive theme the calendar is operating under.
+export function isThemeType(ev: CalendarEvent): boolean {
+  return ev.sourceType === "Weekly Theme" || ev.sourceType === "Monthly Theme";
+}
+
 export function isDailyScope(ev: CalendarEvent): boolean {
+  if (isThemeType(ev)) return false;
   const s = eventScope(ev);
   return s === "day" || s === "week";
 }
 
 export function isThemeScope(ev: CalendarEvent): boolean {
+  if (isThemeType(ev)) return true;
   const s = eventScope(ev);
   return s === "month" || s === "quarter" || s === "year";
 }

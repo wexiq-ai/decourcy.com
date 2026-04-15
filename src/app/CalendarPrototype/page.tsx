@@ -694,7 +694,7 @@ function ThemesBanner({
     () =>
       themesInRange(events, rangeStart, rangeEnd).sort((a, b) => {
         // Larger scopes first, then alphabetical
-        const order: EventScope[] = ["year", "quarter", "month"];
+        const order: EventScope[] = ["year", "quarter", "month", "week"];
         const sa = order.indexOf(eventScope(a));
         const sb = order.indexOf(eventScope(b));
         if (sa !== sb) return sa - sb;
@@ -747,7 +747,7 @@ function ThemesBanner({
       </button>
       {open && (
         <div className="p-3 flex flex-col gap-4">
-          {(["quarter", "month", "year"] as EventScope[]).map((scope) => {
+          {(["quarter", "month", "week", "year"] as EventScope[]).map((scope) => {
             const group = byScope.get(scope);
             if (!group || group.length === 0) return null;
             return (
@@ -760,6 +760,8 @@ function ThemesBanner({
                       ? "multi-month"
                       : scope === "month"
                       ? "full-month arc"
+                      : scope === "week"
+                      ? "week-long arc"
                       : "always on"}
                   </span>
                 </div>
