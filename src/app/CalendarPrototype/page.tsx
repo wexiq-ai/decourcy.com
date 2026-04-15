@@ -21,7 +21,6 @@ import {
   endOfMonth,
   endOfQuarter,
   endOfWeek,
-  formatTimeRange,
   isSameMonth,
   isToday,
   longDayLabel,
@@ -126,7 +125,11 @@ export default function CalendarPrototypePage() {
       {/* Filter panel (collapsible) */}
       {filtersOpen && (
         <div className="px-4 md:px-8 pt-4">
-          <FilterPanel filters={filters} setFilters={setFilters} />
+          <FilterPanel
+            filters={filters}
+            setFilters={setFilters}
+            setView={setView}
+          />
         </div>
       )}
 
@@ -458,9 +461,11 @@ function MiniDatePicker({
 function FilterPanel({
   filters,
   setFilters,
+  setView,
 }: {
   filters: FilterState;
   setFilters: (f: FilterState) => void;
+  setView: (v: ViewMode) => void;
 }) {
   const allSources = uniqueSorted(EVENTS.map((e) => e.sourceTracker));
   const allOwners = uniqueSorted(EVENTS.map((e) => e.owner));
@@ -468,6 +473,14 @@ function FilterPanel({
   const allStatuses = uniqueSorted(
     EVENTS.map((e) => e.status).filter((s): s is EventStatus => !!s)
   );
+
+  // Clicking any chip toggles the filter AND jumps to the month view so
+  // the user always ends up seeing their selection in the at-a-glance grid.
+  // Deselect still works — the × on ActiveFilterChips also removes a filter.
+  function applyAndJump(next: FilterState) {
+    setFilters(next);
+    setView("month");
+  }
 
   return (
     <div className="bg-[#244260] border border-[#3a5a7a] rounded-sm p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -479,7 +492,7 @@ function FilterPanel({
             color={SOURCE_COLORS[s] || DEFAULT_SOURCE_COLOR}
             active={filters.sources.has(s)}
             onToggle={() =>
-              setFilters({ ...filters, sources: toggleSet(filters.sources, s) })
+              applyAndJump({ ...filters, sources: toggleSet(filters.sources, s) })
             }
           />
         ))}
@@ -491,7 +504,7 @@ function FilterPanel({
             label={o}
             active={filters.owners.has(o)}
             onToggle={() =>
-              setFilters({ ...filters, owners: toggleSet(filters.owners, o) })
+              applyAndJump({ ...filters, owners: toggleSet(filters.owners, o) })
             }
           />
         ))}
@@ -503,7 +516,7 @@ function FilterPanel({
             label={t}
             active={filters.sourceTypes.has(t as SourceType)}
             onToggle={() =>
-              setFilters({
+              applyAndJump({
                 ...filters,
                 sourceTypes: toggleSet(filters.sourceTypes, t as SourceType),
               })
@@ -518,7 +531,7 @@ function FilterPanel({
             label={s}
             active={filters.statuses.has(s)}
             onToggle={() =>
-              setFilters({ ...filters, statuses: toggleSet(filters.statuses, s) })
+              applyAndJump({ ...filters, statuses: toggleSet(filters.statuses, s) })
             }
           />
         ))}
@@ -530,7 +543,7 @@ function FilterPanel({
             label={SCOPE_LABELS[s]}
             active={filters.scopes.has(s)}
             onToggle={() =>
-              setFilters({ ...filters, scopes: toggleSet(filters.scopes, s) })
+              applyAndJump({ ...filters, scopes: toggleSet(filters.scopes, s) })
             }
           />
         ))}
@@ -1025,7 +1038,8 @@ function WeekView({
 }
 
 // ---------------------------------------------------------------------------
-// Day View (hour timeline)
+// Day View — flat chronological list (day is the deepest level of hierarchy;
+// no hour-by-hour breakdown)
 // ---------------------------------------------------------------------------
 
 function DayView({
@@ -1040,12 +1054,16 @@ function DayView({
   setExpandedId: (id: string | null) => void;
 }) {
   const dayEvents = eventsOnDay(events, cursor);
-  const allDay = dayEvents.filter((e) => e.allDay || !e.startTime);
-  const timed = dayEvents
-    .filter((e) => !e.allDay && e.startTime)
-    .sort((a, b) => (a.startTime! < b.startTime! ? -1 : 1));
 
-  const hours = Array.from({ length: 14 }, (_, i) => i + 7); // 7am to 8pm
+  // Sort: all-day first, then any timed events by start time, then the rest.
+  const sorted = [...dayEvents].sort((a, b) => {
+    const aAllDay = a.allDay || !a.startTime;
+    const bAllDay = b.allDay || !b.startTime;
+    if (aAllDay && !bAllDay) return -1;
+    if (!aAllDay && bAllDay) return 1;
+    if (a.startTime && b.startTime) return a.startTime < b.startTime ? -1 : 1;
+    return 0;
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -1058,12 +1076,13 @@ function DayView({
         setExpandedId={setExpandedId}
       />
 
-      {/* All-day strip */}
-      {allDay.length > 0 && (
+      {sorted.length > 0 && (
         <div>
-          <SectionHeader>All-Day / Ongoing</SectionHeader>
+          <SectionHeader>
+            {sorted.length} item{sorted.length === 1 ? "" : "s"} on {longDayLabel(cursor)}
+          </SectionHeader>
           <div className="flex flex-col gap-2">
-            {allDay.map((ev) => (
+            {sorted.map((ev) => (
               <EventCard
                 key={ev.id}
                 event={ev}
@@ -1077,56 +1096,13 @@ function DayView({
         </div>
       )}
 
-      {/* Hour timeline */}
-      <div>
-        <SectionHeader>Schedule</SectionHeader>
-        <div className="relative border border-[#3a5a7a] rounded-sm bg-[#244260]">
-          {hours.map((h) => {
-            const hourEvents = timed.filter((e) => {
-              const start = parseInt(e.startTime!.split(":")[0], 10);
-              return start === h;
-            });
-            return (
-              <div
-                key={h}
-                className="flex border-b border-[#3a5a7a]/60 last:border-b-0"
-              >
-                <div className="w-20 flex-shrink-0 p-2 text-[10px] text-white/35 border-r border-[#3a5a7a]/60 font-bold uppercase tracking-wider">
-                  {formatHour(h)}
-                </div>
-                <div className="flex-1 p-2 min-h-[60px] flex flex-col gap-1.5">
-                  {hourEvents.map((ev) => (
-                    <EventCard
-                      key={ev.id}
-                      event={ev}
-                      expanded={expandedId === ev.id}
-                      onToggle={() =>
-                        setExpandedId(expandedId === ev.id ? null : ev.id)
-                      }
-                      allEvents={events}
-                      setExpandedId={setExpandedId}
-                    />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       {dayEvents.length === 0 && (
         <div className="text-center py-12 text-white/30 italic text-sm">
-          Nothing on the schedule for {longDayLabel(cursor)}.
+          Nothing scheduled for {longDayLabel(cursor)}.
         </div>
       )}
     </div>
   );
-}
-
-function formatHour(h: number): string {
-  const suffix = h >= 12 ? "pm" : "am";
-  const hh = h % 12 === 0 ? 12 : h % 12;
-  return `${hh}${suffix}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -1356,7 +1332,6 @@ function EventCard({
   dense?: boolean;
 }) {
   const color = SOURCE_COLORS[event.sourceTracker] || DEFAULT_SOURCE_COLOR;
-  const timeRange = formatTimeRange(event.startTime, event.endTime);
   const dateRange =
     event.startDate && event.endDate && event.startDate !== event.endDate
       ? `${shortDayLabel(event.startDate)} → ${shortDayLabel(event.endDate)}`
@@ -1394,13 +1369,13 @@ function EventCard({
         <div className={`font-bold text-white/90 truncate ${dense ? "text-[11px]" : "text-sm"}`}>
           {event.title}
         </div>
-        <div className="text-[10px] uppercase tracking-wider text-white/45 truncate mt-0.5 flex gap-2">
-          {timeRange && <span>{timeRange}</span>}
-          {!dense && timeRange && <span className="text-white/20">·</span>}
-          {!dense && <span>{dateRange}</span>}
-          {!dense && <span className="text-white/20">·</span>}
-          {!dense && <span>{event.owner}</span>}
-        </div>
+        {!dense && (
+          <div className="text-[10px] uppercase tracking-wider text-white/45 truncate mt-0.5 flex gap-2">
+            <span>{dateRange}</span>
+            <span className="text-white/20">·</span>
+            <span>{event.owner}</span>
+          </div>
+        )}
       </div>
     </button>
   );
@@ -1418,7 +1393,6 @@ function ExpandedCard({
   setExpandedId: (id: string | null) => void;
 }) {
   const color = SOURCE_COLORS[event.sourceTracker] || DEFAULT_SOURCE_COLOR;
-  const timeRange = formatTimeRange(event.startTime, event.endTime);
   const dateRange =
     event.startDate && event.endDate && event.startDate !== event.endDate
       ? `${longDayLabel(event.startDate)} → ${longDayLabel(event.endDate)}`
@@ -1476,7 +1450,6 @@ function ExpandedCard({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
         <MetaItem label="When">
           <div>{dateRange}</div>
-          {timeRange && <div className="text-white/60">{timeRange}</div>}
         </MetaItem>
         <MetaItem label="Owner">{event.owner}</MetaItem>
         {event.location && <MetaItem label="Location">{event.location}</MetaItem>}
@@ -1537,7 +1510,6 @@ function ExpandedCard({
                 >
                   <span className="text-white/45 text-[10px] uppercase tracking-wider w-28 flex-shrink-0">
                     {c.startDate ? shortDayLabel(c.startDate).split(",")[0] : ""}
-                    {c.startTime ? ` · ${formatTimeRange(c.startTime, c.endTime)}` : ""}
                   </span>
                   <span className="text-white/80">{c.title}</span>
                 </button>
