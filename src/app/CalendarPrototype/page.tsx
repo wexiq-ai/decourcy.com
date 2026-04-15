@@ -713,31 +713,55 @@ function ThemesBanner({
   });
 
   return (
-    <div className="mb-5 rounded-sm border border-[#40A590]/30 bg-[#244260]">
+    <div
+      className="mb-5 rounded-sm border border-dashed border-[#40A590]/40 bg-[#244260] relative overflow-hidden"
+      style={{
+        backgroundImage:
+          "repeating-linear-gradient(135deg, rgba(64,165,144,0.04) 0, rgba(64,165,144,0.04) 1px, transparent 1px, transparent 8px)",
+      }}
+    >
+      {/* Left accent rail — visual reminder "this spans time, it is not a point" */}
+      <span
+        aria-hidden
+        className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#40A590]/60"
+      />
       <button
         onClick={() => setOpen(!open)}
-        className="w-full px-4 py-2.5 flex items-center justify-between border-b border-[#40A590]/20 hover:bg-[#2c5073] transition-colors"
+        className="w-full px-4 py-2.5 flex items-start justify-between gap-3 border-b border-dashed border-[#40A590]/25 hover:bg-[#2c5073] transition-colors text-left"
       >
-        <div className="flex items-center gap-3">
-          <span className="inline-block w-2 h-2 rounded-full bg-[#40A590]" />
-          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#40A590]">
-            {`${rangeLabel} Themes & Campaigns`}
-          </span>
-          <span className="text-[10px] uppercase tracking-wider text-white/35">
-            {themes.length} active
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="inline-block w-2 h-2 rounded-full bg-[#40A590] flex-shrink-0" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#40A590]">
+              {`${rangeLabel} Themes & Campaigns`}
+            </span>
+            <span className="text-[10px] uppercase tracking-wider text-white/35">
+              {themes.length} active
+            </span>
+          </div>
+          <span className="text-[10px] text-white/45 pl-5 italic leading-snug">
+            Long-running themes that are <em className="not-italic font-semibold text-white/65">active during this period</em> — not actions happening on this specific day.
           </span>
         </div>
-        <span className="text-[#40A590] text-xs">{open ? "−" : "+"}</span>
+        <span className="text-[#40A590] text-xs flex-shrink-0 mt-0.5">{open ? "−" : "+"}</span>
       </button>
       {open && (
-        <div className="p-3 flex flex-col gap-3">
+        <div className="p-3 flex flex-col gap-4">
           {(["quarter", "month", "year"] as EventScope[]).map((scope) => {
             const group = byScope.get(scope);
             if (!group || group.length === 0) return null;
             return (
               <div key={scope}>
-                <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/35 mb-1.5">
-                  {SCOPE_LABELS[scope]}
+                <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#40A590]/80 mb-2 flex items-center gap-2">
+                  <span className="inline-block w-6 h-px bg-[#40A590]/40" />
+                  <span>{SCOPE_LABELS[scope]} theme{group.length === 1 ? "" : "s"}</span>
+                  <span className="text-white/30 normal-case tracking-normal text-[9px] italic">
+                    {scope === "quarter"
+                      ? "multi-month"
+                      : scope === "month"
+                      ? "full-month arc"
+                      : "always on"}
+                  </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {group.map((ev) => (
@@ -768,26 +792,63 @@ function ThemeChip({
 }) {
   const color = SOURCE_COLORS[event.sourceTracker] || DEFAULT_SOURCE_COLOR;
   const status = event.status;
+  const scope = eventScope(event);
+  const scopeLabel = SCOPE_LABELS[scope];
+  const dateRange =
+    event.startDate && event.endDate && event.startDate !== event.endDate
+      ? `${shortDayLabel(event.startDate).split(",")[0]} → ${shortDayLabel(event.endDate).split(",")[0]}`
+      : event.startDate
+      ? shortDayLabel(event.startDate).split(",")[0]
+      : "Ongoing";
   return (
     <button
       onClick={onClick}
-      className="text-left rounded-sm border px-2.5 py-1.5 hover:brightness-125 transition-all flex items-center gap-2 max-w-full"
+      // Dashed border + diagonal stripe pattern are the at-a-glance "this is a
+      // range, not a same-day event" signal. Day chips elsewhere use solid
+      // borders and flat fills — the visual language is deliberately different.
+      className="text-left rounded-sm border border-dashed px-2.5 py-1.5 hover:brightness-125 transition-all flex items-start gap-2 max-w-full"
       style={{
-        background: `${color}1a`,
-        borderColor: `${color}55`,
+        backgroundColor: `${color}1a`,
+        backgroundImage:
+          "repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 6px)",
+        borderColor: `${color}88`,
       }}
-      title={`${event.sourceTracker} — ${event.owner}${status ? ` — ${status}` : ""}`}
+      title={`${scopeLabel} theme — ${event.sourceTracker} — ${event.owner}${status ? ` — ${status}` : ""} — runs ${dateRange}`}
     >
-      <span
-        className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
-        style={{ background: color }}
-      />
-      <span className="text-[11px] font-bold text-white/90 truncate max-w-[16rem] md:max-w-[22rem]">
-        {event.title}
-      </span>
-      <span className="text-[9px] uppercase tracking-wider text-white/40 flex-shrink-0">
-        {event.owner}
-      </span>
+      {/* Span-range glyph: a double-ended arrow icon makes "this covers a range" obvious at a glance */}
+      <svg
+        aria-hidden
+        viewBox="0 0 20 10"
+        className="w-4 h-2.5 flex-shrink-0 mt-1"
+        style={{ color }}
+      >
+        <path
+          d="M2 5 L18 5 M2 5 L5 2 M2 5 L5 8 M18 5 L15 2 M18 5 L15 8"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+        />
+      </svg>
+      <div className="flex flex-col gap-0.5 min-w-0">
+        <span className="text-[11px] font-bold text-white/90 truncate max-w-[16rem] md:max-w-[22rem]">
+          {event.title}
+        </span>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span
+            className="text-[8px] font-bold uppercase tracking-[0.15em] rounded-sm px-1 py-0.5 border"
+            style={{
+              color,
+              borderColor: `${color}88`,
+              backgroundColor: `${color}22`,
+            }}
+          >
+            {scopeLabel}
+          </span>
+          <span className="text-[9px] text-white/60 tabular-nums">{dateRange}</span>
+          <span className="text-[9px] uppercase tracking-wider text-white/35">{event.owner}</span>
+        </div>
+      </div>
     </button>
   );
 }
@@ -1011,6 +1072,7 @@ function WeekView({
                     key={ev.id}
                     event={ev}
                     dense
+                    inlineExpanded={false}
                     expanded={expandedId === ev.id}
                     onToggle={() =>
                       setExpandedId(expandedId === ev.id ? null : ev.id)
@@ -1033,6 +1095,18 @@ function WeekView({
           );
         })}
       </div>
+
+      {/* Expanded card below grid so it never overflows a narrow day column */}
+      {expandedId && events.find((e) => e.id === expandedId) && (
+        <div className="mt-6">
+          <ExpandedCard
+            event={events.find((e) => e.id === expandedId)!}
+            allEvents={events}
+            onClose={() => setExpandedId(null)}
+            setExpandedId={setExpandedId}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -1323,6 +1397,7 @@ function EventCard({
   allEvents,
   setExpandedId,
   dense = false,
+  inlineExpanded = true,
 }: {
   event: CalendarEvent;
   expanded: boolean;
@@ -1330,6 +1405,11 @@ function EventCard({
   allEvents: CalendarEvent[];
   setExpandedId: (id: string | null) => void;
   dense?: boolean;
+  // When true (default), an expanded card swaps in ExpandedCard in place.
+  // When false, expanded state just highlights the collapsed row — the
+  // parent is expected to render ExpandedCard somewhere with more room
+  // (used by WeekView so the detail panel never overflows a day column).
+  inlineExpanded?: boolean;
 }) {
   const color = SOURCE_COLORS[event.sourceTracker] || DEFAULT_SOURCE_COLOR;
   const dateRange =
@@ -1339,7 +1419,7 @@ function EventCard({
       ? shortDayLabel(event.startDate)
       : "Undated";
 
-  if (expanded) {
+  if (expanded && inlineExpanded) {
     return (
       <ExpandedCard
         event={event}
@@ -1350,14 +1430,16 @@ function EventCard({
     );
   }
 
+  const isHighlighted = expanded && !inlineExpanded;
+
   return (
     <button
       onClick={onToggle}
       className={`text-left rounded-sm border px-2.5 py-1.5 flex items-start gap-2 hover:bg-[#2c5073] transition-colors w-full ${
         dense ? "" : "py-2"
-      }`}
+      } ${isHighlighted ? "ring-2 ring-[#40A590]/70" : ""}`}
       style={{
-        background: `${color}1a`,
+        background: isHighlighted ? `${color}33` : `${color}1a`,
         borderColor: `${color}55`,
       }}
     >
@@ -1405,7 +1487,7 @@ function ExpandedCard({
 
   return (
     <div
-      className="rounded-sm border bg-[#244260] p-5 flex flex-col gap-4 relative"
+      className="rounded-sm border bg-[#244260] p-5 flex flex-col gap-4 relative min-w-0 overflow-hidden"
       style={{ borderColor: `${color}66` }}
     >
       <button
@@ -1417,9 +1499,9 @@ function ExpandedCard({
       </button>
 
       {/* Source badge */}
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap pr-6">
         <span
-          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm border text-[10px] font-bold uppercase tracking-wider"
+          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm border text-[10px] font-bold uppercase tracking-wider max-w-full break-words"
           style={{
             background: `${color}22`,
             borderColor: `${color}66`,
@@ -1427,37 +1509,43 @@ function ExpandedCard({
           }}
         >
           <span
-            className="inline-block w-1.5 h-1.5 rounded-full"
+            className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
             style={{ background: color }}
           />
-          {event.sourceTracker}
+          <span className="break-words">{event.sourceTracker}</span>
         </span>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-white/40 border border-[#3a5a7a] px-2 py-0.5 rounded-sm">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-white/40 border border-[#3a5a7a] px-2 py-0.5 rounded-sm break-words max-w-full">
           {event.sourceType}
         </span>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-[#40A590]/80 border border-[#40A590]/30 bg-[#40A590]/5 px-2 py-0.5 rounded-sm">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#40A590]/80 border border-[#40A590]/30 bg-[#40A590]/5 px-2 py-0.5 rounded-sm break-words max-w-full">
           {SCOPE_LABELS[eventScope(event)]} scope
         </span>
         {event.status && <StatusPill status={event.status} />}
       </div>
 
       {/* Title */}
-      <h3 className="text-lg md:text-xl font-bold text-white/95 uppercase tracking-wide">
+      <h3 className="text-base sm:text-lg md:text-xl font-bold text-white/95 uppercase tracking-wide break-words">
         {event.title}
       </h3>
 
-      {/* Metadata grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+      {/* Metadata — auto-fit responsive grid so columns collapse cleanly in any container width */}
+      <div className="grid gap-x-4 gap-y-3 text-xs" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
         <MetaItem label="When">
-          <div>{dateRange}</div>
+          <div className="break-words">{dateRange}</div>
         </MetaItem>
-        <MetaItem label="Owner">{event.owner}</MetaItem>
-        {event.location && <MetaItem label="Location">{event.location}</MetaItem>}
+        <MetaItem label="Owner">
+          <span className="break-words">{event.owner}</span>
+        </MetaItem>
+        {event.location && (
+          <MetaItem label="Location">
+            <span className="break-words">{event.location}</span>
+          </MetaItem>
+        )}
       </div>
 
       {/* Description */}
       {event.description && (
-        <p className="text-sm leading-relaxed text-white/70 border-t border-[#3a5a7a] pt-4">
+        <p className="text-sm leading-relaxed text-white/70 border-t border-[#3a5a7a] pt-4 break-words">
           {event.description}
         </p>
       )}
@@ -1468,7 +1556,7 @@ function ExpandedCard({
           {event.tags.map((t) => (
             <span
               key={t}
-              className="text-[10px] font-bold uppercase tracking-wider text-white/45 border border-[#3a5a7a] px-1.5 py-0.5 rounded-sm"
+              className="text-[10px] font-bold uppercase tracking-wider text-white/45 border border-[#3a5a7a] px-1.5 py-0.5 rounded-sm break-all max-w-full"
             >
               #{t}
             </span>
@@ -1523,11 +1611,11 @@ function ExpandedCard({
 
 function MetaItem({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div>
+    <div className="min-w-0">
       <div className="text-[10px] font-bold uppercase tracking-wider text-white/40 mb-1">
         {label}
       </div>
-      <div className="text-white/80">{children}</div>
+      <div className="text-white/80 break-words min-w-0">{children}</div>
     </div>
   );
 }
