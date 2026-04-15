@@ -14,6 +14,14 @@ export type EventStatus =
   | "completed"
   | "no-content";
 
+// Derived at render time from startDate/endDate span (see lib/filter.ts).
+// - "day"     single-day or <5 day event (fits in a day cell)
+// - "week"    5-13 day weekly theme (fits in day cells)
+// - "month"   14-62 day theme (floats in "This Month" banner)
+// - "quarter" 63-120 day quarterly theme (floats in "This Quarter" banner)
+// - "year"    long-running / undated (floats in "Ongoing" bucket)
+export type EventScope = "day" | "week" | "month" | "quarter" | "year";
+
 export type CalendarEvent = {
   id: string;
   title: string;
@@ -46,6 +54,7 @@ export type FilterState = {
   owners: Set<string>;
   sourceTypes: Set<SourceType>;
   statuses: Set<EventStatus>;
+  scopes: Set<EventScope>;
   range: DateRange | null;
 };
 

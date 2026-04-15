@@ -124,3 +124,28 @@ export function formatTime(t: string): string {
   const hh = ((h % 12) || 12);
   return m === 0 ? `${hh}${suffix}` : `${hh}:${String(m).padStart(2, "0")}${suffix}`;
 }
+
+export function daysBetween(startIso: string, endIso: string): number {
+  const s = parseISO(startIso);
+  const e = parseISO(endIso);
+  return Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+export function quarterLabel(iso: string): string {
+  const d = parseISO(iso);
+  const q = Math.floor(d.getMonth() / 3) + 1;
+  return `Q${q} ${d.getFullYear()}`;
+}
+
+export function startOfQuarter(iso: string): string {
+  const d = parseISO(iso);
+  const startMonth = Math.floor(d.getMonth() / 3) * 3;
+  return `${d.getFullYear()}-${String(startMonth + 1).padStart(2, "0")}-01`;
+}
+
+export function endOfQuarter(iso: string): string {
+  const d = parseISO(iso);
+  const endMonth = Math.floor(d.getMonth() / 3) * 3 + 2;
+  const last = new Date(d.getFullYear(), endMonth + 1, 0).getDate();
+  return `${d.getFullYear()}-${String(endMonth + 1).padStart(2, "0")}-${String(last).padStart(2, "0")}`;
+}

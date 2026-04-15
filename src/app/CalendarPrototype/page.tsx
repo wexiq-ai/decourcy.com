@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { FadeIn } from "./components/FadeIn";
 import type {
   CalendarEvent,
+  EventScope,
   EventStatus,
   FilterState,
   SourceType,
@@ -17,22 +18,31 @@ import {
   buildMonthGrid,
   compareISO,
   dayNumber,
+  endOfMonth,
+  endOfQuarter,
   endOfWeek,
   formatTimeRange,
   isSameMonth,
   isToday,
   longDayLabel,
   monthLabel,
+  quarterLabel,
   shortDayLabel,
   startOfMonth,
+  startOfQuarter,
   startOfWeek,
   todayISO,
 } from "./lib/dates";
 import {
   applyFilters,
   emptyFilterState,
+  eventScope,
   eventsOnDay,
   hasActiveFilters,
+  isThemeScope,
+  SCOPE_LABELS,
+  SCOPE_ORDER,
+  themesInRange,
   toggleSet,
   uniqueSorted,
 } from "./lib/filter";
@@ -47,8 +57,26 @@ export default function CalendarPrototypePage() {
   const [filters, setFilters] = useState<FilterState>(emptyFilterState());
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const searchRef = useRef<HTMLInputElement | null>(null);
 
   const filtered = useMemo(() => applyFilters(EVENTS, filters), [filters]);
+
+  // Keyboard shortcut: "/" focuses search, Escape collapses expanded card
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (
+        e.key === "/" &&
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLTextAreaElement)
+      ) {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+      if (e.key === "Escape" && expandedId) setExpandedId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [expandedId]);
 
   return (
     <div className="min-h-screen bg-[#071a0e] text-white pb-24">
@@ -76,6 +104,7 @@ export default function CalendarPrototypePage() {
         filtersOpen={filtersOpen}
         setFiltersOpen={setFiltersOpen}
         totalResults={filtered.length}
+        searchRef={searchRef}
       />
 
       {/* Filter panel (collapsible) */}
@@ -199,6 +228,7 @@ function StickyToolbar({
   filtersOpen,
   setFiltersOpen,
   totalResults,
+  searchRef,
 }: {
   view: ViewMode;
   setView: (v: ViewMode) => void;
@@ -209,6 +239,7 @@ function StickyToolbar({
   filtersOpen: boolean;
   setFiltersOpen: (b: boolean) => void;
   totalResults: number;
+  searchRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
@@ -241,12 +272,22 @@ function StickyToolbar({
         <div className="flex flex-col md:flex-row gap-2 md:items-center">
           <div className="flex-1 relative">
             <input
+              ref={searchRef}
               type="text"
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              placeholder="Search events, owners, tags…"
+              placeholder="Search titles, descriptions, owners, tags, locations…  (press / to focus)"
               className="w-full bg-[#0a2314] border border-[#1a4a2e] focus:border-[#5b9bd5]/60 outline-none rounded-sm px-3 py-2 text-sm text-white placeholder:text-white/25"
             />
+            {filters.search && (
+              <button
+                onClick={() => setFilters({ ...filters, search: "" })}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 hover:text-[#5b9bd5] text-sm"
+                aria-label="Clear search"
+              >
+                ×
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -462,6 +503,18 @@ function FilterPanel({
           />
         ))}
       </FilterGroup>
+      <FilterGroup label="Scope">
+        {SCOPE_ORDER.map((s) => (
+          <FilterChip
+            key={s}
+            label={SCOPE_LABELS[s]}
+            active={filters.scopes.has(s)}
+            onToggle={() =>
+              setFilters({ ...filters, scopes: toggleSet(filters.scopes, s) })
+            }
+          />
+        ))}
+      </FilterGroup>
     </div>
   );
 }
@@ -548,6 +601,13 @@ function ActiveFilterChips({
         setFilters({ ...filters, statuses: toggleSet(filters.statuses, s) }),
     })
   );
+  filters.scopes.forEach((s) =>
+    chips.push({
+      label: `Scope: ${SCOPE_LABELS[s]}`,
+      onRemove: () =>
+        setFilters({ ...filters, scopes: toggleSet(filters.scopes, s) }),
+    })
+  );
   if (filters.range) {
     chips.push({
       label: `Range: ${filters.range.start} → ${filters.range.end}`,
@@ -568,6 +628,134 @@ function ActiveFilterChips({
         </span>
       ))}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Themes & Campaigns banner — month-scope items aligned alongside daily tasks.
+//
+// Monthly and quarterly content (ideaXchange issues, Notion monthly themes,
+// Insider quarterly issues, campaign strips, Professor Leads weeks that span
+// the view range, etc.) would clutter the month grid if we dropped them into
+// every single day cell. Instead they float in this banner above the grid so
+// they're always in view but never swallow the daily activity.
+// ---------------------------------------------------------------------------
+
+function ThemesBanner({
+  events,
+  rangeStart,
+  rangeEnd,
+  rangeLabel,
+  expandedId,
+  setExpandedId,
+}: {
+  events: CalendarEvent[];
+  rangeStart: string;
+  rangeEnd: string;
+  rangeLabel: string;
+  expandedId: string | null;
+  setExpandedId: (id: string | null) => void;
+}) {
+  const [open, setOpen] = useState(true);
+  const themes = useMemo(
+    () =>
+      themesInRange(events, rangeStart, rangeEnd).sort((a, b) => {
+        // Larger scopes first, then alphabetical
+        const order: EventScope[] = ["year", "quarter", "month"];
+        const sa = order.indexOf(eventScope(a));
+        const sb = order.indexOf(eventScope(b));
+        if (sa !== sb) return sa - sb;
+        return a.title.localeCompare(b.title);
+      }),
+    [events, rangeStart, rangeEnd]
+  );
+  if (themes.length === 0) return null;
+
+  // Group by scope for clearer visual separation
+  const byScope = new Map<EventScope, CalendarEvent[]>();
+  themes.forEach((ev) => {
+    const s = eventScope(ev);
+    if (!byScope.has(s)) byScope.set(s, []);
+    byScope.get(s)!.push(ev);
+  });
+
+  return (
+    <div className="mb-5 rounded-sm border border-[#5b9bd5]/30 bg-[#0a2314]">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full px-4 py-2.5 flex items-center justify-between border-b border-[#5b9bd5]/20 hover:bg-[#0d2b18] transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <span className="inline-block w-2 h-2 rounded-full bg-[#5b9bd5]" />
+          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#5b9bd5]">
+            {rangeLabel} Themes &amp; Campaigns
+          </span>
+          <span className="text-[10px] uppercase tracking-wider text-white/35">
+            {themes.length} active
+          </span>
+        </div>
+        <span className="text-[#5b9bd5] text-xs">{open ? "−" : "+"}</span>
+      </button>
+      {open && (
+        <div className="p-3 flex flex-col gap-3">
+          {(["quarter", "month", "year"] as EventScope[]).map((scope) => {
+            const group = byScope.get(scope);
+            if (!group || group.length === 0) return null;
+            return (
+              <div key={scope}>
+                <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/35 mb-1.5">
+                  {SCOPE_LABELS[scope]}
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {group.map((ev) => (
+                    <ThemeChip
+                      key={ev.id}
+                      event={ev}
+                      onClick={() =>
+                        setExpandedId(expandedId === ev.id ? null : ev.id)
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ThemeChip({
+  event,
+  onClick,
+}: {
+  event: CalendarEvent;
+  onClick: () => void;
+}) {
+  const color = SOURCE_COLORS[event.sourceTracker] || DEFAULT_SOURCE_COLOR;
+  const status = event.status;
+  return (
+    <button
+      onClick={onClick}
+      className="text-left rounded-sm border px-2.5 py-1.5 hover:brightness-125 transition-all flex items-center gap-2 max-w-full"
+      style={{
+        background: `${color}1a`,
+        borderColor: `${color}55`,
+      }}
+      title={`${event.sourceTracker} — ${event.owner}${status ? ` — ${status}` : ""}`}
+    >
+      <span
+        className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
+        style={{ background: color }}
+      />
+      <span className="text-[11px] font-bold text-white/90 truncate max-w-[16rem] md:max-w-[22rem]">
+        {event.title}
+      </span>
+      <span className="text-[9px] uppercase tracking-wider text-white/40 flex-shrink-0">
+        {event.owner}
+      </span>
+    </button>
   );
 }
 
@@ -594,6 +782,15 @@ function MonthView({
 
   return (
     <div>
+      <ThemesBanner
+        events={events}
+        rangeStart={startOfMonth(cursor)}
+        rangeEnd={endOfMonth(cursor)}
+        rangeLabel={monthLabel(cursor)}
+        expandedId={expandedId}
+        setExpandedId={setExpandedId}
+      />
+
       {/* Weekday header */}
       <div className="grid grid-cols-7 gap-1 mb-1">
         {dayNames.map((d) => (
@@ -708,6 +905,14 @@ function WeekView({
 
   return (
     <div>
+      <ThemesBanner
+        events={events}
+        rangeStart={weekStart}
+        rangeEnd={endOfWeek(cursor)}
+        rangeLabel={`${shortDayLabel(weekStart).split(",")[0]} – ${shortDayLabel(endOfWeek(cursor)).split(",")[0]}`}
+        expandedId={expandedId}
+        setExpandedId={setExpandedId}
+      />
       <div className="grid grid-cols-7 gap-2">
         {days.map((iso) => {
           const dayEvents = eventsOnDay(events, iso);
@@ -788,6 +993,15 @@ function DayView({
 
   return (
     <div className="flex flex-col gap-6">
+      <ThemesBanner
+        events={events}
+        rangeStart={cursor}
+        rangeEnd={cursor}
+        rangeLabel={longDayLabel(cursor)}
+        expandedId={expandedId}
+        setExpandedId={setExpandedId}
+      />
+
       {/* All-day strip */}
       {allDay.length > 0 && (
         <div>
@@ -872,22 +1086,35 @@ function AgendaView({
   expandedId: string | null;
   setExpandedId: (id: string | null) => void;
 }) {
-  // Group by startDate (dated events only), preserve chronological order
-  const dated = events.filter((e) => e.startDate).slice();
-  dated.sort((a, b) => {
-    const d = compareISO(a.startDate!, b.startDate!);
-    if (d !== 0) return d;
-    return (a.startTime || "").localeCompare(b.startTime || "");
-  });
+  // Split into daily-scoped events (show in chronological day groups) and
+  // theme-scoped events (show in a "Themes & Campaigns" block above).
+  const daily = events
+    .filter((e) => e.startDate && !isThemeScope(e))
+    .slice()
+    .sort((a, b) => {
+      const d = compareISO(a.startDate!, b.startDate!);
+      if (d !== 0) return d;
+      return (a.startTime || "").localeCompare(b.startTime || "");
+    });
+  const themes = events
+    .filter((e) => isThemeScope(e))
+    .slice()
+    .sort((a, b) => {
+      // Earlier theme-windows first
+      const sa = a.startDate || "9999";
+      const sb = b.startDate || "9999";
+      if (sa !== sb) return sa < sb ? -1 : 1;
+      return a.title.localeCompare(b.title);
+    });
 
   const groups = new Map<string, CalendarEvent[]>();
-  dated.forEach((ev) => {
+  daily.forEach((ev) => {
     const key = ev.startDate!;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(ev);
   });
 
-  if (groups.size === 0) {
+  if (groups.size === 0 && themes.length === 0) {
     return (
       <div className="text-center py-16 text-white/30 italic text-sm">
         No events match the current filters.
@@ -897,6 +1124,24 @@ function AgendaView({
 
   return (
     <div className="flex flex-col gap-6">
+      {themes.length > 0 && (
+        <div>
+          <SectionHeader>Themes &amp; Campaigns ({themes.length})</SectionHeader>
+          <div className="flex flex-col gap-2">
+            {themes.map((ev) => (
+              <EventCard
+                key={ev.id}
+                event={ev}
+                expanded={expandedId === ev.id}
+                onToggle={() => setExpandedId(expandedId === ev.id ? null : ev.id)}
+                allEvents={events}
+                setExpandedId={setExpandedId}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {Array.from(groups.entries()).map(([iso, group]) => (
         <div key={iso}>
           <SectionHeader highlight={isToday(iso)}>
@@ -1159,6 +1404,9 @@ function ExpandedCard({
         </span>
         <span className="text-[10px] font-bold uppercase tracking-wider text-white/40 border border-[#1a4a2e] px-2 py-0.5 rounded-sm">
           {event.sourceType}
+        </span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#5b9bd5]/80 border border-[#5b9bd5]/30 bg-[#5b9bd5]/5 px-2 py-0.5 rounded-sm">
+          {SCOPE_LABELS[eventScope(event)]} scope
         </span>
         {event.status && <StatusPill status={event.status} />}
       </div>
