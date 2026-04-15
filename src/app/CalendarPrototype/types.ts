@@ -5,7 +5,8 @@ export type SourceType =
   | "Campaign"
   | "Channel Activity"
   | "Social Post"
-  | "Weekly Theme";
+  | "Weekly Theme"
+  | "Monthly Theme";
 
 export type EventStatus =
   | "planned"
