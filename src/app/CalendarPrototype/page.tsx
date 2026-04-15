@@ -25,6 +25,7 @@ import {
   isToday,
   longDayLabel,
   monthLabel,
+  parseISO,
   quarterLabel,
   shortDayLabel,
   startOfMonth,
@@ -143,6 +144,22 @@ export default function CalendarPrototypePage() {
       {/* Main view */}
       <div className="px-4 md:px-8 pt-6 max-w-7xl mx-auto w-full">
         <FadeIn className="w-full">
+          {view === "year" && (
+            <YearView
+              cursor={cursor}
+              events={filtered}
+              expandedId={expandedId}
+              setExpandedId={setExpandedId}
+              goToMonth={(iso) => {
+                setCursor(iso);
+                setView("month");
+              }}
+              goToDay={(iso) => {
+                setCursor(iso);
+                setView("day");
+              }}
+            />
+          )}
           {view === "month" && (
             <MonthView
               cursor={cursor}
@@ -277,6 +294,7 @@ function StickyToolbar({
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const navLabel = (() => {
+    if (view === "year") return cursor.slice(0, 4);
     if (view === "month") return monthLabel(cursor);
     if (view === "week") {
       const s = startOfWeek(cursor);
@@ -288,12 +306,14 @@ function StickyToolbar({
   })();
 
   function navPrev() {
-    if (view === "month") setCursor(addMonths(cursor, -1));
+    if (view === "year") setCursor(addMonths(cursor, -12));
+    else if (view === "month") setCursor(addMonths(cursor, -1));
     else if (view === "week") setCursor(addDays(cursor, -7));
     else if (view === "day") setCursor(addDays(cursor, -1));
   }
   function navNext() {
-    if (view === "month") setCursor(addMonths(cursor, 1));
+    if (view === "year") setCursor(addMonths(cursor, 12));
+    else if (view === "month") setCursor(addMonths(cursor, 1));
     else if (view === "week") setCursor(addDays(cursor, 7));
     else if (view === "day") setCursor(addDays(cursor, 1));
   }
@@ -403,6 +423,7 @@ function IconBtn({ label, onClick }: { label: string; onClick: () => void }) {
 
 function ViewSwitcher({ view, setView }: { view: ViewMode; setView: (v: ViewMode) => void }) {
   const opts: { v: ViewMode; label: string }[] = [
+    { v: "year", label: "Year" },
     { v: "month", label: "Month" },
     { v: "week", label: "Week" },
     { v: "day", label: "Day" },
@@ -863,6 +884,178 @@ function ThemeChip({
         </div>
       </div>
     </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Year View — 12 mini-months arranged in a responsive grid. Each day cell is
+// colored by the dominant source tracker active that day, with opacity scaled
+// by event count, so seasonality and source concentration read at a glance.
+// Click a month header → zoom to month view. Click a day → zoom to day view.
+// The full-year ThemesBanner sits below the grid as secondary context.
+// ---------------------------------------------------------------------------
+
+function YearView({
+  cursor,
+  events,
+  expandedId,
+  setExpandedId,
+  goToMonth,
+  goToDay,
+}: {
+  cursor: string;
+  events: CalendarEvent[];
+  expandedId: string | null;
+  setExpandedId: (id: string | null) => void;
+  goToMonth: (iso: string) => void;
+  goToDay: (iso: string) => void;
+}) {
+  const year = parseInt(cursor.slice(0, 4), 10);
+  const months = Array.from({ length: 12 }, (_, i) => i);
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div
+        className="grid gap-3 sm:gap-4"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}
+      >
+        {months.map((m) => (
+          <MiniMonth
+            key={m}
+            year={year}
+            monthIdx={m}
+            events={events}
+            goToMonth={goToMonth}
+            goToDay={goToDay}
+          />
+        ))}
+      </div>
+
+      <ThemesBanner
+        events={events}
+        rangeStart={`${year}-01-01`}
+        rangeEnd={`${year}-12-31`}
+        rangeLabel={String(year)}
+        expandedId={expandedId}
+        setExpandedId={setExpandedId}
+      />
+    </div>
+  );
+}
+
+function MiniMonth({
+  year,
+  monthIdx,
+  events,
+  goToMonth,
+  goToDay,
+}: {
+  year: number;
+  monthIdx: number;
+  events: CalendarEvent[];
+  goToMonth: (iso: string) => void;
+  goToDay: (iso: string) => void;
+}) {
+  const firstISO = `${year}-${String(monthIdx + 1).padStart(2, "0")}-01`;
+  const monthName = parseISO(firstISO).toLocaleDateString("en-US", { month: "long" });
+  const days = buildMonthGrid(firstISO); // 42 ISO strings, Monday-start
+  const monthRef = startOfMonth(firstISO);
+
+  // Per-day metric: dominant source (most events on that day) + count.
+  // Cached so a re-render of the parent year view doesn't rebuild 12 of these.
+  const metrics = useMemo(() => {
+    const m = new Map<string, { color: string; count: number }>();
+    for (const iso of days) {
+      if (!isSameMonth(iso, monthRef)) continue;
+      const items = eventsOnDay(events, iso);
+      if (items.length === 0) continue;
+      const sourceCounts = new Map<string, number>();
+      for (const ev of items) {
+        sourceCounts.set(ev.sourceTracker, (sourceCounts.get(ev.sourceTracker) || 0) + 1);
+      }
+      const dominant = [...sourceCounts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+      const color = SOURCE_COLORS[dominant] || DEFAULT_SOURCE_COLOR;
+      m.set(iso, { color, count: items.length });
+    }
+    return m;
+  }, [events, days, monthRef]);
+
+  // Monday-start single-letter header to match MonthView's weekday order.
+  const dayNames = ["M", "T", "W", "T", "F", "S", "S"];
+
+  return (
+    <div className="border border-[#1a4a2e]/50 rounded-sm bg-[#0a2314]/40 p-3">
+      <button
+        onClick={() => goToMonth(firstISO)}
+        className="w-full text-left text-[11px] uppercase tracking-[0.18em] font-bold text-white/80 hover:text-[#40A590] transition-colors pb-2 border-b border-[#1a4a2e] mb-2"
+      >
+        {monthName}
+      </button>
+
+      <div className="grid grid-cols-7 gap-0.5 mb-1">
+        {dayNames.map((d, i) => (
+          <div
+            key={i}
+            className="text-center text-[8px] text-white/25 font-bold uppercase"
+          >
+            {d}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-0.5">
+        {days.map((iso) => {
+          const inMonth = isSameMonth(iso, monthRef);
+          const metric = inMonth ? metrics.get(iso) : undefined;
+          const dayNum = dayNumber(iso);
+          const today = isToday(iso);
+
+          // Opacity ramp: 1→0.25, 2→0.40, 3→0.55, 4→0.70, 5+→0.85
+          const opacity = metric
+            ? Math.min(0.25 + (metric.count - 1) * 0.15, 0.85)
+            : 0;
+          const alphaHex = Math.round(opacity * 255)
+            .toString(16)
+            .padStart(2, "0");
+          const bg = metric
+            ? `${metric.color}${alphaHex}`
+            : inMonth
+              ? "rgba(255,255,255,0.03)"
+              : "transparent";
+          const textColor = !inMonth
+            ? "rgba(255,255,255,0.12)"
+            : metric
+              ? "rgba(255,255,255,0.95)"
+              : "rgba(255,255,255,0.35)";
+
+          return (
+            <button
+              key={iso}
+              onClick={() => inMonth && goToDay(iso)}
+              disabled={!inMonth}
+              className={`aspect-square rounded-[2px] text-[9px] font-medium flex items-center justify-center transition-all ${
+                inMonth
+                  ? "hover:ring-1 hover:ring-[#5b9bd5]/60 cursor-pointer"
+                  : "cursor-default"
+              } ${today ? "ring-1 ring-[#40A590]" : ""}`}
+              style={{
+                backgroundColor: bg,
+                color: textColor,
+              }}
+              title={
+                metric
+                  ? `${shortDayLabel(iso)} — ${metric.count} item${metric.count === 1 ? "" : "s"}`
+                  : inMonth
+                    ? shortDayLabel(iso)
+                    : ""
+              }
+            >
+              {inMonth ? dayNum : ""}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

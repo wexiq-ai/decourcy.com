@@ -41,7 +41,7 @@ export type CalendarEvent = {
   parentId?: string;
 };
 
-export type ViewMode = "month" | "week" | "day" | "agenda" | "source";
+export type ViewMode = "year" | "month" | "week" | "day" | "agenda" | "source";
 
 export type DateRange = {
   start: string; // ISO YYYY-MM-DD
