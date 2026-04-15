@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const PAGE_PASSWORDS: Record<string, string> = {
   "/amerilife-marketing-strategy": "ovitas2026",
   "/ca47media": "troutman2026",
+  "/calendarprototype": "Marketing2026",
 };
 
 const DEFAULT_PASSWORD = "ovitas2026";

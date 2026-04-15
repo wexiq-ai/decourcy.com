@@ -2,19 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   const pagePath = request.nextUrl.pathname;
-  const cookieName = `auth_${pagePath.replace(/\//g, "_")}`;
+  // Normalize to lowercase so mixed-case routes (e.g. /CalendarPrototype)
+  // generate the same cookie key that the login route sets.
+  const normalizedPath = pagePath.toLowerCase();
+  const cookieName = `auth_${normalizedPath.replace(/\//g, "_")}`;
   const auth = request.cookies.get(cookieName)?.value;
 
   // Accept legacy cookie only for the original amerilife page
   const legacyAuth = request.cookies.get("site_auth")?.value;
-  const isLegacyPage = pagePath === "/amerilife-marketing-strategy";
+  const isLegacyPage = normalizedPath === "/amerilife-marketing-strategy";
 
   if (auth === "authenticated" || (isLegacyPage && legacyAuth === "authenticated")) {
     return NextResponse.next();
   }
 
   // Allow the login API route through
-  if (pagePath === "/api/login") {
+  if (normalizedPath === "/api/login") {
     return NextResponse.next();
   }
 
@@ -25,7 +28,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/amerilife-marketing-strategy", "/ca47media"],
+  matcher: ["/amerilife-marketing-strategy", "/ca47media", "/CalendarPrototype"],
 };
 
 function loginHTML(pagePath: string) {
