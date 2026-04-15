@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { FadeIn } from "./components/FadeIn";
 import type {
   CalendarEvent,
@@ -142,6 +142,10 @@ export default function CalendarPrototypePage() {
               events={filtered}
               expandedId={expandedId}
               setExpandedId={setExpandedId}
+              goToDay={(iso) => {
+                setCursor(iso);
+                setView("day");
+              }}
             />
           )}
           {view === "day" && (
@@ -812,31 +816,50 @@ function MonthView({
           return (
             <div
               key={iso}
-              className={`min-h-[110px] md:min-h-[130px] rounded-sm border p-1.5 flex flex-col gap-1 ${
+              role="button"
+              tabIndex={0}
+              aria-label={`Open ${longDayLabel(iso)}`}
+              onClick={() => goToDay(iso)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  goToDay(iso);
+                }
+              }}
+              className={`group min-h-[110px] md:min-h-[130px] rounded-sm border p-1.5 flex flex-col gap-1 cursor-pointer transition-colors hover:border-[#5b9bd5]/60 hover:bg-[#0d2b18] focus:outline-none focus:border-[#5b9bd5] ${
                 inMonth
                   ? "bg-[#0a2314] border-[#1a4a2e]"
                   : "bg-[#071a0e] border-[#0d2b18] opacity-50"
               } ${today ? "border-[#5b9bd5]/60" : ""}`}
             >
-              <button
-                onClick={() => goToDay(iso)}
-                className={`text-left text-[11px] font-bold ${
-                  today ? "text-[#5b9bd5]" : inMonth ? "text-white/70" : "text-white/30"
-                } hover:text-[#5b9bd5] transition-colors`}
+              <span
+                className={`text-[11px] font-bold transition-colors ${
+                  today
+                    ? "text-[#5b9bd5]"
+                    : inMonth
+                    ? "text-white/70 group-hover:text-[#5b9bd5]"
+                    : "text-white/30 group-hover:text-[#5b9bd5]"
+                }`}
               >
                 {dayNumber(iso)}
-              </button>
+              </span>
               <div className="flex flex-col gap-0.5">
                 {dayEvents.slice(0, 3).map((ev) => (
                   <MonthChip
                     key={ev.id}
                     event={ev}
-                    onClick={() => setExpandedId(expandedId === ev.id ? null : ev.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedId(expandedId === ev.id ? null : ev.id);
+                    }}
                   />
                 ))}
                 {dayEvents.length > 3 && (
                   <button
-                    onClick={() => goToDay(iso)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goToDay(iso);
+                    }}
                     className="text-[9px] text-white/35 hover:text-[#5b9bd5] text-left pl-1"
                   >
                     +{dayEvents.length - 3} more
@@ -863,7 +886,13 @@ function MonthView({
   );
 }
 
-function MonthChip({ event, onClick }: { event: CalendarEvent; onClick: () => void }) {
+function MonthChip({
+  event,
+  onClick,
+}: {
+  event: CalendarEvent;
+  onClick: (e: MouseEvent) => void;
+}) {
   const color = SOURCE_COLORS[event.sourceTracker] || DEFAULT_SOURCE_COLOR;
   return (
     <button
@@ -894,11 +923,13 @@ function WeekView({
   events,
   expandedId,
   setExpandedId,
+  goToDay,
 }: {
   cursor: string;
   events: CalendarEvent[];
   expandedId: string | null;
   setExpandedId: (id: string | null) => void;
+  goToDay: (iso: string) => void;
 }) {
   const weekStart = startOfWeek(cursor);
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -920,28 +951,31 @@ function WeekView({
           return (
             <div
               key={iso}
-              className={`min-h-[320px] rounded-sm border p-2 flex flex-col gap-1.5 ${
-                today
-                  ? "bg-[#0a2314] border-[#5b9bd5]/60"
-                  : "bg-[#0a2314] border-[#1a4a2e]"
+              className={`group min-h-[320px] rounded-sm border p-2 flex flex-col gap-1.5 bg-[#0a2314] ${
+                today ? "border-[#5b9bd5]/60" : "border-[#1a4a2e]"
               }`}
             >
-              <div className="flex items-baseline justify-between">
+              <button
+                type="button"
+                onClick={() => goToDay(iso)}
+                aria-label={`Open ${longDayLabel(iso)}`}
+                className="flex items-baseline justify-between w-full text-left -mx-1 px-1 py-0.5 rounded-sm transition-colors hover:bg-[#0d2b18] focus:outline-none focus:ring-1 focus:ring-[#5b9bd5]/60"
+              >
                 <span
-                  className={`text-[10px] font-bold uppercase tracking-wider ${
-                    today ? "text-[#5b9bd5]" : "text-white/40"
+                  className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                    today ? "text-[#5b9bd5]" : "text-white/40 group-hover:text-[#5b9bd5]"
                   }`}
                 >
                   {shortDayLabel(iso).split(",")[0]}
                 </span>
                 <span
-                  className={`text-sm font-bold ${
-                    today ? "text-[#5b9bd5]" : "text-white/70"
+                  className={`text-sm font-bold transition-colors ${
+                    today ? "text-[#5b9bd5]" : "text-white/70 group-hover:text-[#5b9bd5]"
                   }`}
                 >
                   {dayNumber(iso)}
                 </span>
-              </div>
+              </button>
               <div className="flex flex-col gap-1.5">
                 {dayEvents.map((ev) => (
                   <EventCard
@@ -957,7 +991,13 @@ function WeekView({
                   />
                 ))}
                 {dayEvents.length === 0 && (
-                  <span className="text-[10px] text-white/20 italic">No events</span>
+                  <button
+                    type="button"
+                    onClick={() => goToDay(iso)}
+                    className="text-[10px] text-white/20 hover:text-[#5b9bd5] italic text-left transition-colors"
+                  >
+                    No events — open day →
+                  </button>
                 )}
               </div>
             </div>
