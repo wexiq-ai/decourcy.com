@@ -207,9 +207,13 @@ export default function CalendarPrototypePage() {
 // ---------------------------------------------------------------------------
 
 function LastUpdated() {
-  // Format the ISO data-refresh timestamp deterministically (timezone is
-  // pinned to America/New_York so SSR and CSR produce identical output).
-  const ts = useMemo(() => {
+  // Two distinct freshness signals:
+  //   dataTs  — when the 10 source trackers were last re-pulled into data.ts
+  //             (the content the reader is scanning for)
+  //   buildTs — when the code itself was last deployed (injected at build
+  //             time by next.config.ts via process.env.BUILD_TIMESTAMP)
+  // The data timestamp is pinned to America/New_York so SSR and CSR match.
+  const dataTs = useMemo(() => {
     try {
       const d = new Date(LAST_UPDATED);
       return (
@@ -228,12 +232,18 @@ function LastUpdated() {
     }
   }, []);
 
-  if (!ts) return <div className="mb-4" />;
+  const [buildTs, setBuildTs] = useState("");
+  useEffect(() => {
+    setBuildTs(process.env.BUILD_TIMESTAMP || "");
+  }, []);
+
+  if (!dataTs && !buildTs) return <div className="mb-4" />;
 
   return (
-    <p className="text-[10px] italic text-white/25 mt-3 mb-0 text-center">
-      Last updated {ts}
-    </p>
+    <div className="text-[10px] italic text-white/25 mt-3 mb-0 text-center leading-snug">
+      {dataTs && <div>Data last refreshed {dataTs}</div>}
+      {buildTs && <div>Code last updated {buildTs}</div>}
+    </div>
   );
 }
 
@@ -1515,7 +1525,7 @@ function EventCard({
         // this item represents. Color-tinted to match the dot on the left
         // so the eye pairs them and the reader can scan by source quickly.
         <span
-          className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-sm border text-[9px] font-bold uppercase tracking-[0.12em] flex-shrink-0 max-w-[12rem] truncate self-start mt-0.5"
+          className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-sm border text-[9px] font-bold uppercase tracking-[0.12em] flex-shrink-0 whitespace-nowrap self-start mt-0.5"
           style={{
             color,
             borderColor: `${color}66`,
