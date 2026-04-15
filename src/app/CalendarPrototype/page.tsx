@@ -99,7 +99,7 @@ export default function CalendarPrototypePage() {
           </div>
           <div className="h-px w-24 bg-[#40A590] mt-4 mb-3" aria-hidden />
           <h1 className="text-sm md:text-base font-semibold tracking-[0.25em] uppercase text-[#71C495] text-center">
-            Consolidated Calendar Prototype
+            Consolidated Marketing Calendar Prototype
           </h1>
           <p className="text-[11px] font-medium text-white/50 mt-2 uppercase tracking-wider text-center">
             {SOURCES.length} Sources · One View

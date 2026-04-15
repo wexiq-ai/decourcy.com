@@ -8,7 +8,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "AmeriLife Consolidated Calendar Prototype",
+  title: "AmeriLife Consolidated Marketing Calendar Prototype",
 };
 
 export default function CalendarPrototypeLayout({
