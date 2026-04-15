@@ -879,15 +879,6 @@ function MonthView({
 
   return (
     <div>
-      <ThemesBanner
-        events={events}
-        rangeStart={startOfMonth(cursor)}
-        rangeEnd={endOfMonth(cursor)}
-        rangeLabel={monthLabel(cursor)}
-        expandedId={expandedId}
-        setExpandedId={setExpandedId}
-      />
-
       {/* Weekday header */}
       <div className="grid grid-cols-7 gap-1 mb-1">
         {dayNames.map((d) => (
@@ -975,6 +966,18 @@ function MonthView({
           />
         </div>
       )}
+
+      {/* Themes sit below the grid — secondary context to this month's content */}
+      <div className="mt-8">
+        <ThemesBanner
+          events={events}
+          rangeStart={startOfMonth(cursor)}
+          rangeEnd={endOfMonth(cursor)}
+          rangeLabel={monthLabel(cursor)}
+          expandedId={expandedId}
+          setExpandedId={setExpandedId}
+        />
+      </div>
     </div>
   );
 }
@@ -1029,14 +1032,6 @@ function WeekView({
 
   return (
     <div>
-      <ThemesBanner
-        events={events}
-        rangeStart={weekStart}
-        rangeEnd={endOfWeek(cursor)}
-        rangeLabel={`${shortDayLabel(weekStart).split(",")[0]} – ${shortDayLabel(endOfWeek(cursor)).split(",")[0]}`}
-        expandedId={expandedId}
-        setExpandedId={setExpandedId}
-      />
       <div className="grid grid-cols-7 gap-2">
         {days.map((iso) => {
           const dayEvents = eventsOnDay(events, iso);
@@ -1111,6 +1106,18 @@ function WeekView({
           />
         </div>
       )}
+
+      {/* Themes sit below the grid — secondary context to this week's content */}
+      <div className="mt-8">
+        <ThemesBanner
+          events={events}
+          rangeStart={weekStart}
+          rangeEnd={endOfWeek(cursor)}
+          rangeLabel={`${shortDayLabel(weekStart).split(",")[0]} – ${shortDayLabel(endOfWeek(cursor)).split(",")[0]}`}
+          expandedId={expandedId}
+          setExpandedId={setExpandedId}
+        />
+      </div>
     </div>
   );
 }
@@ -1145,15 +1152,6 @@ function DayView({
 
   return (
     <div className="flex flex-col gap-6">
-      <ThemesBanner
-        events={events}
-        rangeStart={cursor}
-        rangeEnd={cursor}
-        rangeLabel={longDayLabel(cursor)}
-        expandedId={expandedId}
-        setExpandedId={setExpandedId}
-      />
-
       {sorted.length > 0 && (
         <div>
           <SectionHeader>
@@ -1179,6 +1177,16 @@ function DayView({
           Nothing scheduled for {longDayLabel(cursor)}.
         </div>
       )}
+
+      {/* Themes sit below the day's items — secondary context */}
+      <ThemesBanner
+        events={events}
+        rangeStart={cursor}
+        rangeEnd={cursor}
+        rangeLabel={longDayLabel(cursor)}
+        expandedId={expandedId}
+        setExpandedId={setExpandedId}
+      />
     </div>
   );
 }
@@ -1234,24 +1242,6 @@ function AgendaView({
 
   return (
     <div className="flex flex-col gap-6">
-      {themes.length > 0 && (
-        <div>
-          <SectionHeader>Themes &amp; Campaigns ({themes.length})</SectionHeader>
-          <div className="flex flex-col gap-2">
-            {themes.map((ev) => (
-              <EventCard
-                key={ev.id}
-                event={ev}
-                expanded={expandedId === ev.id}
-                onToggle={() => setExpandedId(expandedId === ev.id ? null : ev.id)}
-                allEvents={events}
-                setExpandedId={setExpandedId}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
       {Array.from(groups.entries()).map(([iso, group]) => (
         <div key={iso}>
           <SectionHeader highlight={isToday(iso)}>
@@ -1272,6 +1262,25 @@ function AgendaView({
           </div>
         </div>
       ))}
+
+      {/* Themes after the date-grouped agenda — secondary context */}
+      {themes.length > 0 && (
+        <div>
+          <SectionHeader>Themes &amp; Campaigns ({themes.length})</SectionHeader>
+          <div className="flex flex-col gap-2">
+            {themes.map((ev) => (
+              <EventCard
+                key={ev.id}
+                event={ev}
+                expanded={expandedId === ev.id}
+                onToggle={() => setExpandedId(expandedId === ev.id ? null : ev.id)}
+                allEvents={events}
+                setExpandedId={setExpandedId}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
