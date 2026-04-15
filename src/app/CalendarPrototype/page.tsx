@@ -708,7 +708,7 @@ function ThemesBanner({
         <div className="flex items-center gap-3">
           <span className="inline-block w-2 h-2 rounded-full bg-[#40A590]" />
           <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#40A590]">
-            {rangeLabel} Themes &amp; Campaigns
+            {`${rangeLabel} Themes & Campaigns`}
           </span>
           <span className="text-[10px] uppercase tracking-wider text-white/35">
             {themes.length} active
