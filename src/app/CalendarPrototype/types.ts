@@ -58,17 +58,20 @@ export type FilterState = {
   range: DateRange | null;
 };
 
+// AmeriLife brand-aligned palette: teal + seafoam ramp with Gold for the
+// highest-profile live event. Each tracker gets a distinct shade but the
+// overall vibe stays on-brand (Teal #40A590, Seafoam #71C495).
 export const SOURCE_COLORS: Record<string, string> = {
-  "AmeriLife Affiliates & Carriers Events": "#5b9bd5",
-  "Social Media (Notion)": "#7eb8e0",
-  "2026 Marketing Channel Activity": "#4a8abf",
-  "Integrated Marketing Calendar": "#6fa8d3",
-  "Editorial Tracker": "#8ec5e5",
-  "Employee Comms Channel Tracker": "#5090bf",
-  "2025 Key Event Calendar": "#a3d0ea",
-  "Marketing Mentors Deliverables": "#3f7ca8",
-  "Professor Leads": "#b8daee",
-  "Medicarians LIVE 2026": "#2f6b93",
+  "AmeriLife Affiliates & Carriers Events": "#40A590", // AmeriLife Teal
+  "Social Media (Notion)": "#71C495",                  // AmeriLife Seafoam
+  "2026 Marketing Channel Activity": "#2d8a78",        // deep teal
+  "Integrated Marketing Calendar": "#5fb5a2",          // light teal
+  "Editorial Tracker": "#88d0a8",                      // light seafoam
+  "Employee Comms Channel Tracker": "#3d8e7c",         // mid-deep teal
+  "2025 Key Event Calendar": "#a5dcbc",                // pale seafoam
+  "Marketing Mentors Deliverables": "#267a68",         // deepest teal
+  "Professor Leads": "#bce3ce",                        // very pale seafoam
+  "Medicarians LIVE 2026": "#EFB54E",                  // AmeriLife Gold (flagship event)
 };
 
-export const DEFAULT_SOURCE_COLOR = "#5b9bd5";
+export const DEFAULT_SOURCE_COLOR = "#40A590";

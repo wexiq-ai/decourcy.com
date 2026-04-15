@@ -79,14 +79,30 @@ export default function CalendarPrototypePage() {
   }, [expandedId]);
 
   return (
-    <div className="min-h-screen bg-[#071a0e] text-white pb-24">
+    <div className="min-h-screen bg-[#1a3047] text-white pb-24">
+      {/* Brand gradient band — AmeriLife signature teal→navy */}
+      <div
+        className="h-1.5 w-full"
+        style={{
+          background:
+            "linear-gradient(90deg, #71C495 0%, #40A590 45%, #244260 100%)",
+        }}
+      />
+
       {/* Top header band */}
       <div className="px-4 md:px-8 pt-12 pb-6 flex flex-col items-center">
         <FadeIn className="w-full flex flex-col items-center">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-[0.25em] uppercase text-white/90 text-center">
-            AmeriLife Consolidated Calendar Prototype
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl md:text-4xl font-bold tracking-[0.18em] uppercase text-white leading-none">
+              AmeriLife
+            </span>
+            <span className="text-[10px] md:text-xs text-white/70 font-semibold">®</span>
+          </div>
+          <div className="h-px w-24 bg-[#40A590] mt-4 mb-3" aria-hidden />
+          <h1 className="text-sm md:text-base font-semibold tracking-[0.25em] uppercase text-[#71C495] text-center">
+            Consolidated Calendar Prototype
           </h1>
-          <p className="text-xs font-bold text-white/40 mt-2 uppercase tracking-wider text-center">
+          <p className="text-[11px] font-medium text-white/50 mt-2 uppercase tracking-wider text-center">
             {SOURCES.length} Sources · One View
           </p>
           <LastUpdated />
@@ -270,7 +286,7 @@ function StickyToolbar({
   }
 
   return (
-    <div className="sticky top-0 z-30 bg-[#071a0e]/95 backdrop-blur border-b border-[#1a4a2e]/60">
+    <div className="sticky top-0 z-30 bg-[#1a3047]/95 backdrop-blur border-b border-[#3a5a7a]/60">
       <div className="px-4 md:px-8 py-3 flex flex-col gap-3 max-w-7xl mx-auto w-full">
         {/* Row 1: Search + filter toggle + result count */}
         <div className="flex flex-col md:flex-row gap-2 md:items-center">
@@ -281,12 +297,12 @@ function StickyToolbar({
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
               placeholder="Search titles, descriptions, owners, tags, locations…  (press / to focus)"
-              className="w-full bg-[#0a2314] border border-[#1a4a2e] focus:border-[#5b9bd5]/60 outline-none rounded-sm px-3 py-2 text-sm text-white placeholder:text-white/25"
+              className="w-full bg-[#244260] border border-[#3a5a7a] focus:border-[#40A590]/60 outline-none rounded-sm px-3 py-2 text-sm text-white placeholder:text-white/25"
             />
             {filters.search && (
               <button
                 onClick={() => setFilters({ ...filters, search: "" })}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 hover:text-[#5b9bd5] text-sm"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 hover:text-[#40A590] text-sm"
                 aria-label="Clear search"
               >
                 ×
@@ -298,8 +314,8 @@ function StickyToolbar({
               onClick={() => setFiltersOpen(!filtersOpen)}
               className={`px-3 py-2 rounded-sm text-[11px] font-bold uppercase tracking-wider border transition-colors ${
                 filtersOpen
-                  ? "border-[#5b9bd5]/60 text-[#5b9bd5]"
-                  : "border-[#1a4a2e] text-white/60 hover:border-[#5b9bd5]/40 hover:text-[#5b9bd5]/80"
+                  ? "border-[#40A590]/60 text-[#40A590]"
+                  : "border-[#3a5a7a] text-white/60 hover:border-[#40A590]/40 hover:text-[#40A590]/80"
               }`}
             >
               Filters
@@ -307,7 +323,7 @@ function StickyToolbar({
             {hasActiveFilters(filters) && (
               <button
                 onClick={() => setFilters(emptyFilterState())}
-                className="px-3 py-2 rounded-sm text-[11px] font-bold uppercase tracking-wider border border-[#1a4a2e] text-white/40 hover:border-rose-400/40 hover:text-rose-300/80"
+                className="px-3 py-2 rounded-sm text-[11px] font-bold uppercase tracking-wider border border-[#3a5a7a] text-white/40 hover:border-rose-400/40 hover:text-rose-300/80"
               >
                 Clear
               </button>
@@ -327,14 +343,14 @@ function StickyToolbar({
                 <IconBtn label="◀" onClick={navPrev} />
                 <button
                   onClick={() => setDatePickerOpen(!datePickerOpen)}
-                  className="px-3 py-1.5 rounded-sm border border-[#1a4a2e] hover:border-[#5b9bd5]/40 text-white/80 text-xs font-bold uppercase tracking-wider min-w-[220px] text-center"
+                  className="px-3 py-1.5 rounded-sm border border-[#3a5a7a] hover:border-[#40A590]/40 text-white/80 text-xs font-bold uppercase tracking-wider min-w-[220px] text-center"
                 >
                   {navLabel}
                 </button>
                 <IconBtn label="▶" onClick={navNext} />
                 <button
                   onClick={() => setCursor(todayISO())}
-                  className="px-3 py-1.5 rounded-sm border border-[#1a4a2e] hover:border-[#5b9bd5]/40 text-[#5b9bd5]/80 text-[11px] font-bold uppercase tracking-wider"
+                  className="px-3 py-1.5 rounded-sm border border-[#3a5a7a] hover:border-[#40A590]/40 text-[#40A590]/80 text-[11px] font-bold uppercase tracking-wider"
                 >
                   Today
                 </button>
@@ -364,7 +380,7 @@ function IconBtn({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="w-8 h-8 flex items-center justify-center rounded-sm border border-[#1a4a2e] hover:border-[#5b9bd5]/40 text-white/70 hover:text-[#5b9bd5] text-xs"
+      className="w-8 h-8 flex items-center justify-center rounded-sm border border-[#3a5a7a] hover:border-[#40A590]/40 text-white/70 hover:text-[#40A590] text-xs"
       aria-label={label}
     >
       {label}
@@ -381,7 +397,7 @@ function ViewSwitcher({ view, setView }: { view: ViewMode; setView: (v: ViewMode
     { v: "source", label: "By Source" },
   ];
   return (
-    <div className="flex flex-wrap gap-1 border border-[#1a4a2e] rounded-sm p-1 bg-[#0a2314]">
+    <div className="flex flex-wrap gap-1 border border-[#3a5a7a] rounded-sm p-1 bg-[#244260]">
       {opts.map((o) => {
         const active = view === o.v;
         return (
@@ -390,7 +406,7 @@ function ViewSwitcher({ view, setView }: { view: ViewMode; setView: (v: ViewMode
             onClick={() => setView(o.v)}
             className={`px-3 py-1.5 rounded-sm text-[11px] font-bold uppercase tracking-wider transition-colors ${
               active
-                ? "bg-[#5b9bd5]/15 text-[#5b9bd5]"
+                ? "bg-[#40A590]/15 text-[#40A590]"
                 : "text-white/50 hover:text-white/80"
             }`}
           >
@@ -423,11 +439,11 @@ function MiniDatePicker({
         type="date"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="bg-[#0a2314] border border-[#1a4a2e] focus:border-[#5b9bd5]/60 outline-none rounded-sm px-2 py-1.5 text-xs text-white"
+        className="bg-[#244260] border border-[#3a5a7a] focus:border-[#40A590]/60 outline-none rounded-sm px-2 py-1.5 text-xs text-white"
       />
       <button
         onClick={() => setCursor(value)}
-        className="px-3 py-1.5 rounded-sm border border-[#5b9bd5]/40 text-[#5b9bd5] text-[11px] font-bold uppercase tracking-wider hover:bg-[#5b9bd5]/10"
+        className="px-3 py-1.5 rounded-sm border border-[#40A590]/40 text-[#40A590] text-[11px] font-bold uppercase tracking-wider hover:bg-[#40A590]/10"
       >
         Go
       </button>
@@ -454,7 +470,7 @@ function FilterPanel({
   );
 
   return (
-    <div className="bg-[#0a2314] border border-[#1a4a2e] rounded-sm p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="bg-[#244260] border border-[#3a5a7a] rounded-sm p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <FilterGroup label="Source">
         {allSources.map((s) => (
           <FilterChip
@@ -550,8 +566,8 @@ function FilterChip({
       onClick={onToggle}
       className={`px-2 py-1 rounded-sm text-[10px] font-bold uppercase tracking-wider border transition-colors flex items-center gap-1.5 ${
         active
-          ? "border-[#5b9bd5]/60 bg-[#5b9bd5]/10 text-[#5b9bd5]"
-          : "border-[#1a4a2e] text-white/55 hover:text-white/80 hover:border-[#5b9bd5]/30"
+          ? "border-[#40A590]/60 bg-[#40A590]/10 text-[#40A590]"
+          : "border-[#3a5a7a] text-white/55 hover:text-white/80 hover:border-[#40A590]/30"
       }`}
     >
       {color && (
@@ -623,7 +639,7 @@ function ActiveFilterChips({
       {chips.map((c, i) => (
         <span
           key={i}
-          className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider border border-[#5b9bd5]/40 bg-[#5b9bd5]/10 text-[#5b9bd5] rounded-sm flex items-center gap-2"
+          className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider border border-[#40A590]/40 bg-[#40A590]/10 text-[#40A590] rounded-sm flex items-center gap-2"
         >
           {c.label}
           <button onClick={c.onRemove} aria-label="Remove" className="hover:text-rose-300">
@@ -684,21 +700,21 @@ function ThemesBanner({
   });
 
   return (
-    <div className="mb-5 rounded-sm border border-[#5b9bd5]/30 bg-[#0a2314]">
+    <div className="mb-5 rounded-sm border border-[#40A590]/30 bg-[#244260]">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full px-4 py-2.5 flex items-center justify-between border-b border-[#5b9bd5]/20 hover:bg-[#0d2b18] transition-colors"
+        className="w-full px-4 py-2.5 flex items-center justify-between border-b border-[#40A590]/20 hover:bg-[#2c5073] transition-colors"
       >
         <div className="flex items-center gap-3">
-          <span className="inline-block w-2 h-2 rounded-full bg-[#5b9bd5]" />
-          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#5b9bd5]">
+          <span className="inline-block w-2 h-2 rounded-full bg-[#40A590]" />
+          <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#40A590]">
             {rangeLabel} Themes &amp; Campaigns
           </span>
           <span className="text-[10px] uppercase tracking-wider text-white/35">
             {themes.length} active
           </span>
         </div>
-        <span className="text-[#5b9bd5] text-xs">{open ? "−" : "+"}</span>
+        <span className="text-[#40A590] text-xs">{open ? "−" : "+"}</span>
       </button>
       {open && (
         <div className="p-3 flex flex-col gap-3">
@@ -826,19 +842,19 @@ function MonthView({
                   goToDay(iso);
                 }
               }}
-              className={`group min-h-[110px] md:min-h-[130px] rounded-sm border p-1.5 flex flex-col gap-1 cursor-pointer transition-colors hover:border-[#5b9bd5]/60 hover:bg-[#0d2b18] focus:outline-none focus:border-[#5b9bd5] ${
+              className={`group min-h-[110px] md:min-h-[130px] rounded-sm border p-1.5 flex flex-col gap-1 cursor-pointer transition-colors hover:border-[#40A590]/60 hover:bg-[#2c5073] focus:outline-none focus:border-[#40A590] ${
                 inMonth
-                  ? "bg-[#0a2314] border-[#1a4a2e]"
-                  : "bg-[#071a0e] border-[#0d2b18] opacity-50"
-              } ${today ? "border-[#5b9bd5]/60" : ""}`}
+                  ? "bg-[#244260] border-[#3a5a7a]"
+                  : "bg-[#1a3047] border-[#2c5073] opacity-50"
+              } ${today ? "border-[#40A590]/60" : ""}`}
             >
               <span
                 className={`text-[11px] font-bold transition-colors ${
                   today
-                    ? "text-[#5b9bd5]"
+                    ? "text-[#40A590]"
                     : inMonth
-                    ? "text-white/70 group-hover:text-[#5b9bd5]"
-                    : "text-white/30 group-hover:text-[#5b9bd5]"
+                    ? "text-white/70 group-hover:text-[#40A590]"
+                    : "text-white/30 group-hover:text-[#40A590]"
                 }`}
               >
                 {dayNumber(iso)}
@@ -860,7 +876,7 @@ function MonthView({
                       e.stopPropagation();
                       goToDay(iso);
                     }}
-                    className="text-[9px] text-white/35 hover:text-[#5b9bd5] text-left pl-1"
+                    className="text-[9px] text-white/35 hover:text-[#40A590] text-left pl-1"
                   >
                     +{dayEvents.length - 3} more
                   </button>
@@ -951,26 +967,26 @@ function WeekView({
           return (
             <div
               key={iso}
-              className={`group min-h-[320px] rounded-sm border p-2 flex flex-col gap-1.5 bg-[#0a2314] ${
-                today ? "border-[#5b9bd5]/60" : "border-[#1a4a2e]"
+              className={`group min-h-[320px] rounded-sm border p-2 flex flex-col gap-1.5 bg-[#244260] ${
+                today ? "border-[#40A590]/60" : "border-[#3a5a7a]"
               }`}
             >
               <button
                 type="button"
                 onClick={() => goToDay(iso)}
                 aria-label={`Open ${longDayLabel(iso)}`}
-                className="flex items-baseline justify-between w-full text-left -mx-1 px-1 py-0.5 rounded-sm transition-colors hover:bg-[#0d2b18] focus:outline-none focus:ring-1 focus:ring-[#5b9bd5]/60"
+                className="flex items-baseline justify-between w-full text-left -mx-1 px-1 py-0.5 rounded-sm transition-colors hover:bg-[#2c5073] focus:outline-none focus:ring-1 focus:ring-[#40A590]/60"
               >
                 <span
                   className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                    today ? "text-[#5b9bd5]" : "text-white/40 group-hover:text-[#5b9bd5]"
+                    today ? "text-[#40A590]" : "text-white/40 group-hover:text-[#40A590]"
                   }`}
                 >
                   {shortDayLabel(iso).split(",")[0]}
                 </span>
                 <span
                   className={`text-sm font-bold transition-colors ${
-                    today ? "text-[#5b9bd5]" : "text-white/70 group-hover:text-[#5b9bd5]"
+                    today ? "text-[#40A590]" : "text-white/70 group-hover:text-[#40A590]"
                   }`}
                 >
                   {dayNumber(iso)}
@@ -994,7 +1010,7 @@ function WeekView({
                   <button
                     type="button"
                     onClick={() => goToDay(iso)}
-                    className="text-[10px] text-white/20 hover:text-[#5b9bd5] italic text-left transition-colors"
+                    className="text-[10px] text-white/20 hover:text-[#40A590] italic text-left transition-colors"
                   >
                     No events — open day →
                   </button>
@@ -1064,7 +1080,7 @@ function DayView({
       {/* Hour timeline */}
       <div>
         <SectionHeader>Schedule</SectionHeader>
-        <div className="relative border border-[#1a4a2e] rounded-sm bg-[#0a2314]">
+        <div className="relative border border-[#3a5a7a] rounded-sm bg-[#244260]">
           {hours.map((h) => {
             const hourEvents = timed.filter((e) => {
               const start = parseInt(e.startTime!.split(":")[0], 10);
@@ -1073,9 +1089,9 @@ function DayView({
             return (
               <div
                 key={h}
-                className="flex border-b border-[#1a4a2e]/60 last:border-b-0"
+                className="flex border-b border-[#3a5a7a]/60 last:border-b-0"
               >
-                <div className="w-20 flex-shrink-0 p-2 text-[10px] text-white/35 border-r border-[#1a4a2e]/60 font-bold uppercase tracking-wider">
+                <div className="w-20 flex-shrink-0 p-2 text-[10px] text-white/35 border-r border-[#3a5a7a]/60 font-bold uppercase tracking-wider">
                   {formatHour(h)}
                 </div>
                 <div className="flex-1 p-2 min-h-[60px] flex flex-col gap-1.5">
@@ -1186,7 +1202,7 @@ function AgendaView({
         <div key={iso}>
           <SectionHeader highlight={isToday(iso)}>
             {longDayLabel(iso)}
-            {isToday(iso) && <span className="ml-2 text-[#5b9bd5]">— Today</span>}
+            {isToday(iso) && <span className="ml-2 text-[#40A590]">— Today</span>}
           </SectionHeader>
           <div className="flex flex-col gap-2">
             {group.map((ev) => (
@@ -1236,7 +1252,7 @@ function SourceView({
         return (
           <div
             key={source}
-            className="bg-[#0a2314] border border-[#1a4a2e] rounded-sm"
+            className="bg-[#244260] border border-[#3a5a7a] rounded-sm"
           >
             <button
               onClick={() =>
@@ -1247,7 +1263,7 @@ function SourceView({
                   return next;
                 })
               }
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-[#0d2b18] transition-colors"
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-[#2c5073] transition-colors"
             >
               <div className="flex items-center gap-3">
                 <span
@@ -1261,10 +1277,10 @@ function SourceView({
                   {group.length} {group.length === 1 ? "event" : "events"}
                 </span>
               </div>
-              <span className="text-[#5b9bd5] text-xs">{isCollapsed ? "+" : "−"}</span>
+              <span className="text-[#40A590] text-xs">{isCollapsed ? "+" : "−"}</span>
             </button>
             {!isCollapsed && (
-              <div className="p-3 border-t border-[#1a4a2e] flex flex-col gap-2">
+              <div className="p-3 border-t border-[#3a5a7a] flex flex-col gap-2">
                 {group.map((ev) => (
                   <EventCard
                     key={ev.id}
@@ -1362,7 +1378,7 @@ function EventCard({
   return (
     <button
       onClick={onToggle}
-      className={`text-left rounded-sm border px-2.5 py-1.5 flex items-start gap-2 hover:bg-[#0d2b18] transition-colors w-full ${
+      className={`text-left rounded-sm border px-2.5 py-1.5 flex items-start gap-2 hover:bg-[#2c5073] transition-colors w-full ${
         dense ? "" : "py-2"
       }`}
       style={{
@@ -1415,7 +1431,7 @@ function ExpandedCard({
 
   return (
     <div
-      className="rounded-sm border bg-[#0a2314] p-5 flex flex-col gap-4 relative"
+      className="rounded-sm border bg-[#244260] p-5 flex flex-col gap-4 relative"
       style={{ borderColor: `${color}66` }}
     >
       <button
@@ -1442,10 +1458,10 @@ function ExpandedCard({
           />
           {event.sourceTracker}
         </span>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-white/40 border border-[#1a4a2e] px-2 py-0.5 rounded-sm">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-white/40 border border-[#3a5a7a] px-2 py-0.5 rounded-sm">
           {event.sourceType}
         </span>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-[#5b9bd5]/80 border border-[#5b9bd5]/30 bg-[#5b9bd5]/5 px-2 py-0.5 rounded-sm">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#40A590]/80 border border-[#40A590]/30 bg-[#40A590]/5 px-2 py-0.5 rounded-sm">
           {SCOPE_LABELS[eventScope(event)]} scope
         </span>
         {event.status && <StatusPill status={event.status} />}
@@ -1468,7 +1484,7 @@ function ExpandedCard({
 
       {/* Description */}
       {event.description && (
-        <p className="text-sm leading-relaxed text-white/70 border-t border-[#1a4a2e] pt-4">
+        <p className="text-sm leading-relaxed text-white/70 border-t border-[#3a5a7a] pt-4">
           {event.description}
         </p>
       )}
@@ -1479,7 +1495,7 @@ function ExpandedCard({
           {event.tags.map((t) => (
             <span
               key={t}
-              className="text-[10px] font-bold uppercase tracking-wider text-white/45 border border-[#1a4a2e] px-1.5 py-0.5 rounded-sm"
+              className="text-[10px] font-bold uppercase tracking-wider text-white/45 border border-[#3a5a7a] px-1.5 py-0.5 rounded-sm"
             >
               #{t}
             </span>
@@ -1493,7 +1509,7 @@ function ExpandedCard({
           href={event.link}
           target="_blank"
           rel="noreferrer"
-          className="text-xs text-[#5b9bd5] hover:text-[#5b9bd5]/80 uppercase tracking-wider font-bold"
+          className="text-xs text-[#40A590] hover:text-[#40A590]/80 uppercase tracking-wider font-bold"
         >
           Open source →
         </a>
@@ -1501,7 +1517,7 @@ function ExpandedCard({
 
       {/* Child sessions */}
       {children.length > 0 && (
-        <div className="border-t border-[#1a4a2e] pt-4">
+        <div className="border-t border-[#3a5a7a] pt-4">
           <div className="text-[10px] font-bold uppercase tracking-wider text-white/45 mb-2">
             Sessions ({children.length})
           </div>
@@ -1517,7 +1533,7 @@ function ExpandedCard({
                 <button
                   key={c.id}
                   onClick={() => setExpandedId(c.id)}
-                  className="text-left text-xs px-2 py-1.5 rounded-sm border border-[#1a4a2e] hover:border-[#5b9bd5]/40 hover:bg-[#0d2b18] flex items-center gap-2 w-full"
+                  className="text-left text-xs px-2 py-1.5 rounded-sm border border-[#3a5a7a] hover:border-[#40A590]/40 hover:bg-[#2c5073] flex items-center gap-2 w-full"
                 >
                   <span className="text-white/45 text-[10px] uppercase tracking-wider w-28 flex-shrink-0">
                     {c.startDate ? shortDayLabel(c.startDate).split(",")[0] : ""}
@@ -1546,10 +1562,10 @@ function MetaItem({ label, children }: { label: string; children: ReactNode }) {
 
 function StatusPill({ status }: { status: EventStatus }) {
   const colors: Record<EventStatus, string> = {
-    planned: "#5b9bd5",
-    "in-production": "#c9a34a",
-    completed: "#6fa86f",
-    "no-content": "#a06a6a",
+    planned: "#40A590",
+    "in-production": "#EFB54E",
+    completed: "#71C495",
+    "no-content": "#C6C8CA",
   };
   const c = colors[status];
   return (
@@ -1576,7 +1592,7 @@ function SectionHeader({
   return (
     <div
       className={`text-xs font-bold uppercase tracking-wider mb-2 pb-1 border-b ${
-        highlight ? "text-[#5b9bd5] border-[#5b9bd5]/40" : "text-white/50 border-[#1a4a2e]"
+        highlight ? "text-[#40A590] border-[#40A590]/40" : "text-white/50 border-[#3a5a7a]"
       }`}
     >
       {children}
