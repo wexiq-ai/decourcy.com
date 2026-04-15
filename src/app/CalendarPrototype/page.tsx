@@ -1468,6 +1468,22 @@ function EventCard({
           </div>
         )}
       </div>
+      {!dense && (
+        // Source-tracker pill — at-a-glance proxy for the type of content
+        // this item represents. Color-tinted to match the dot on the left
+        // so the eye pairs them and the reader can scan by source quickly.
+        <span
+          className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-sm border text-[9px] font-bold uppercase tracking-[0.12em] flex-shrink-0 max-w-[12rem] truncate self-start mt-0.5"
+          style={{
+            color,
+            borderColor: `${color}66`,
+            backgroundColor: `${color}1a`,
+          }}
+          title={event.sourceTracker}
+        >
+          {event.sourceTracker}
+        </span>
+      )}
     </button>
   );
 }
