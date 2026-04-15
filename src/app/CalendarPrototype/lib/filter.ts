@@ -75,11 +75,16 @@ export function isThemeScope(ev: CalendarEvent): boolean {
   return s === "month" || s === "quarter" || s === "year";
 }
 
-// Multi-term substring search: every whitespace-separated term must appear.
-export function matchesSearch(ev: CalendarEvent, query: string): boolean {
-  const q = query.trim().toLowerCase();
-  if (!q) return true;
-  const hay = [
+// Lowercased-haystack cache, keyed by event.id. Event data is static (loaded
+// once from data.ts) so this never invalidates. Without this cache, every
+// keystroke in the search box rebuilt a fresh 8-field joined-and-lowercased
+// string for each of ~1000 events — meaningful per-keystroke cost.
+const HAYSTACK_CACHE = new Map<string, string>();
+
+function haystackFor(ev: CalendarEvent): string {
+  const cached = HAYSTACK_CACHE.get(ev.id);
+  if (cached !== undefined) return cached;
+  const built = [
     ev.title,
     ev.description || "",
     ev.owner,
@@ -91,6 +96,15 @@ export function matchesSearch(ev: CalendarEvent, query: string): boolean {
   ]
     .join(" ")
     .toLowerCase();
+  HAYSTACK_CACHE.set(ev.id, built);
+  return built;
+}
+
+// Multi-term substring search: every whitespace-separated term must appear.
+export function matchesSearch(ev: CalendarEvent, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const hay = haystackFor(ev);
   return q.split(/\s+/).every((term) => hay.includes(term));
 }
 

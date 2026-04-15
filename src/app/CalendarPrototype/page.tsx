@@ -51,6 +51,18 @@ import {
 // Page
 // ---------------------------------------------------------------------------
 
+// Small local debounce: returns `value` but delayed by `ms`. Used to hold
+// off the heavy refilter-every-keystroke work while a user is still typing.
+// The input itself keeps the live value so typing feels instant.
+function useDebouncedValue<T>(value: T, ms: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), ms);
+    return () => clearTimeout(id);
+  }, [value, ms]);
+  return debounced;
+}
+
 export default function CalendarPrototypePage() {
   const [view, setView] = useState<ViewMode>("month");
   const [cursor, setCursor] = useState<string>(todayISO());
@@ -59,7 +71,22 @@ export default function CalendarPrototypePage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement | null>(null);
 
-  const filtered = useMemo(() => applyFilters(EVENTS, filters), [filters]);
+  // Non-search filter fields apply instantly (clicking a chip is a deliberate
+  // action). Search text, which fires on every keystroke, is debounced so we
+  // don't re-run applyFilters 8 times per second while a user is still typing.
+  const debouncedSearch = useDebouncedValue(filters.search, 150);
+  const filtered = useMemo(
+    () => applyFilters(EVENTS, { ...filters, search: debouncedSearch }),
+    [
+      filters.sources,
+      filters.owners,
+      filters.sourceTypes,
+      filters.statuses,
+      filters.scopes,
+      filters.range,
+      debouncedSearch,
+    ]
+  );
 
   // Keyboard shortcut: "/" focuses search, Escape collapses expanded card
   useEffect(() => {
