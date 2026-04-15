@@ -1041,16 +1041,21 @@ function WeekView({
           return (
             <div
               key={iso}
-              className={`group min-h-[320px] rounded-sm border p-2 flex flex-col gap-1.5 bg-[#244260] ${
+              role="button"
+              tabIndex={0}
+              aria-label={`Open ${longDayLabel(iso)}`}
+              onClick={() => goToDay(iso)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  goToDay(iso);
+                }
+              }}
+              className={`group min-h-[320px] rounded-sm border p-2 flex flex-col gap-1.5 bg-[#244260] cursor-pointer transition-colors hover:border-[#40A590]/60 hover:bg-[#2c5073] focus:outline-none focus:border-[#40A590] ${
                 today ? "border-[#40A590]/60" : "border-[#3a5a7a]"
               }`}
             >
-              <button
-                type="button"
-                onClick={() => goToDay(iso)}
-                aria-label={`Open ${longDayLabel(iso)}`}
-                className="flex items-baseline justify-between w-full text-left -mx-1 px-1 py-0.5 rounded-sm transition-colors hover:bg-[#2c5073] focus:outline-none focus:ring-1 focus:ring-[#40A590]/60"
-              >
+              <div className="flex items-baseline justify-between w-full text-left px-1 py-0.5 rounded-sm">
                 <span
                   className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${
                     today ? "text-[#40A590]" : "text-white/40 group-hover:text-[#40A590]"
@@ -1065,7 +1070,7 @@ function WeekView({
                 >
                   {dayNumber(iso)}
                 </span>
-              </button>
+              </div>
               <div className="flex flex-col gap-1.5">
                 {dayEvents.map((ev) => (
                   <EventCard
@@ -1082,13 +1087,9 @@ function WeekView({
                   />
                 ))}
                 {dayEvents.length === 0 && (
-                  <button
-                    type="button"
-                    onClick={() => goToDay(iso)}
-                    className="text-[10px] text-white/20 hover:text-[#40A590] italic text-left transition-colors"
-                  >
-                    No events — open day →
-                  </button>
+                  <span className="text-[10px] text-white/25 italic">
+                    Click to open day →
+                  </span>
                 )}
               </div>
             </div>
@@ -1434,7 +1435,12 @@ function EventCard({
 
   return (
     <button
-      onClick={onToggle}
+      // stopPropagation so a chip click expands the card instead of bubbling
+      // up to a surrounding clickable cell (e.g. the WeekView day column).
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle();
+      }}
       className={`text-left rounded-sm border px-2.5 py-1.5 flex items-start gap-2 hover:bg-[#2c5073] transition-colors w-full ${
         dense ? "" : "py-2"
       } ${isHighlighted ? "ring-2 ring-[#40A590]/70" : ""}`}
