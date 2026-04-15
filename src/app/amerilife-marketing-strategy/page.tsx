@@ -2,15 +2,51 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
+/* AmeriLife brand palette (from Mini Brand Guide, 12/06/23)
+   Navy   #244260   primary
+   Teal   #40A590   primary accent
+   White  #FFFFFF
+   Seafoam #71C495  secondary
+   Grey   #C6C8CA   secondary
+   Gold   #EFB54E   accent / CTA
+   Font: Poppins (Light for headlines, Bold for subheads in teal, Regular for body)
+*/
+
 export default function AmeriLifeMarketingStrategyPage() {
   return (
-    <div className="min-h-screen bg-[#071a0e] text-white pl-12 pr-4 md:px-6 py-16 flex flex-col items-center">
+    <div
+      className="min-h-screen text-white pl-12 pr-4 md:px-6 pb-16 flex flex-col items-center"
+      style={{
+        backgroundColor: "#244260",
+        fontFamily: "var(--font-poppins), ui-sans-serif, system-ui, sans-serif",
+      }}
+    >
+      {/* Brand gradient header bar with logo */}
+      <div
+        className="w-full -mx-4 md:-mx-6 mb-10"
+        style={{
+          marginLeft: "calc(-1 * var(--bleed, 3rem))",
+          marginRight: "calc(-1 * var(--bleed, 1rem))",
+        }}
+      >
+        <div
+          className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 h-28 md:h-32 flex items-center justify-center"
+          style={{
+            background:
+              "linear-gradient(90deg, #244260 0%, #2e6b7a 45%, #40A590 75%, #71C495 100%)",
+          }}
+        >
+          <AmeriLifeLogo />
+        </div>
+        <div className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 h-2" style={{ backgroundColor: "#40A590" }} />
+      </div>
+
       {/* Page Header */}
       <FadeIn>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-wide mb-2 text-white/90 uppercase text-center">
-          AmeriLife Health & Wealth Marketing Strategy
+        <h1 className="text-2xl md:text-4xl font-light tracking-wide mb-2 text-white uppercase text-center">
+          AmeriLife Health &amp; Wealth Marketing Strategy
         </h1>
-        <p className="text-xs font-bold text-white/40 mb-2 uppercase tracking-wider text-center">
+        <p className="text-xs md:text-sm font-bold uppercase tracking-widest text-center mb-1" style={{ color: "#71C495" }}>
           A Dual-Track Approach for 2026 and Beyond
         </p>
         <LastUpdated />
@@ -19,7 +55,7 @@ export default function AmeriLifeMarketingStrategyPage() {
       {/* Opening Narrative */}
       <FadeIn>
         <NarrativeBlock>
-          AmeriLife&apos;s competitive advantage shows up differently depending on the vertical. In Health, it&apos;s an entrepreneur-focused model where each affiliate owns its own identity and value proposition. In Wealth, it&apos;s the collective strength of the platform itself — relationships, contracts, capital access, and shared services that no single entity could replicate alone. This marketing strategy honors both realities by deploying two distinct approaches: a bottoms-up strategy for Health and a top-down strategy for Wealth. Together, they position AmeriLife for accelerated growth across both verticals.
+          AmeriLife&apos;s competitive advantage shows up differently depending on the vertical. In Health, it&apos;s an entrepreneur-focused model where each affiliate owns its own identity and value proposition. In Wealth, it&apos;s the collective strength of the platform itself: relationships, contracts, capital access, and shared services that no single entity could replicate alone. This marketing strategy honors both realities by deploying two distinct approaches: a bottoms-up strategy for Health and a top-down strategy for Wealth. Together, they position AmeriLife for accelerated growth across both verticals.
         </NarrativeBlock>
       </FadeIn>
 
@@ -31,14 +67,14 @@ export default function AmeriLifeMarketingStrategyPage() {
           <FlowBox
             step={1}
             label="Strategic Foundation"
-            sublabel="Cross-Functional Alignment — Health Distribution, Wealth Distribution, Marketing, Ops+IT & Corporate Development (M&A)"
+            sublabel="Cross-Functional Alignment: Health Distribution, Wealth Distribution, Marketing, Ops+IT & Corporate Development (M&A)"
             variant="accent"
           />
         </FadeIn>
 
         <FadeIn>
           <NarrativeBlock>
-            This strategy begins with the alignment work already underway between Health Distribution, Wealth Distribution, Marketing, Ops+IT, and Corporate Development (M&amp;A) leadership. Neither track operates in isolation — both rely on shared infrastructure, coordinated messaging, and collaborative execution across all five functions.
+            This strategy begins with the alignment work already underway between Health Distribution, Wealth Distribution, Marketing, Ops+IT, and Corporate Development (M&amp;A) leadership. Neither track operates in isolation: both rely on shared infrastructure, coordinated messaging, and collaborative execution across all five functions.
           </NarrativeBlock>
         </FadeIn>
 
@@ -54,13 +90,13 @@ export default function AmeriLifeMarketingStrategyPage() {
             <FadeIn>
               <ColumnHeader
                 label="Health Distribution"
-                sublabel={`"Bottoms-Up" — Affiliate-Led Storytelling`}
+                sublabel={`"Bottoms-Up": Affiliate-Led Storytelling`}
               />
             </FadeIn>
 
             <FadeIn>
               <NarrativeBlockSmall>
-                The Health strategy flips the traditional corporate marketing playbook. Instead of telling generic, top-level stories that cloud our true strengths, AmeriLife Corporate Marketing becomes a platform that tells affiliate stories through their own eyes and point of view — letting the affiliates own their narrative. The goal: position AmeriLife as the partner of choice for unaffiliated health insurance shops evaluating which organization to join. This approach directly serves AmeriLife&apos;s Corporate Development (M&amp;A) pipeline.
+                The Health strategy flips the traditional corporate marketing playbook. Instead of telling generic, top-level stories that cloud our true strengths, AmeriLife Corporate Marketing becomes a platform that tells affiliate stories through their own eyes and point of view, letting the affiliates own their narrative. The goal: position AmeriLife as the partner of choice for unaffiliated health insurance shops evaluating which organization to join. This approach directly serves AmeriLife&apos;s Corporate Development (M&amp;A) pipeline.
               </NarrativeBlockSmall>
             </FadeIn>
 
@@ -68,7 +104,7 @@ export default function AmeriLifeMarketingStrategyPage() {
               <FlowBox
                 step={2}
                 label="Affiliate Selection & Prioritization"
-                sublabel="Top Affiliates by EBITDA — One Per Month, Starting H2 2026"
+                sublabel="Top Affiliates by EBITDA, One Per Month, Starting H2 2026"
                 size="sm"
               />
             </FadeIn>
@@ -82,7 +118,7 @@ export default function AmeriLifeMarketingStrategyPage() {
               <FlowBox
                 step={3}
                 label="On-Site Content Engagement"
-                sublabel="Corporate Marketing Goes to Them — Embedded Capture"
+                sublabel="Corporate Marketing Goes to Them, Embedded Capture"
                 size="sm"
               />
             </FadeIn>
@@ -106,7 +142,7 @@ export default function AmeriLifeMarketingStrategyPage() {
               <FlowBox
                 step={5}
                 label="Dual-Use Content Production"
-                sublabel="Video + Editorial — For Affiliate Use & Corporate Promotion"
+                sublabel="Video + Editorial, For Affiliate Use & Corporate Promotion"
                 size="sm"
               />
             </FadeIn>
@@ -116,7 +152,7 @@ export default function AmeriLifeMarketingStrategyPage() {
               <FlowBox
                 step={6}
                 label="Monthly Affiliate Spotlight Series"
-                sublabel="One Featured Affiliate Per Month — Consistent, Structured Storytelling"
+                sublabel="One Featured Affiliate Per Month, Consistent, Structured Storytelling"
                 size="sm"
               />
             </FadeIn>
@@ -136,7 +172,7 @@ export default function AmeriLifeMarketingStrategyPage() {
               <FlowBox
                 step={8}
                 label={`"AmeriLife Is the Partner of Choice"`}
-                sublabel="Brand Platform Theme — Every Piece of Content Ladders Here"
+                sublabel="Brand Platform Theme, Every Piece of Content Ladders Here"
                 variant="accent"
                 size="sm"
               />
@@ -144,7 +180,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
             <FadeIn>
               <NarrativeBlockSmall>
-                By leading with affiliate voices rather than corporate messaging, this strategy creates authentic social proof. An unaffiliated shop owner considering AmeriLife won&apos;t hear a sales pitch — they&apos;ll hear peers who kept their identity, grew their business, and chose AmeriLife because the model works for entrepreneurs.
+                By leading with affiliate voices rather than corporate messaging, this strategy creates authentic social proof. An unaffiliated shop owner considering AmeriLife won&apos;t hear a sales pitch: they&apos;ll hear peers who kept their identity, grew their business, and chose AmeriLife because the model works for entrepreneurs.
               </NarrativeBlockSmall>
             </FadeIn>
           </div>
@@ -154,13 +190,13 @@ export default function AmeriLifeMarketingStrategyPage() {
             <FadeIn>
               <ColumnHeader
                 label="Wealth Distribution"
-                sublabel={`"Top-Down" — Platform Strength Positioning`}
+                sublabel={`"Top-Down": Platform Strength Positioning`}
               />
             </FadeIn>
 
             <FadeIn>
               <NarrativeBlockSmall>
-                The Wealth strategy takes the opposite approach. Here, the voice is AmeriLife Corporate — projecting the full power of the platform itself. The tactical backbone is search dominance: owning not just traditional SEO, but the zero-click landscape, answer engines, and generative AI surfaces where prospects and partners research wealth distribution partnerships.
+                The Wealth strategy takes the opposite approach. Here, the voice is AmeriLife Corporate: projecting the full power of the platform itself. The tactical backbone is search dominance: owning not just traditional SEO, but the zero-click landscape, answer engines, and generative AI surfaces where prospects and partners research wealth distribution partnerships.
               </NarrativeBlockSmall>
             </FadeIn>
 
@@ -228,7 +264,7 @@ export default function AmeriLifeMarketingStrategyPage() {
               <FlowBox
                 step={8}
                 label={`"The Power of the AmeriLife Platform"`}
-                sublabel="Authority Positioning — Anyone Researching Wealth Distribution Finds Us"
+                sublabel="Authority Positioning, Anyone Researching Wealth Distribution Finds Us"
                 variant="accent"
                 size="sm"
               />
@@ -236,7 +272,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
             <FadeIn>
               <NarrativeBlockSmall>
-                When a financial professional, carrier partner, or potential acquisition target searches for information about wealth distribution platforms — whether in Google, ChatGPT, Perplexity, or any generative AI tool — AmeriLife should be the definitive answer. This strategy makes that happen through content architecture and search infrastructure, not ad spend.
+                When a financial professional, carrier partner, or potential acquisition target searches for information about wealth distribution platforms, whether in Google, ChatGPT, Perplexity, or any generative AI tool, AmeriLife should be the definitive answer. This strategy makes that happen through content architecture and search infrastructure, not ad spend.
               </NarrativeBlockSmall>
             </FadeIn>
           </div>
@@ -253,7 +289,7 @@ export default function AmeriLifeMarketingStrategyPage() {
           <FlowBox
             step={9}
             label="Monthly Shared Services Spotlight Series"
-            sublabel="One Corporate Function Per Month — Platform Strength Through Storytelling"
+            sublabel="One Corporate Function Per Month, Platform Strength Through Storytelling"
           />
         </FadeIn>
 
@@ -263,7 +299,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
         <FadeIn>
           <NarrativeBlock>
-            This series serves both tracks. Each spotlight deepens the platform narrative for Wealth while simultaneously giving Health affiliates proof that AmeriLife&apos;s shared services are real, operational, and growing — reinforcing the value proposition for current and prospective affiliates alike.
+            This series serves both tracks. Each spotlight deepens the platform narrative for Wealth while simultaneously giving Health affiliates proof that AmeriLife&apos;s shared services are real, operational, and growing, reinforcing the value proposition for current and prospective affiliates alike.
           </NarrativeBlock>
         </FadeIn>
 
@@ -271,25 +307,26 @@ export default function AmeriLifeMarketingStrategyPage() {
         <FadeIn><Arrow /></FadeIn>
 
         <FadeIn>
-          <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] px-5 md:px-8 py-6 text-center">
-            <div className="absolute -left-8 md:-left-10 top-1/2 -translate-y-1/2 w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
-              <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">10</span>
-            </div>
+          <div
+            className="relative w-full border border-dashed rounded-md px-5 md:px-8 py-6 text-center"
+            style={{ borderColor: "rgba(64,165,144,0.5)", backgroundColor: "#1a3352" }}
+          >
+            <StepIcon step={10} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
               <div>
-                <div className="font-bold uppercase tracking-wide text-xs md:text-sm text-white/90">
-                  Corporate Development (M&A) Pipeline Acceleration
+                <div className="font-bold uppercase tracking-wide text-xs md:text-sm text-white">
+                  Corporate Development (M&amp;A) Pipeline Acceleration
                 </div>
-                <div className="uppercase font-bold tracking-wider text-[10px] md:text-xs text-white/40 mt-1">
-                  Health — Unaffiliated Shops See Thriving Affiliates → Inbound Interest
+                <div className="uppercase font-bold tracking-wider text-[10px] md:text-xs mt-1" style={{ color: "#71C495" }}>
+                  Health: Unaffiliated Shops See Thriving Affiliates → Inbound Interest
                 </div>
               </div>
               <div>
-                <div className="font-bold uppercase tracking-wide text-xs md:text-sm text-white/90">
+                <div className="font-bold uppercase tracking-wide text-xs md:text-sm text-white">
                   Inbound Advisor / Advisory Pipeline
                 </div>
-                <div className="uppercase font-bold tracking-wider text-[10px] md:text-xs text-white/40 mt-1">
-                  Wealth — Authority Positioning Drives Inquiries from Advisors & Advisories
+                <div className="uppercase font-bold tracking-wider text-[10px] md:text-xs mt-1" style={{ color: "#71C495" }}>
+                  Wealth: Authority Positioning Drives Inquiries from Advisors & Advisories
                 </div>
               </div>
             </div>
@@ -300,14 +337,15 @@ export default function AmeriLifeMarketingStrategyPage() {
         <FadeIn><Arrow /></FadeIn>
 
         <FadeIn>
-          <div className="relative w-full border border-[#5b9bd5]/20 border-dashed rounded-md bg-[#0a2314] px-5 md:px-8 py-6 text-center">
-            <div className="absolute -left-8 md:-left-10 top-1/2 -translate-y-1/2 w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
-              <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">11</span>
-            </div>
-            <div className="font-bold uppercase tracking-wide text-base text-white/90">
+          <div
+            className="relative w-full border border-dashed rounded-md px-5 md:px-8 py-6 text-center"
+            style={{ borderColor: "rgba(239,181,78,0.5)", backgroundColor: "#1a3352" }}
+          >
+            <StepIcon step={11} tone="gold" />
+            <div className="font-bold uppercase tracking-wide text-base text-white">
               Cross-Sell Bridge
             </div>
-            <div className="uppercase font-bold tracking-wider text-sm text-white/40 mt-1">
+            <div className="uppercase font-bold tracking-wider text-sm mt-1" style={{ color: "#EFB54E" }}>
               Connecting Health Relationships to Wealth Opportunities
             </div>
           </div>
@@ -315,7 +353,7 @@ export default function AmeriLifeMarketingStrategyPage() {
 
         <FadeIn>
           <NarrativeBlock>
-            The Cross-Sell Bridge exists to drive organic revenue growth across both verticals. Health affiliates already have deep client relationships — surfacing Wealth product opportunities within those relationships creates new revenue without new acquisition cost. On the other side, Wealth advisors gain access to Health distribution channels, expanding their reach. The goal is a two-way referral engine that makes cross-sell a natural part of how affiliates do business, not a corporate initiative layered on top.
+            The Cross-Sell Bridge exists to drive organic revenue growth across both verticals. Health affiliates already have deep client relationships: surfacing Wealth product opportunities within those relationships creates new revenue without new acquisition cost. On the other side, Wealth advisors gain access to Health distribution channels, expanding their reach. The goal is a two-way referral engine that makes cross-sell a natural part of how affiliates do business, not a corporate initiative layered on top.
           </NarrativeBlock>
         </FadeIn>
 
@@ -337,6 +375,74 @@ export default function AmeriLifeMarketingStrategyPage() {
           </NarrativeBlock>
         </FadeIn>
       </div>
+
+      {/* Footer gradient bar + logo */}
+      <div className="w-full mt-16">
+        <div className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 h-1" style={{ backgroundColor: "#40A590" }} />
+        <div
+          className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 py-6 flex flex-col items-center gap-2"
+          style={{
+            background:
+              "linear-gradient(90deg, #244260 0%, #2e6b7a 50%, #40A590 100%)",
+          }}
+        >
+          <AmeriLifeLogo small />
+          <div className="text-[10px] uppercase tracking-[0.2em] text-white/70">
+            AmeriLife Brand Guide Applied
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── AmeriLife logo (inline SVG wordmark with star "A") ── */
+
+function AmeriLifeLogo({ small = false }: { small?: boolean }) {
+  const height = small ? 28 : 44;
+  return (
+    <div className="flex items-center gap-2" aria-label="AmeriLife">
+      <svg
+        viewBox="0 0 60 60"
+        width={height}
+        height={height}
+        role="img"
+        aria-hidden="true"
+      >
+        {/* Outer triangle (the "A" letterform) */}
+        <path
+          d="M30 4 L56 54 L4 54 Z"
+          fill="none"
+          stroke="#FFFFFF"
+          strokeWidth="4"
+          strokeLinejoin="round"
+        />
+        {/* Inner star */}
+        <path
+          d="M30 20 L32.9 28.3 L41.6 28.5 L34.7 33.7 L37.2 42 L30 37 L22.8 42 L25.3 33.7 L18.4 28.5 L27.1 28.3 Z"
+          fill="#FFFFFF"
+        />
+      </svg>
+      <span
+        className="font-bold text-white leading-none"
+        style={{
+          fontSize: small ? "22px" : "36px",
+          letterSpacing: "0.08em",
+          fontFamily: "var(--font-poppins), sans-serif",
+        }}
+      >
+        MERILIFE
+        <sup
+          style={{
+            fontSize: small ? "8px" : "10px",
+            marginLeft: "2px",
+            verticalAlign: "super",
+            opacity: 0.85,
+          }}
+        >
+          ®
+        </sup>
+      </span>
     </div>
   );
 }
@@ -353,7 +459,7 @@ function LastUpdated() {
   if (!timestamp) return <div className="mb-8" />;
 
   return (
-    <p className="text-[10px] italic text-white/25 mb-8 text-center">
+    <p className="text-[10px] italic text-white/40 mb-8 text-center">
       Last updated {timestamp}
     </p>
   );
@@ -394,7 +500,7 @@ function FadeIn({ children }: { children: ReactNode }) {
 function NarrativeBlock({ children }: { children: ReactNode }) {
   return (
     <div className="w-full max-w-2xl text-center px-4 py-6">
-      <div className="text-sm leading-relaxed text-white/60">
+      <div className="text-sm leading-relaxed text-white/85 font-light">
         {children}
       </div>
     </div>
@@ -404,7 +510,7 @@ function NarrativeBlock({ children }: { children: ReactNode }) {
 function NarrativeBlockSmall({ children }: { children: ReactNode }) {
   return (
     <div className="w-full text-left px-2 py-4">
-      <div className="text-xs leading-relaxed text-white/50">
+      <div className="text-xs leading-relaxed text-white/75 font-light">
         {children}
       </div>
     </div>
@@ -416,10 +522,13 @@ function NarrativeBlockSmall({ children }: { children: ReactNode }) {
 function ColumnHeader({ label, sublabel }: { label: string; sublabel: string }) {
   return (
     <div className="w-full text-center mb-4">
-      <div className="text-lg font-bold uppercase tracking-wide text-white/90">
+      <div className="text-lg font-bold uppercase tracking-wide text-white">
         {label}
       </div>
-      <div className="text-xs font-bold uppercase tracking-wider text-white/40 mt-1">
+      <div
+        className="text-xs font-bold uppercase tracking-wider mt-1"
+        style={{ color: "#71C495" }}
+      >
         {sublabel}
       </div>
     </div>
@@ -428,10 +537,19 @@ function ColumnHeader({ label, sublabel }: { label: string; sublabel: string }) 
 
 /* ── Flow components ── */
 
-function StepIcon({ step }: { step: number }) {
+function StepIcon({ step, tone = "teal" }: { step: number; tone?: "teal" | "gold" }) {
+  const color = tone === "gold" ? "#EFB54E" : "#40A590";
   return (
-    <div className="absolute -left-8 md:-left-10 top-1/2 -translate-y-1/2 w-6 h-6 md:w-7 md:h-7 rounded-full border border-[#5b9bd5]/40 bg-[#071a0e] flex items-center justify-center">
-      <span className="text-[10px] md:text-[11px] font-bold text-[#5b9bd5]/70">{step}</span>
+    <div
+      className="absolute -left-8 md:-left-10 top-1/2 -translate-y-1/2 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center"
+      style={{
+        border: `1.5px solid ${color}`,
+        backgroundColor: "#244260",
+      }}
+    >
+      <span className="text-[10px] md:text-[11px] font-bold" style={{ color }}>
+        {step}
+      </span>
     </div>
   );
 }
@@ -449,22 +567,33 @@ function FlowBox({
   size?: "sm" | "md";
   step?: number;
 }) {
-  const base =
-    variant === "accent"
-      ? "border-[#5b9bd5]/50 bg-[#0d2b18]"
-      : "border-[#1a4a2e] bg-[#0d2b18]";
+  const isAccent = variant === "accent";
+  const borderColor = isAccent ? "#40A590" : "rgba(64,165,144,0.35)";
+  const background = isAccent
+    ? "linear-gradient(135deg, #1a3352 0%, #2a6b6a 100%)"
+    : "#1a3352";
   const padding = size === "sm" ? "px-3 md:px-5 py-3" : "px-4 md:px-8 py-4";
 
   return (
     <div
-      className={`relative ${base} ${padding} w-full border rounded text-center`}
+      className={`relative ${padding} w-full border rounded text-center`}
+      style={{ borderColor, background }}
     >
       {step && <StepIcon step={step} />}
-      <div className={`font-bold uppercase tracking-wide ${size === "sm" ? "text-xs md:text-sm" : "text-sm md:text-base"} text-white/90`}>
+      <div
+        className={`font-bold uppercase tracking-wide ${
+          size === "sm" ? "text-xs md:text-sm" : "text-sm md:text-base"
+        } text-white`}
+      >
         {label}
       </div>
       {sublabel && (
-        <div className={`uppercase font-bold tracking-wider ${size === "sm" ? "text-[10px] md:text-xs" : "text-xs md:text-sm"} text-white/40 mt-1`}>
+        <div
+          className={`uppercase font-bold tracking-wider ${
+            size === "sm" ? "text-[10px] md:text-xs" : "text-xs md:text-sm"
+          } mt-1`}
+          style={{ color: isAccent ? "#FFFFFF" : "#71C495" }}
+        >
           {sublabel}
         </div>
       )}
@@ -487,13 +616,19 @@ function SharedServicesList() {
   ];
 
   return (
-    <div className="w-full border border-[#1a4a2e]/60 rounded bg-[#0a2314] px-5 py-3 mt-1">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-white/30 mb-2">
+    <div
+      className="w-full border rounded px-5 py-3 mt-1"
+      style={{ borderColor: "rgba(113,196,149,0.4)", backgroundColor: "#1a3352" }}
+    >
+      <div
+        className="text-[10px] font-bold uppercase tracking-wider mb-2"
+        style={{ color: "#71C495" }}
+      >
         Spotlight Rotation
       </div>
       <ol className="list-decimal list-inside space-y-1">
         {services.map((name) => (
-          <li key={name} className="text-xs text-white/60 tracking-wide">
+          <li key={name} className="text-xs text-white/85 tracking-wide font-light">
             {name}
           </li>
         ))}
@@ -512,13 +647,19 @@ function AffiliateList() {
   ];
 
   return (
-    <div className="w-full border border-[#1a4a2e]/60 rounded bg-[#0a2314] px-5 py-3 mt-1">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-white/30 mb-2">
-        Initial Priority — H2 2026 & Beyond
+    <div
+      className="w-full border rounded px-5 py-3 mt-1"
+      style={{ borderColor: "rgba(113,196,149,0.4)", backgroundColor: "#1a3352" }}
+    >
+      <div
+        className="text-[10px] font-bold uppercase tracking-wider mb-2"
+        style={{ color: "#71C495" }}
+      >
+        Initial Priority: H2 2026 & Beyond
       </div>
       <ol className="list-decimal list-inside space-y-1">
         {affiliates.map((name) => (
-          <li key={name} className="text-xs text-white/60 tracking-wide">
+          <li key={name} className="text-xs text-white/85 tracking-wide font-light">
             {name}
           </li>
         ))}
@@ -549,27 +690,40 @@ function AffiliateVideoDetail() {
   ];
 
   return (
-    <div className="w-full border border-[#1a4a2e]/60 rounded bg-[#0a2314] px-5 py-3 mt-1">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-white/30 mb-2">
+    <div
+      className="w-full border rounded px-5 py-3 mt-1"
+      style={{ borderColor: "rgba(113,196,149,0.4)", backgroundColor: "#1a3352" }}
+    >
+      <div
+        className="text-[10px] font-bold uppercase tracking-wider mb-2"
+        style={{ color: "#71C495" }}
+      >
         Two Videos Per Top-5 Affiliate
       </div>
       <ul className="space-y-2 mb-3">
         {videos.map((v) => (
-          <li key={v.title} className="text-xs text-white/60 tracking-wide flex items-start gap-2">
-            <span className="text-[#5b9bd5]/60 mt-0.5 shrink-0">&bull;</span>
+          <li key={v.title} className="text-xs text-white/85 tracking-wide flex items-start gap-2 font-light">
+            <span style={{ color: "#40A590" }} className="mt-0.5 shrink-0">
+              &bull;
+            </span>
             <span>
-              <span className="font-bold text-white/75">{v.title}:</span> {v.desc}
+              <span className="font-bold text-white">{v.title}:</span> {v.desc}
             </span>
           </li>
         ))}
       </ul>
-      <div className="text-[10px] font-bold uppercase tracking-wider text-white/30 mb-2 mt-3">
+      <div
+        className="text-[10px] font-bold uppercase tracking-wider mb-2 mt-3"
+        style={{ color: "#71C495" }}
+      >
         Shared Production Standards
       </div>
       <ul className="space-y-1">
         {shared.map((item) => (
-          <li key={item} className="text-xs text-white/60 tracking-wide flex items-start gap-2">
-            <span className="text-[#5b9bd5]/60 mt-0.5 shrink-0">&bull;</span>
+          <li key={item} className="text-xs text-white/85 tracking-wide flex items-start gap-2 font-light">
+            <span style={{ color: "#40A590" }} className="mt-0.5 shrink-0">
+              &bull;
+            </span>
             <span>{item}</span>
           </li>
         ))}
@@ -581,8 +735,8 @@ function AffiliateVideoDetail() {
 function Arrow() {
   return (
     <div className="flex flex-col items-center py-1">
-      <div className="w-px h-8 bg-[#5b9bd5]/60" />
-      <svg width="12" height="8" viewBox="0 0 12 8" className="text-[#5b9bd5]/60">
+      <div className="w-px h-8" style={{ backgroundColor: "#40A590" }} />
+      <svg width="12" height="8" viewBox="0 0 12 8" style={{ color: "#40A590" }}>
         <path d="M6 8L0 0h12z" fill="currentColor" />
       </svg>
     </div>
@@ -596,27 +750,32 @@ function BranchArrows({
   leftLabel: string;
   rightLabel: string;
 }) {
+  const teal = "#40A590";
   return (
     <div className="relative w-full py-1">
       {/* Vertical stem from parent */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-0 w-px h-4 bg-[#5b9bd5]/60" />
+      <div className="absolute left-1/2 -translate-x-1/2 top-0 w-px h-4" style={{ backgroundColor: teal }} />
       {/* Horizontal bar */}
-      <div className="absolute top-4 left-1/4 right-1/4 h-px bg-[#5b9bd5]/60" />
+      <div className="absolute top-4 left-1/4 right-1/4 h-px" style={{ backgroundColor: teal }} />
       {/* Left branch down */}
       <div className="absolute top-4 left-1/4 -translate-x-1/2 flex flex-col items-center">
-        <div className="w-px h-4 bg-[#5b9bd5]/60" />
-        <svg width="12" height="8" viewBox="0 0 12 8" className="text-[#5b9bd5]/60">
+        <div className="w-px h-4" style={{ backgroundColor: teal }} />
+        <svg width="12" height="8" viewBox="0 0 12 8" style={{ color: teal }}>
           <path d="M6 8L0 0h12z" fill="currentColor" />
         </svg>
-        <span className="text-[10px] text-white/30 mt-0.5 uppercase font-bold tracking-wider">{leftLabel}</span>
+        <span className="text-[10px] mt-0.5 uppercase font-bold tracking-wider" style={{ color: "#71C495" }}>
+          {leftLabel}
+        </span>
       </div>
       {/* Right branch down */}
       <div className="absolute top-4 right-1/4 translate-x-1/2 flex flex-col items-center">
-        <div className="w-px h-4 bg-[#5b9bd5]/60" />
-        <svg width="12" height="8" viewBox="0 0 12 8" className="text-[#5b9bd5]/60">
+        <div className="w-px h-4" style={{ backgroundColor: teal }} />
+        <svg width="12" height="8" viewBox="0 0 12 8" style={{ color: teal }}>
           <path d="M6 8L0 0h12z" fill="currentColor" />
         </svg>
-        <span className="text-[10px] text-white/30 mt-0.5 uppercase font-bold tracking-wider">{rightLabel}</span>
+        <span className="text-[10px] mt-0.5 uppercase font-bold tracking-wider" style={{ color: "#71C495" }}>
+          {rightLabel}
+        </span>
       </div>
       {/* Spacer */}
       <div className="h-16" />

@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { Libre_Baskerville } from "next/font/google";
+import { Libre_Baskerville, Poppins } from "next/font/google";
 import "./globals.css";
 
 const baskerville = Libre_Baskerville({
   variable: "--font-baskerville",
   subsets: ["latin"],
   weight: ["400", "700"],
+});
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -19,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${baskerville.variable} h-full antialiased`}>
+    <html lang="en" className={`${baskerville.variable} ${poppins.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
