@@ -21,34 +21,38 @@ export default function AmeriLifeMarketingStrategyPage() {
         fontFamily: "var(--font-poppins), ui-sans-serif, system-ui, sans-serif",
       }}
     >
-      {/* Brand gradient header bar with logo */}
+      {/* Brand gradient band: AmeriLife signature seafoam→teal→navy */}
       <div
-        className="w-full -mx-4 md:-mx-6 mb-10"
+        className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 h-1.5"
         style={{
-          marginLeft: "calc(-1 * var(--bleed, 3rem))",
-          marginRight: "calc(-1 * var(--bleed, 1rem))",
+          background:
+            "linear-gradient(90deg, #71C495 0%, #40A590 45%, #244260 100%)",
         }}
-      >
-        <div
-          className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 h-28 md:h-32 flex items-center justify-center"
-          style={{
-            background:
-              "linear-gradient(90deg, #244260 0%, #2e6b7a 45%, #40A590 75%, #71C495 100%)",
-          }}
-        >
-          <AmeriLifeLogo />
-        </div>
-        <div className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 h-2" style={{ backgroundColor: "#40A590" }} />
-      </div>
+      />
 
-      {/* Page Header */}
+      {/* Page Header: wordmark + title */}
       <FadeIn>
-        <h1 className="text-2xl md:text-4xl font-light tracking-wide mb-2 text-white uppercase text-center">
-          AmeriLife Health &amp; Wealth Marketing Strategy
-        </h1>
-        <p className="text-xs md:text-sm font-bold uppercase tracking-widest text-center mb-1" style={{ color: "#71C495" }}>
-          A Dual-Track Approach for 2026 and Beyond
-        </p>
+        <div className="flex flex-col items-center pt-12 pb-4">
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl md:text-4xl font-bold tracking-[0.18em] uppercase text-white leading-none">
+              AmeriLife
+            </span>
+            <span className="text-[10px] md:text-xs text-white/70 font-semibold">
+              ®
+            </span>
+          </div>
+          <div
+            className="h-px w-24 mt-4 mb-3"
+            style={{ backgroundColor: "#40A590" }}
+            aria-hidden
+          />
+          <h1 className="text-sm md:text-base font-semibold tracking-[0.25em] uppercase text-center" style={{ color: "#71C495" }}>
+            Health &amp; Wealth Marketing Strategy
+          </h1>
+          <p className="text-[11px] md:text-xs font-medium text-white/60 mt-2 uppercase tracking-wider text-center">
+            A Dual-Track Approach for 2026 and Beyond
+          </p>
+        </div>
         <LastUpdated />
       </FadeIn>
 
@@ -376,73 +380,14 @@ export default function AmeriLifeMarketingStrategyPage() {
         </FadeIn>
       </div>
 
-      {/* Footer gradient bar + logo */}
-      <div className="w-full mt-16">
-        <div className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 h-1" style={{ backgroundColor: "#40A590" }} />
-        <div
-          className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 py-6 flex flex-col items-center gap-2"
-          style={{
-            background:
-              "linear-gradient(90deg, #244260 0%, #2e6b7a 50%, #40A590 100%)",
-          }}
-        >
-          <AmeriLifeLogo small />
-          <div className="text-[10px] uppercase tracking-[0.2em] text-white/70">
-            AmeriLife Brand Guide Applied
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── AmeriLife logo (inline SVG wordmark with star "A") ── */
-
-function AmeriLifeLogo({ small = false }: { small?: boolean }) {
-  const height = small ? 28 : 44;
-  return (
-    <div className="flex items-center gap-2" aria-label="AmeriLife">
-      <svg
-        viewBox="0 0 60 60"
-        width={height}
-        height={height}
-        role="img"
-        aria-hidden="true"
-      >
-        {/* Outer triangle (the "A" letterform) */}
-        <path
-          d="M30 4 L56 54 L4 54 Z"
-          fill="none"
-          stroke="#FFFFFF"
-          strokeWidth="4"
-          strokeLinejoin="round"
-        />
-        {/* Inner star */}
-        <path
-          d="M30 20 L32.9 28.3 L41.6 28.5 L34.7 33.7 L37.2 42 L30 37 L22.8 42 L25.3 33.7 L18.4 28.5 L27.1 28.3 Z"
-          fill="#FFFFFF"
-        />
-      </svg>
-      <span
-        className="font-bold text-white leading-none"
+      {/* Footer gradient band */}
+      <div
+        className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 h-1.5 mt-16"
         style={{
-          fontSize: small ? "22px" : "36px",
-          letterSpacing: "0.08em",
-          fontFamily: "var(--font-poppins), sans-serif",
+          background:
+            "linear-gradient(90deg, #244260 0%, #40A590 55%, #71C495 100%)",
         }}
-      >
-        MERILIFE
-        <sup
-          style={{
-            fontSize: small ? "8px" : "10px",
-            marginLeft: "2px",
-            verticalAlign: "super",
-            opacity: 0.85,
-          }}
-        >
-          ®
-        </sup>
-      </span>
+      />
     </div>
   );
 }
