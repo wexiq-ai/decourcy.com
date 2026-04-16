@@ -378,7 +378,7 @@ function StickyToolbar({
                   : "border-[#3a5a7a] text-white/60 hover:border-[#40A590]/40 hover:text-[#40A590]/80"
               }`}
             >
-              Filters
+              Tags
             </button>
             {hasActiveFilters(filters) && (
               <button
@@ -525,19 +525,38 @@ function FilterPanel({
   setFilters: (f: FilterState) => void;
   setView: (v: ViewMode) => void;
 }) {
-  const allSources = uniqueSorted(EVENTS.map((e) => e.sourceTracker));
-  const allOwners = uniqueSorted(EVENTS.map((e) => e.owner));
-  const allTypes = uniqueSorted(EVENTS.map((e) => e.sourceType));
-  const allStatuses = uniqueSorted(
-    EVENTS.map((e) => e.status).filter((s): s is EventStatus => !!s)
+  // EVENTS is module-static (loaded once from data.ts), so these axis lists
+  // never change across the life of the page. Memoizing keeps the search
+  // input from paying the cost of 4 × O(n) map+sort passes on every keystroke
+  // while the tag panel is open — that pressure was enough to crash the tab.
+  const allSources = useMemo(
+    () => uniqueSorted(EVENTS.map((e) => e.sourceTracker)),
+    []
+  );
+  const allOwners = useMemo(
+    () => uniqueSorted(EVENTS.map((e) => e.owner)),
+    []
+  );
+  const allTypes = useMemo(
+    () => uniqueSorted(EVENTS.map((e) => e.sourceType)),
+    []
+  );
+  const allStatuses = useMemo(
+    () =>
+      uniqueSorted(
+        EVENTS.map((e) => e.status).filter((s): s is EventStatus => !!s)
+      ),
+    []
   );
 
-  // Clicking any chip toggles the filter AND jumps to the month view so
-  // the user always ends up seeing their selection in the at-a-glance grid.
-  // Deselect still works — the × on ActiveFilterChips also removes a filter.
+  // Clicking any tag toggles the filter AND jumps to the Agenda (flat-list)
+  // view so the user sees a granular, chronological list of every item
+  // matching the selected tags — the primary "what is tagged X?" question.
+  // Multi-select is native: toggleSet() on each filter Set already supports
+  // selecting multiple Sources, Owners, Types, Statuses, Scopes at once.
   function applyAndJump(next: FilterState) {
     setFilters(next);
-    setView("month");
+    setView("agenda");
   }
 
   return (
