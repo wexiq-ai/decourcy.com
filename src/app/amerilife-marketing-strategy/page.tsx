@@ -166,7 +166,7 @@ export default function AmeriLifeMarketingStrategyPage() {
               <FlowBox
                 step={7}
                 label="Multi-Channel Distribution"
-                sublabel="AmeriLife.com/blog • Social • Affiliate Co-Promotion"
+                sublabel="AmeriLife.com/insights • Social • Affiliate Co-Promotion"
                 size="sm"
               />
             </FadeIn>
