@@ -52,6 +52,19 @@ export const bulkArchive = inngest.createFunction(
       return { account: c.account.email };
     });
 
+    await step.run("set-archive-phase", async () => {
+      await db
+        .update(schema.actions)
+        .set({
+          scopeJson: sql`coalesce(scope_json, '{}'::jsonb) || ${JSON.stringify({
+            phase: "archiving",
+            archiveTotal: ids.length,
+            archivedSoFar: 0,
+          })}::jsonb`,
+        })
+        .where(eq(schema.actions.id, actionId));
+    });
+
     let archived = 0;
     for (let i = 0; i < ids.length; i += ARCHIVE_BATCH_SIZE) {
       const batch = ids.slice(i, i + ARCHIVE_BATCH_SIZE);
@@ -63,6 +76,13 @@ export const bulkArchive = inngest.createFunction(
           .update(schema.messages)
           .set({ actedOnAt: new Date(), actionTaken: "archived" })
           .where(inArray(schema.messages.gmailId, batch));
+        const newTotal = i + batch.length;
+        await db
+          .update(schema.actions)
+          .set({
+            scopeJson: sql`coalesce(scope_json, '{}'::jsonb) || ${JSON.stringify({ archivedSoFar: newTotal })}::jsonb`,
+          })
+          .where(eq(schema.actions.id, actionId));
         return batch.length;
       });
       archived += count;
@@ -113,6 +133,19 @@ export const bulkUnsubscribe = inngest.createFunction(
     const senders = (action.scopeJson?.senders as string[]) ?? [];
     const myEmail = (action.scopeJson?.account as string) ?? "";
 
+    await step.run("set-unsub-phase", async () => {
+      await db
+        .update(schema.actions)
+        .set({
+          scopeJson: sql`coalesce(scope_json, '{}'::jsonb) || ${JSON.stringify({
+            phase: "unsubscribing",
+            sendersTotal: senders.length,
+            sendersProcessed: 0,
+          })}::jsonb`,
+        })
+        .where(eq(schema.actions.id, actionId));
+    });
+
     const allResults: UnsubResult[] = [];
     for (let i = 0; i < senders.length; i += UNSUB_BATCH_SIZE) {
       const batch = senders.slice(i, i + UNSUB_BATCH_SIZE);
@@ -134,13 +167,32 @@ export const bulkUnsubscribe = inngest.createFunction(
           };
         });
 
-        return unsubscribeFromSenders(c.gmail, senderInputs, myEmail);
+        const r = await unsubscribeFromSenders(c.gmail, senderInputs, myEmail);
+        await db
+          .update(schema.actions)
+          .set({
+            scopeJson: sql`coalesce(scope_json, '{}'::jsonb) || ${JSON.stringify({ sendersProcessed: i + batch.length })}::jsonb`,
+          })
+          .where(eq(schema.actions.id, actionId));
+        return r;
       });
       allResults.push(...results);
     }
 
     if (archiveExisting && action.messageIds && action.messageIds.length > 0) {
       const ids = action.messageIds;
+      await step.run("set-archive-phase-after-unsub", async () => {
+        await db
+          .update(schema.actions)
+          .set({
+            scopeJson: sql`coalesce(scope_json, '{}'::jsonb) || ${JSON.stringify({
+              phase: "archiving",
+              archiveTotal: ids.length,
+              archivedSoFar: 0,
+            })}::jsonb`,
+          })
+          .where(eq(schema.actions.id, actionId));
+      });
       for (let i = 0; i < ids.length; i += ARCHIVE_BATCH_SIZE) {
         const batch = ids.slice(i, i + ARCHIVE_BATCH_SIZE);
         await step.run(`archive-existing-${i}`, async () => {
@@ -151,6 +203,13 @@ export const bulkUnsubscribe = inngest.createFunction(
             .update(schema.messages)
             .set({ actedOnAt: new Date(), actionTaken: "unsubscribed" })
             .where(inArray(schema.messages.gmailId, batch));
+          const newTotal = i + batch.length;
+          await db
+            .update(schema.actions)
+            .set({
+              scopeJson: sql`coalesce(scope_json, '{}'::jsonb) || ${JSON.stringify({ archivedSoFar: newTotal })}::jsonb`,
+            })
+            .where(eq(schema.actions.id, actionId));
         });
       }
     }

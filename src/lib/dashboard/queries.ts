@@ -120,6 +120,9 @@ export type RecentAction = {
   messageCount: number;
   archivedSoFar: number;
   status: string;
+  phase: "queued" | "unsubscribing" | "archiving" | "completed";
+  sendersTotal: number | null;
+  sendersProcessed: number | null;
   processed: number;
   succeeded: number | null;
   createdAt: Date;
@@ -143,11 +146,14 @@ export async function getRecentActions(): Promise<RecentAction[]> {
       const status =
         typeof scope.status === "string" ? scope.status : "pending";
 
-      // Count how many of this action's messages are now archived.
-      // Skips the count when status is completed (waste) or when there
-      // are no messages.
+      // Prefer the live scope_json archivedSoFar (updated per-batch by the
+      // Inngest functions); fall back to a count over messages.acted_on_at.
       let archivedSoFar = 0;
-      if (ids.length > 0 && status !== "completed") {
+      if (status === "completed") {
+        archivedSoFar = ids.length;
+      } else if (typeof scope.archivedSoFar === "number") {
+        archivedSoFar = scope.archivedSoFar;
+      } else if (ids.length > 0) {
         const result = await db
           .select({ n: sql<number>`count(*)::int` })
           .from(schema.messages)
@@ -158,9 +164,16 @@ export async function getRecentActions(): Promise<RecentAction[]> {
             ),
           );
         archivedSoFar = result[0]?.n ?? 0;
-      } else if (status === "completed") {
-        archivedSoFar = ids.length;
       }
+
+      const phase: RecentAction["phase"] =
+        status === "completed"
+          ? "completed"
+          : scope.phase === "unsubscribing"
+            ? "unsubscribing"
+            : scope.phase === "archiving"
+              ? "archiving"
+              : "queued";
 
       return {
         id: row.id,
@@ -169,6 +182,13 @@ export async function getRecentActions(): Promise<RecentAction[]> {
         messageCount: ids.length,
         archivedSoFar,
         status,
+        phase,
+        sendersTotal:
+          typeof scope.sendersTotal === "number" ? scope.sendersTotal : null,
+        sendersProcessed:
+          typeof scope.sendersProcessed === "number"
+            ? scope.sendersProcessed
+            : null,
         processed: typeof scope.processed === "number" ? scope.processed : 0,
         succeeded:
           typeof scope.succeeded === "number" ? scope.succeeded : null,
