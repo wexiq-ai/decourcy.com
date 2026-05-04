@@ -132,12 +132,27 @@ export type RecentAction = {
 
 export async function getRecentActions(): Promise<RecentAction[]> {
   const cutoff = new Date(Date.now() - UNDO_WINDOW_MS);
-  const rows = await db
+  const allRows = await db
     .select()
     .from(schema.actions)
     .where(gte(schema.actions.createdAt, cutoff))
     .orderBy(desc(schema.actions.createdAt))
-    .limit(5);
+    .limit(20);
+
+  // Dedupe by (kind, bucket): keep only the most recent action per pair.
+  // Re-clicking Archive on the same bucket, or doing undo+redo, would
+  // otherwise stack identical-looking rows in the banner.
+  const seen = new Set<string>();
+  const rows = [];
+  for (const row of allRows) {
+    const scope = (row.scopeJson ?? {}) as Record<string, unknown>;
+    const bucket = typeof scope.bucket === "string" ? scope.bucket : "";
+    const key = `${row.kind}:${bucket}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    rows.push(row);
+    if (rows.length >= 5) break;
+  }
 
   return Promise.all(
     rows.map(async (row) => {
