@@ -1,4 +1,5 @@
 import { inngest } from "./client";
+import { sweepRun } from "./sweep";
 
 export const ping = inngest.createFunction(
   {
@@ -18,4 +19,4 @@ export const ping = inngest.createFunction(
   },
 );
 
-export const functions = [ping];
+export const functions = [ping, sweepRun];
