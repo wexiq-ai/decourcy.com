@@ -110,7 +110,13 @@ export default async function GmailCleanerPage({
                 </>
               )}
               {view.bodyState === "running" && view.sweep && (
-                <SweepProgress sweep={view.sweep} costSoFar={view.sweepCost} />
+                <SweepProgress
+                  sweep={view.sweep}
+                  costSoFar={view.sweepCost}
+                  dbFetched={view.messagesInDb}
+                  dbClassified={view.messagesInDb - view.uncategorizedInDb}
+                  inboxUnreadEstimate={view.inboxUnread}
+                />
               )}
               {view.bodyState === "done" && view.summaries && (
                 <BucketDashboard
