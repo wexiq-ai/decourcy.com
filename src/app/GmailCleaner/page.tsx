@@ -154,10 +154,18 @@ async function loadView(): Promise<View> {
   if (!client) return { kind: "disconnected" };
 
   const sweep = await getLatestSweepRun();
-  const active = isSweepActive(sweep);
-  const done = isSweepDone(sweep);
+  const dbStats = await getDbStats();
+  // Effectively done: every message in the DB has been classified.
+  // Defends against sweep_runs.status getting stuck at "pending" or
+  // "classifying" due to Inngest step memoization across deploys.
+  const effectivelyDone =
+    dbStats.uncategorized === 0 && dbStats.categorized > 0;
+  const done = isSweepDone(sweep) || effectivelyDone;
+  const active = !done && isSweepActive(sweep);
   const failedWithProgress =
-    sweep?.status === "failed" && (sweep.fetchedCount ?? 0) > 0;
+    !done &&
+    sweep?.status === "failed" &&
+    (sweep.fetchedCount ?? 0) > 0;
 
   let gmailUnavailable = false;
   let profile = { emailAddress: client.account.email, messagesTotal: 0 };
@@ -189,8 +197,7 @@ async function loadView(): Promise<View> {
     }
   }
 
-  const [dbStats, summaries, sweepCost, lifetimeCost] = await Promise.all([
-    getDbStats(),
+  const [summaries, sweepCost, lifetimeCost] = await Promise.all([
     done ? getBucketSummaries() : Promise.resolve(null),
     getCurrentSweepCost(),
     getLifetimeCost(),
