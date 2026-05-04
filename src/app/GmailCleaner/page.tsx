@@ -1,13 +1,48 @@
 import { FadeIn } from "@/components/FadeIn";
+import { getGmailClient } from "@/lib/gmail/client";
+import {
+  getProfile,
+  getInboxUnreadCount,
+  listSampleMessages,
+  type SampleMessage,
+} from "@/lib/gmail/messages";
 
-export default function GmailCleanerPage() {
+export const dynamic = "force-dynamic";
+
+type SearchParams = {
+  connected?: string;
+  disconnected?: string;
+  oauth_error?: string;
+};
+
+export default async function GmailCleanerPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const params = await searchParams;
+  const connection = await loadConnection();
+
   return (
     <main className="min-h-screen bg-[#071a0e] text-white">
-      <TopBar />
+      <TopBar
+        email={connection?.profile.emailAddress}
+        inboxUnread={connection?.inboxUnread}
+      />
       <div className="mx-auto max-w-5xl px-6 py-16">
+        {params.connected && (
+          <Banner kind="ok" text="Gmail connected." />
+        )}
+        {params.disconnected && (
+          <Banner kind="muted" text="Gmail disconnected." />
+        )}
+        {params.oauth_error && (
+          <Banner kind="err" text={`OAuth error: ${params.oauth_error}`} />
+        )}
+
         <FadeIn>
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-[#5b9bd5]">
-            DeCourcy.com / Phase 1
+            DeCourcy.com / Phase 2
           </p>
           <h1
             className="mb-3 text-5xl font-bold uppercase tracking-tight md:text-6xl"
@@ -16,27 +51,61 @@ export default function GmailCleanerPage() {
             Gmail Cleaner
           </h1>
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-white/60">
-            Foundation Connected — OAuth & Sweep Pending
+            {connection ? "Connected — Sweep Pending" : "Connect Gmail to Begin"}
           </p>
         </FadeIn>
 
         <FadeIn className="mt-16">
-          <SystemDiagram />
-        </FadeIn>
-
-        <FadeIn className="mt-16">
-          <PhaseStatus />
+          {connection ? (
+            <ConnectedView
+              email={connection.profile.emailAddress}
+              messagesTotal={connection.profile.messagesTotal}
+              inboxUnread={connection.inboxUnread}
+              samples={connection.samples}
+            />
+          ) : (
+            <ConnectGmailView />
+          )}
         </FadeIn>
       </div>
     </main>
   );
 }
 
-function TopBar() {
+type Connection = {
+  profile: { emailAddress: string; messagesTotal: number };
+  inboxUnread: number;
+  samples: SampleMessage[];
+};
+
+async function loadConnection(): Promise<Connection | null> {
+  const client = await getGmailClient();
+  if (!client) return null;
+  try {
+    const [profile, inboxUnread, samples] = await Promise.all([
+      getProfile(client.gmail),
+      getInboxUnreadCount(client.gmail),
+      listSampleMessages(client.gmail, 10),
+    ]);
+    return { profile, inboxUnread, samples };
+  } catch {
+    return null;
+  }
+}
+
+function TopBar({
+  email,
+  inboxUnread,
+}: {
+  email?: string;
+  inboxUnread?: number;
+}) {
   return (
     <div className="border-b border-[#1a4a2e] bg-[#0d2b18]/80 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3 text-[10px] font-bold uppercase tracking-[0.25em]">
-        <span className="text-white/40">DeCourcy.com / GmailCleaner</span>
+        <span className="text-white/40 truncate">
+          {email ? `Connected · ${email}` : "DeCourcy.com / GmailCleaner"}
+        </span>
         <div className="flex gap-6 text-[#5b9bd5]">
           <span>
             Session <span className="text-white/80">$0.00</span>
@@ -45,7 +114,12 @@ function TopBar() {
             Lifetime <span className="text-white/80">$0.00</span>
           </span>
           <span>
-            Inbox <span className="text-white/80">—</span>
+            Inbox{" "}
+            <span className="text-white/80">
+              {inboxUnread === undefined
+                ? "—"
+                : inboxUnread.toLocaleString()}
+            </span>
           </span>
         </div>
       </div>
@@ -53,105 +127,110 @@ function TopBar() {
   );
 }
 
-const STEPS: Array<{ n: number; label: string; sub: string; status: "ready" | "pending" }> = [
-  { n: 1, label: "Page Gate", sub: "Password middleware", status: "ready" },
-  { n: 2, label: "Database", sub: "Neon Postgres / Drizzle", status: "ready" },
-  { n: 3, label: "Background Jobs", sub: "Inngest", status: "ready" },
-  { n: 4, label: "Gmail OAuth", sub: "Phase 2", status: "pending" },
-  { n: 5, label: "Sweep & Classify", sub: "Phase 3 — Haiku + Sonnet", status: "pending" },
-  { n: 6, label: "Bulk Actions", sub: "Phase 4 — archive, unsubscribe", status: "pending" },
-  { n: 7, label: "Ongoing Maintenance", sub: "Phase 5 — since-last-visit", status: "pending" },
-];
-
-function SystemDiagram() {
+function Banner({ kind, text }: { kind: "ok" | "err" | "muted"; text: string }) {
+  const cls = {
+    ok: "border-[#5b9bd5] bg-[#143d24] text-[#5b9bd5]",
+    err: "border-red-400/40 bg-red-900/30 text-red-200",
+    muted: "border-white/20 bg-[#0d2b18] text-white/60",
+  }[kind];
   return (
-    <div>
-      <h2 className="mb-8 text-xs font-bold uppercase tracking-[0.3em] text-white/50">
-        Build Pipeline
-      </h2>
-      <div className="flex flex-col items-stretch gap-3">
-        {STEPS.map((step, i) => (
-          <div key={step.n}>
-            <StepRow step={step} />
-            {i < STEPS.length - 1 && <Connector />}
-          </div>
-        ))}
-      </div>
+    <div
+      className={`mb-8 rounded border px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] ${cls}`}
+    >
+      {text}
     </div>
   );
 }
 
-function StepRow({ step }: { step: (typeof STEPS)[number] }) {
-  const isReady = step.status === "ready";
-  return (
-    <div className="flex items-center gap-4">
-      <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-bold ${
-          isReady
-            ? "border-[#5b9bd5] bg-[#071a0e] text-[#5b9bd5]"
-            : "border-white/20 bg-[#071a0e] text-white/30"
-        }`}
-      >
-        {step.n}
-      </div>
-      <div
-        className={`flex-1 rounded border px-5 py-4 ${
-          isReady
-            ? "border-[#1a4a2e] bg-[#143d24]"
-            : "border-white/10 bg-[#0d2b18]/40"
-        }`}
-      >
-        <div className="flex items-baseline justify-between gap-4">
-          <p
-            className={`text-sm font-bold uppercase tracking-[0.15em] ${
-              isReady ? "text-white" : "text-white/40"
-            }`}
-          >
-            {step.label}
-          </p>
-          <p
-            className={`text-[10px] font-bold uppercase tracking-[0.2em] ${
-              isReady ? "text-[#5b9bd5]" : "text-white/30"
-            }`}
-          >
-            {isReady ? "Ready" : "Pending"}
-          </p>
-        </div>
-        <p
-          className={`mt-1 text-xs ${
-            isReady ? "text-white/60" : "text-white/30"
-          }`}
-        >
-          {step.sub}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function Connector() {
-  return (
-    <div className="ml-5 flex h-6 w-px flex-col items-center bg-[#5b9bd5]/40" aria-hidden />
-  );
-}
-
-function PhaseStatus() {
+function ConnectGmailView() {
   return (
     <div className="rounded border border-[#1a4a2e] bg-[#0d2b18] p-8">
-      <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-[#5b9bd5]">
-        What This Means
+      <p className="mb-6 text-xs font-bold uppercase tracking-[0.3em] text-[#5b9bd5]">
+        Step 1 — Connect Your Mailbox
       </p>
-      <p className="text-sm leading-relaxed text-white/80">
-        Phase 1 lays the foundation: password gate is wired into the existing
-        middleware, the Neon database schema is defined for messages, senders,
-        VIPs, actions, usage events, and rules, and Inngest is connected for
-        background processing. No Gmail data is touched yet.
+      <p className="mb-8 text-sm leading-relaxed text-white/80">
+        Sign in with Google to grant read and modify access to this Gmail
+        account. The refresh token is encrypted at rest. You can disconnect at
+        any time.
       </p>
-      <p className="mt-4 text-sm leading-relaxed text-white/80">
-        Phase 2 adds Google OAuth so this account can connect to Gmail. Phase 3
-        runs the initial sweep (~33,000 unread messages) through Haiku and
-        Sonnet for categorization, with live cost tracking displayed above.
-      </p>
+      <a
+        href="/api/oauth/google/start"
+        className="inline-block rounded border border-[#5b9bd5] px-6 py-3 text-xs font-bold uppercase tracking-[0.25em] text-[#5b9bd5] transition-colors hover:bg-[#5b9bd5]/10"
+      >
+        Connect Gmail
+      </a>
+    </div>
+  );
+}
+
+function ConnectedView({
+  email,
+  messagesTotal,
+  inboxUnread,
+  samples,
+}: {
+  email: string;
+  messagesTotal: number;
+  inboxUnread: number;
+  samples: SampleMessage[];
+}) {
+  return (
+    <div className="space-y-8">
+      <div className="rounded border border-[#1a4a2e] bg-[#0d2b18] p-8">
+        <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-[#5b9bd5]">
+          Mailbox
+        </p>
+        <dl className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <Stat label="Account" value={email} />
+          <Stat label="Total Messages" value={messagesTotal.toLocaleString()} />
+          <Stat label="Inbox Unread" value={inboxUnread.toLocaleString()} />
+        </dl>
+      </div>
+
+      <div className="rounded border border-[#1a4a2e] bg-[#0d2b18] p-8">
+        <p className="mb-6 text-xs font-bold uppercase tracking-[0.3em] text-[#5b9bd5]">
+          Latest Unread (Sample of 10)
+        </p>
+        {samples.length === 0 ? (
+          <p className="text-sm text-white/50">Inbox unread is empty.</p>
+        ) : (
+          <ul className="divide-y divide-[#1a4a2e]">
+            {samples.map((m) => (
+              <li key={m.id} className="py-3">
+                <p className="text-sm font-bold text-white truncate">
+                  {m.subject || "(no subject)"}
+                </p>
+                <p className="mt-1 text-xs text-white/50 truncate">
+                  {m.from}
+                </p>
+                <p className="mt-1 text-xs text-white/40 line-clamp-1">
+                  {m.snippet}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <form action="/api/oauth/google/disconnect" method="POST">
+        <button
+          type="submit"
+          className="rounded border border-white/20 px-5 py-2 text-[10px] font-bold uppercase tracking-[0.25em] text-white/60 transition-colors hover:border-white/40 hover:text-white/80"
+        >
+          Disconnect Gmail
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/40">
+        {label}
+      </dt>
+      <dd className="mt-1 text-sm font-bold text-white truncate">{value}</dd>
     </div>
   );
 }
