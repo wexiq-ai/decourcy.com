@@ -1,4 +1,4 @@
-import { desc, eq, and, gte, isNotNull, sql } from "drizzle-orm";
+import { desc, eq, and, gte, isNull, isNotNull, sql } from "drizzle-orm";
 import { db, schema } from "@/lib/db/client";
 import { BUCKETS, type Bucket } from "@/lib/claude/classify";
 
@@ -27,7 +27,9 @@ export async function getBucketSummaries(): Promise<BucketSummary[]> {
       count: sql<number>`count(*)::int`,
     })
     .from(schema.messages)
-    .where(isNotNull(schema.messages.category))
+    .where(
+      and(isNotNull(schema.messages.category), isNull(schema.messages.actedOnAt)),
+    )
     .groupBy(schema.messages.category);
 
   const summaries: BucketSummary[] = [];
@@ -46,7 +48,12 @@ export async function getBucketSummaries(): Promise<BucketSummary[]> {
         count: sql<number>`count(*)::int`,
       })
       .from(schema.messages)
-      .where(eq(schema.messages.category, bucket))
+      .where(
+        and(
+          eq(schema.messages.category, bucket),
+          isNull(schema.messages.actedOnAt),
+        ),
+      )
       .groupBy(schema.messages.senderEmail)
       .orderBy(sql`count(*) desc`)
       .limit(3);
@@ -54,7 +61,12 @@ export async function getBucketSummaries(): Promise<BucketSummary[]> {
     const subjects = await db
       .select({ subject: schema.messages.subject })
       .from(schema.messages)
-      .where(eq(schema.messages.category, bucket))
+      .where(
+        and(
+          eq(schema.messages.category, bucket),
+          isNull(schema.messages.actedOnAt),
+        ),
+      )
       .orderBy(desc(schema.messages.internalDate))
       .limit(3);
 
@@ -97,4 +109,47 @@ export function isSweepActive(sweep: SweepRun | null): boolean {
 
 export function isSweepDone(sweep: SweepRun | null): boolean {
   return sweep?.status === "done";
+}
+
+const UNDO_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+export type RecentAction = {
+  id: string;
+  kind: string;
+  bucket: string | null;
+  messageCount: number;
+  status: string;
+  processed: number;
+  succeeded: number | null;
+  createdAt: Date;
+  undoneAt: Date | null;
+  expiresAt: Date;
+};
+
+export async function getRecentAction(): Promise<RecentAction | null> {
+  const cutoff = new Date(Date.now() - UNDO_WINDOW_MS);
+  const rows = await db
+    .select()
+    .from(schema.actions)
+    .where(gte(schema.actions.createdAt, cutoff))
+    .orderBy(desc(schema.actions.createdAt))
+    .limit(1);
+
+  const row = rows[0];
+  if (!row) return null;
+
+  const scope = (row.scopeJson ?? {}) as Record<string, unknown>;
+
+  return {
+    id: row.id,
+    kind: row.kind,
+    bucket: typeof scope.bucket === "string" ? scope.bucket : null,
+    messageCount: row.messageIds?.length ?? 0,
+    status: typeof scope.status === "string" ? scope.status : "pending",
+    processed: typeof scope.processed === "number" ? scope.processed : 0,
+    succeeded: typeof scope.succeeded === "number" ? scope.succeeded : null,
+    createdAt: row.createdAt,
+    undoneAt: row.undoneAt,
+    expiresAt: new Date(row.createdAt.getTime() + UNDO_WINDOW_MS),
+  };
 }

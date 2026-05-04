@@ -1,5 +1,6 @@
 import { inngest } from "./client";
 import { sweepRun } from "./sweep";
+import { bulkArchive, bulkUnsubscribe, undoAction } from "./actions";
 
 export const ping = inngest.createFunction(
   {
@@ -19,4 +20,4 @@ export const ping = inngest.createFunction(
   },
 );
 
-export const functions = [ping, sweepRun];
+export const functions = [ping, sweepRun, bulkArchive, bulkUnsubscribe, undoAction];
