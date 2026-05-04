@@ -12,7 +12,7 @@ const BUCKET_DESCRIPTIONS: Record<string, string> = {
 };
 
 const UNSUB_BUCKETS = new Set(["NEWSLETTER", "PROMOTIONAL"]);
-const SAFE_BUCKETS = new Set(["PERSONAL", "JOB", "UNCERTAIN"]);
+const SAFE_BUCKETS = new Set(["PERSONAL", "UNCERTAIN"]);
 
 export function BucketDashboard({
   summaries,
