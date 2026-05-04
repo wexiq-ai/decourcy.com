@@ -154,27 +154,33 @@ async function loadView(): Promise<View> {
     sweep?.status === "failed" && (sweep.fetchedCount ?? 0) > 0;
 
   let gmailUnavailable = false;
-  let profile = { emailAddress: "—", messagesTotal: 0 };
+  let profile = { emailAddress: client.account.email, messagesTotal: 0 };
   let inboxUnread = 0;
   let samples: SampleMessage[] = [];
 
-  try {
-    const [p, count] = await Promise.all([
-      getProfile(client.gmail),
-      getInboxUnreadCount(client.gmail),
-    ]);
-    profile = p;
-    inboxUnread = count;
-    if (!active && !done && !failedWithProgress) {
-      try {
-        samples = await listSampleMessages(client.gmail, 10);
-      } catch {
-        samples = [];
+  // Skip Gmail API calls while a sweep is active — Inngest is already
+  // hammering Gmail, page renders should not compete and risk timeouts.
+  if (!active) {
+    try {
+      const [p, count] = await Promise.all([
+        withTimeout(getProfile(client.gmail), 4000),
+        withTimeout(getInboxUnreadCount(client.gmail), 4000),
+      ]);
+      profile = p;
+      inboxUnread = count;
+      if (!done && !failedWithProgress) {
+        try {
+          samples = await withTimeout(
+            listSampleMessages(client.gmail, 10),
+            6000,
+          );
+        } catch {
+          samples = [];
+        }
       }
+    } catch {
+      gmailUnavailable = true;
     }
-  } catch {
-    gmailUnavailable = true;
-    profile = { emailAddress: client.account.email, messagesTotal: 0 };
   }
 
   const [dbStats, summaries, sweepCost, lifetimeCost] = await Promise.all([
@@ -208,6 +214,15 @@ async function loadView(): Promise<View> {
     gmailUnavailable,
     bodyState,
   };
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`timeout after ${ms}ms`)), ms),
+    ),
+  ]);
 }
 
 async function getDbStats(): Promise<{ uncategorized: number; categorized: number }> {
