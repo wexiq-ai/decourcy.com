@@ -11,16 +11,20 @@ import {
   getBucketSummaries,
   getCurrentSweepCost,
   getLifetimeCost,
+  getRecentAction,
   isSweepActive,
   isSweepDone,
   type SweepRun,
   type BucketSummary,
+  type RecentAction,
 } from "@/lib/dashboard/queries";
 import { db, schema } from "@/lib/db/client";
 import { sql, isNull } from "drizzle-orm";
 import { RunSweepButton } from "./components/RunSweepButton";
 import { SweepProgress } from "./components/SweepProgress";
 import { BucketDashboard } from "./components/BucketDashboard";
+import { UndoBanner } from "./components/UndoBanner";
+import { PollSweep } from "./components/PollSweep";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +61,14 @@ export default async function GmailCleanerPage({
             kind="muted"
             text="Gmail temporarily unavailable (likely rate-limited). Stats below come from local DB. Page will recover automatically."
           />
+        )}
+        {view.kind === "connected" && view.recentAction && (
+          <>
+            {view.recentAction.status === "pending" && (
+              <PollSweep intervalMs={3000} />
+            )}
+            <UndoBanner action={view.recentAction} />
+          </>
         )}
 
         <FadeIn>
@@ -147,6 +159,7 @@ type View =
       uncategorizedInDb: number;
       gmailUnavailable: boolean;
       bodyState: "no-sweep" | "running" | "done" | "failed-resumable";
+      recentAction: RecentAction | null;
     };
 
 async function loadView(): Promise<View> {
@@ -197,10 +210,11 @@ async function loadView(): Promise<View> {
     }
   }
 
-  const [summaries, sweepCost, lifetimeCost] = await Promise.all([
+  const [summaries, sweepCost, lifetimeCost, recentAction] = await Promise.all([
     done ? getBucketSummaries() : Promise.resolve(null),
     getCurrentSweepCost(),
     getLifetimeCost(),
+    getRecentAction(),
   ]);
 
   if (gmailUnavailable && inboxUnread === 0) {
@@ -226,6 +240,7 @@ async function loadView(): Promise<View> {
     uncategorizedInDb: dbStats.uncategorized,
     gmailUnavailable,
     bodyState,
+    recentAction,
   };
 }
 

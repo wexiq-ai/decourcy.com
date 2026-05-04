@@ -1,4 +1,5 @@
 import type { BucketSummary } from "@/lib/dashboard/queries";
+import { archiveBucket, unsubscribeBucket } from "../actions";
 
 const BUCKET_DESCRIPTIONS: Record<string, string> = {
   PERSONAL: "Human-to-human correspondence",
@@ -9,6 +10,9 @@ const BUCKET_DESCRIPTIONS: Record<string, string> = {
   JOB: "Recruiter outreach and hiring updates",
   UNCERTAIN: "Confidence below 0.75 — review manually",
 };
+
+const UNSUB_BUCKETS = new Set(["NEWSLETTER", "PROMOTIONAL"]);
+const SAFE_BUCKETS = new Set(["PERSONAL", "JOB", "UNCERTAIN"]);
 
 export function BucketDashboard({
   summaries,
@@ -23,7 +27,7 @@ export function BucketDashboard({
     <div className="space-y-6">
       <div className="flex items-baseline justify-between border-b border-[#1a4a2e] pb-4">
         <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#5b9bd5]">
-          Sweep Complete · {totalCount.toLocaleString()} Messages Categorized
+          Sweep Complete · {totalCount.toLocaleString()} Messages Pending
         </p>
         <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/60">
           Sweep Cost · <span className="text-[#5b9bd5]">${totalSweepCost.toFixed(2)}</span>
@@ -43,6 +47,9 @@ export function BucketDashboard({
 }
 
 function BucketCard({ summary }: { summary: BucketSummary }) {
+  const showUnsub = UNSUB_BUCKETS.has(summary.bucket);
+  const isSafe = SAFE_BUCKETS.has(summary.bucket);
+
   return (
     <div className="rounded border border-[#1a4a2e] bg-[#0d2b18] p-6">
       <div className="mb-3 flex items-baseline justify-between gap-4">
@@ -77,7 +84,7 @@ function BucketCard({ summary }: { summary: BucketSummary }) {
       )}
 
       {summary.sampleSubjects.length > 0 && (
-        <div>
+        <div className="mb-4">
           <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.25em] text-white/40">
             Recent Subjects
           </p>
@@ -89,6 +96,36 @@ function BucketCard({ summary }: { summary: BucketSummary }) {
             ))}
           </ul>
         </div>
+      )}
+
+      {!isSafe && (
+        <div className="mt-4 flex flex-wrap gap-3 border-t border-[#1a4a2e] pt-4">
+          <form action={archiveBucket}>
+            <input type="hidden" name="bucket" value={summary.bucket} />
+            <button
+              type="submit"
+              className="rounded border border-[#5b9bd5] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.25em] text-[#5b9bd5] transition-colors hover:bg-[#5b9bd5]/10"
+            >
+              Archive {summary.count.toLocaleString()}
+            </button>
+          </form>
+          {showUnsub && (
+            <form action={unsubscribeBucket}>
+              <input type="hidden" name="bucket" value={summary.bucket} />
+              <button
+                type="submit"
+                className="rounded border border-yellow-500/60 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.25em] text-yellow-300 transition-colors hover:bg-yellow-500/10"
+              >
+                Unsubscribe All & Archive
+              </button>
+            </form>
+          )}
+        </div>
+      )}
+      {isSafe && (
+        <p className="mt-4 border-t border-[#1a4a2e] pt-4 text-[10px] uppercase tracking-[0.25em] text-white/30">
+          Manual review only — no bulk actions for this bucket
+        </p>
       )}
     </div>
   );
