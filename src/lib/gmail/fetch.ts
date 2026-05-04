@@ -1,4 +1,7 @@
 import type { gmail_v1 } from "googleapis";
+import { mapWithConcurrency } from "@/lib/util/concurrency";
+
+const GMAIL_FETCH_CONCURRENCY = 5;
 
 export type FetchedMessage = {
   gmailId: string;
@@ -37,20 +40,13 @@ export async function fetchMessageMetadata(
   gmail: gmail_v1.Gmail,
   ids: string[],
 ): Promise<FetchedMessage[]> {
-  const responses = await Promise.all(
-    ids.map((id) =>
-      gmail.users.messages.get({
-        userId: "me",
-        id,
-        format: "metadata",
-        metadataHeaders: [
-          "From",
-          "Subject",
-          "Date",
-          "List-Unsubscribe",
-        ],
-      }),
-    ),
+  const responses = await mapWithConcurrency(ids, GMAIL_FETCH_CONCURRENCY, (id) =>
+    gmail.users.messages.get({
+      userId: "me",
+      id,
+      format: "metadata",
+      metadataHeaders: ["From", "Subject", "Date", "List-Unsubscribe"],
+    }),
   );
 
   return responses.map((res): FetchedMessage => {
