@@ -4,6 +4,7 @@ const PAGE_PASSWORDS: Record<string, string> = {
   "/amerilife-marketing-strategy": "ovitas2026",
   "/ca47media": "troutman2026",
   "/calendarprototype": "Marketing2026",
+  "/gmailcleaner": process.env.GMAIL_CLEANER_PASSWORD ?? "CHANGE_ME_IN_VERCEL",
 };
 
 const DEFAULT_PASSWORD = "ovitas2026";

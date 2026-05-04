@@ -28,7 +28,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/amerilife-marketing-strategy", "/ca47media", "/CalendarPrototype"],
+  matcher: ["/amerilife-marketing-strategy", "/ca47media", "/CalendarPrototype", "/GmailCleaner"],
 };
 
 function loginHTML(pagePath: string) {
