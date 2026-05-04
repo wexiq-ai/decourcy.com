@@ -13,14 +13,33 @@ const STAGE_LABELS: Record<string, string> = {
 export function SweepProgress({
   sweep,
   costSoFar,
+  dbFetched,
+  dbClassified,
+  inboxUnreadEstimate,
 }: {
   sweep: SweepRun;
   costSoFar: number;
+  dbFetched: number;
+  dbClassified: number;
+  inboxUnreadEstimate: number;
 }) {
-  const total = sweep.totalMessages ?? 0;
-  const fetchPct = total > 0 ? (sweep.fetchedCount / total) * 100 : 0;
-  const classifyPct =
-    total > 0 ? (sweep.classifiedCount / total) * 100 : 0;
+  // Prefer live DB counts over sweep_runs counters (which can be stale due
+  // to Inngest step memoization across deploys).
+  const fetched = Math.max(sweep.fetchedCount, dbFetched);
+  const classified = Math.max(sweep.classifiedCount, dbClassified);
+  const total = Math.max(sweep.totalMessages ?? 0, fetched, inboxUnreadEstimate);
+
+  // Derive a more honest status label from observed work, falling back to
+  // sweep_runs.status when nothing has happened yet.
+  const derivedStage =
+    classified > 0
+      ? "Classifying with Haiku"
+      : fetched > 0
+        ? "Fetching Metadata"
+        : (STAGE_LABELS[sweep.status] ?? sweep.status);
+
+  const fetchPct = total > 0 ? (fetched / total) * 100 : 0;
+  const classifyPct = total > 0 ? (classified / total) * 100 : 0;
 
   return (
     <div className="space-y-6">
@@ -28,7 +47,7 @@ export function SweepProgress({
       <div className="rounded border border-[#5b9bd5] bg-[#143d24] p-8">
         <div className="mb-6 flex items-center justify-between">
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#5b9bd5]">
-            Sweep Running — {STAGE_LABELS[sweep.status] ?? sweep.status}
+            Sweep Running — {derivedStage}
           </p>
           <p className="text-xs font-bold uppercase tracking-[0.25em] text-white/60">
             Cost so far · <span className="text-[#5b9bd5]">${costSoFar.toFixed(4)}</span>
@@ -37,14 +56,14 @@ export function SweepProgress({
 
         <ProgressBar
           label="Metadata Fetched"
-          current={sweep.fetchedCount}
+          current={fetched}
           total={total}
           pct={fetchPct}
         />
         <div className="mt-6">
           <ProgressBar
             label="Classified"
-            current={sweep.classifiedCount}
+            current={classified}
             total={total}
             pct={classifyPct}
           />
