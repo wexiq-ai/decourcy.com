@@ -11,7 +11,7 @@ import {
   getBucketSummaries,
   getCurrentSweepCost,
   getLifetimeCost,
-  getRecentAction,
+  getRecentActions,
   isSweepActive,
   isSweepDone,
   type SweepRun,
@@ -62,12 +62,12 @@ export default async function GmailCleanerPage({
             text="Gmail temporarily unavailable (likely rate-limited). Stats below come from local DB. Page will recover automatically."
           />
         )}
-        {view.kind === "connected" && view.recentAction && (
+        {view.kind === "connected" && view.recentActions.length > 0 && (
           <>
-            {view.recentAction.status === "pending" && (
-              <PollSweep intervalMs={3000} />
-            )}
-            <UndoBanner action={view.recentAction} />
+            {view.recentActions.some(
+              (a) => !a.undoneAt && a.status !== "completed",
+            ) && <PollSweep intervalMs={3000} />}
+            <UndoBanner actions={view.recentActions} />
           </>
         )}
 
@@ -159,7 +159,7 @@ type View =
       uncategorizedInDb: number;
       gmailUnavailable: boolean;
       bodyState: "no-sweep" | "running" | "done" | "failed-resumable";
-      recentAction: RecentAction | null;
+      recentActions: RecentAction[];
     };
 
 async function loadView(): Promise<View> {
@@ -210,11 +210,11 @@ async function loadView(): Promise<View> {
     }
   }
 
-  const [summaries, sweepCost, lifetimeCost, recentAction] = await Promise.all([
+  const [summaries, sweepCost, lifetimeCost, recentActions] = await Promise.all([
     done ? getBucketSummaries() : Promise.resolve(null),
     getCurrentSweepCost(),
     getLifetimeCost(),
-    getRecentAction(),
+    getRecentActions(),
   ]);
 
   if (gmailUnavailable && inboxUnread === 0) {
@@ -240,7 +240,7 @@ async function loadView(): Promise<View> {
     uncategorizedInDb: dbStats.uncategorized,
     gmailUnavailable,
     bodyState,
-    recentAction,
+    recentActions,
   };
 }
 
