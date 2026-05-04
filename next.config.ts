@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   env: {
     BUILD_TIMESTAMP: new Date().toLocaleString("en-US", {
       timeZone: "America/New_York",
