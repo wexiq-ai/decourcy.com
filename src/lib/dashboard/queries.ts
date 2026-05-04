@@ -1,4 +1,4 @@
-import { desc, eq, and, gte, isNull, isNotNull, sql } from "drizzle-orm";
+import { desc, eq, and, gte, isNull, isNotNull, sql, inArray } from "drizzle-orm";
 import { db, schema } from "@/lib/db/client";
 import { BUCKETS, type Bucket } from "@/lib/claude/classify";
 
@@ -118,6 +118,7 @@ export type RecentAction = {
   kind: string;
   bucket: string | null;
   messageCount: number;
+  archivedSoFar: number;
   status: string;
   processed: number;
   succeeded: number | null;
@@ -126,30 +127,60 @@ export type RecentAction = {
   expiresAt: Date;
 };
 
-export async function getRecentAction(): Promise<RecentAction | null> {
+export async function getRecentActions(): Promise<RecentAction[]> {
   const cutoff = new Date(Date.now() - UNDO_WINDOW_MS);
   const rows = await db
     .select()
     .from(schema.actions)
     .where(gte(schema.actions.createdAt, cutoff))
     .orderBy(desc(schema.actions.createdAt))
-    .limit(1);
+    .limit(5);
 
-  const row = rows[0];
-  if (!row) return null;
+  return Promise.all(
+    rows.map(async (row) => {
+      const scope = (row.scopeJson ?? {}) as Record<string, unknown>;
+      const ids = row.messageIds ?? [];
+      const status =
+        typeof scope.status === "string" ? scope.status : "pending";
 
-  const scope = (row.scopeJson ?? {}) as Record<string, unknown>;
+      // Count how many of this action's messages are now archived.
+      // Skips the count when status is completed (waste) or when there
+      // are no messages.
+      let archivedSoFar = 0;
+      if (ids.length > 0 && status !== "completed") {
+        const result = await db
+          .select({ n: sql<number>`count(*)::int` })
+          .from(schema.messages)
+          .where(
+            and(
+              isNotNull(schema.messages.actedOnAt),
+              inArray(schema.messages.gmailId, ids),
+            ),
+          );
+        archivedSoFar = result[0]?.n ?? 0;
+      } else if (status === "completed") {
+        archivedSoFar = ids.length;
+      }
 
-  return {
-    id: row.id,
-    kind: row.kind,
-    bucket: typeof scope.bucket === "string" ? scope.bucket : null,
-    messageCount: row.messageIds?.length ?? 0,
-    status: typeof scope.status === "string" ? scope.status : "pending",
-    processed: typeof scope.processed === "number" ? scope.processed : 0,
-    succeeded: typeof scope.succeeded === "number" ? scope.succeeded : null,
-    createdAt: row.createdAt,
-    undoneAt: row.undoneAt,
-    expiresAt: new Date(row.createdAt.getTime() + UNDO_WINDOW_MS),
-  };
+      return {
+        id: row.id,
+        kind: row.kind,
+        bucket: typeof scope.bucket === "string" ? scope.bucket : null,
+        messageCount: ids.length,
+        archivedSoFar,
+        status,
+        processed: typeof scope.processed === "number" ? scope.processed : 0,
+        succeeded:
+          typeof scope.succeeded === "number" ? scope.succeeded : null,
+        createdAt: row.createdAt,
+        undoneAt: row.undoneAt,
+        expiresAt: new Date(row.createdAt.getTime() + UNDO_WINDOW_MS),
+      };
+    }),
+  );
+}
+
+export async function getRecentAction(): Promise<RecentAction | null> {
+  const all = await getRecentActions();
+  return all[0] ?? null;
 }
