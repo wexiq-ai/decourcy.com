@@ -1,5 +1,6 @@
 import { getAnthropic } from "./client";
 import { recordUsage, type ModelId } from "./cost";
+import { withRetry, isRateLimitError } from "@/lib/util/retry";
 
 export type Bucket =
   | "PERSONAL"
@@ -52,18 +53,22 @@ export async function classifyOne(
   const anthropic = getAnthropic();
   const userText = `From: ${message.from}\nSubject: ${message.subject}\nSnippet: ${message.snippet}`;
 
-  const response = await anthropic.messages.create({
-    model,
-    max_tokens: 64,
-    system: [
-      {
-        type: "text",
-        text: SYSTEM_PROMPT,
-        cache_control: { type: "ephemeral" },
-      },
-    ],
-    messages: [{ role: "user", content: userText }],
-  });
+  const response = await withRetry(
+    () =>
+      anthropic.messages.create({
+        model,
+        max_tokens: 64,
+        system: [
+          {
+            type: "text",
+            text: SYSTEM_PROMPT,
+            cache_control: { type: "ephemeral" },
+          },
+        ],
+        messages: [{ role: "user", content: userText }],
+      }),
+    { isRetryable: isRateLimitError, maxAttempts: 5 },
+  );
 
   const cost = await recordUsage({
     model,

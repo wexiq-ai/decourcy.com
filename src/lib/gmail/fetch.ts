@@ -1,7 +1,8 @@
 import type { gmail_v1 } from "googleapis";
 import { mapWithConcurrency } from "@/lib/util/concurrency";
+import { withRetry, isRateLimitError } from "@/lib/util/retry";
 
-const GMAIL_FETCH_CONCURRENCY = 5;
+const GMAIL_FETCH_CONCURRENCY = 3;
 
 export type FetchedMessage = {
   gmailId: string;
@@ -41,12 +42,16 @@ export async function fetchMessageMetadata(
   ids: string[],
 ): Promise<FetchedMessage[]> {
   const responses = await mapWithConcurrency(ids, GMAIL_FETCH_CONCURRENCY, (id) =>
-    gmail.users.messages.get({
-      userId: "me",
-      id,
-      format: "metadata",
-      metadataHeaders: ["From", "Subject", "Date", "List-Unsubscribe"],
-    }),
+    withRetry(
+      () =>
+        gmail.users.messages.get({
+          userId: "me",
+          id,
+          format: "metadata",
+          metadataHeaders: ["From", "Subject", "Date", "List-Unsubscribe"],
+        }),
+      { isRetryable: isRateLimitError, maxAttempts: 6 },
+    ),
   );
 
   return responses.map((res): FetchedMessage => {

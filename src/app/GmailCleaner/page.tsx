@@ -16,6 +16,8 @@ import {
   type SweepRun,
   type BucketSummary,
 } from "@/lib/dashboard/queries";
+import { db, schema } from "@/lib/db/client";
+import { sql, isNull } from "drizzle-orm";
 import { RunSweepButton } from "./components/RunSweepButton";
 import { SweepProgress } from "./components/SweepProgress";
 import { BucketDashboard } from "./components/BucketDashboard";
@@ -26,7 +28,6 @@ type SearchParams = {
   connected?: string;
   disconnected?: string;
   oauth_error?: string;
-  swept?: string;
 };
 
 export default async function GmailCleanerPage({
@@ -51,6 +52,12 @@ export default async function GmailCleanerPage({
         {params.oauth_error && (
           <Banner kind="err" text={`OAuth error: ${params.oauth_error}`} />
         )}
+        {view.kind === "connected" && view.gmailUnavailable && (
+          <Banner
+            kind="muted"
+            text="Gmail temporarily unavailable (likely rate-limited). Stats below come from local DB. Page will recover automatically."
+          />
+        )}
 
         <FadeIn>
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-[#5b9bd5]">
@@ -67,6 +74,7 @@ export default async function GmailCleanerPage({
             {view.kind === "connected" && view.bodyState === "no-sweep" && "Connected — Ready to Sweep"}
             {view.kind === "connected" && view.bodyState === "running" && "Sweep in Progress"}
             {view.kind === "connected" && view.bodyState === "done" && "Sweep Complete — Action Phase Pending"}
+            {view.kind === "connected" && view.bodyState === "failed-resumable" && "Sweep Stopped — Resume Available"}
           </p>
         </FadeIn>
 
@@ -77,11 +85,28 @@ export default async function GmailCleanerPage({
               email={view.profile.emailAddress}
               messagesTotal={view.profile.messagesTotal}
               inboxUnread={view.inboxUnread}
+              messagesInDb={view.messagesInDb}
+              uncategorizedInDb={view.uncategorizedInDb}
             >
-              {view.bodyState === "no-sweep" && (
+              {(view.bodyState === "no-sweep" || view.bodyState === "failed-resumable") && (
                 <>
-                  <RunSweepButton inboxUnread={view.inboxUnread} />
-                  <SampleMessages samples={view.samples} />
+                  {view.sweep?.status === "failed" && (
+                    <FailedSweepNote
+                      sweep={view.sweep}
+                      uncategorizedInDb={view.uncategorizedInDb}
+                    />
+                  )}
+                  <RunSweepButton
+                    inboxUnread={view.inboxUnread}
+                    isResume={view.bodyState === "failed-resumable"}
+                    remaining={Math.max(
+                      0,
+                      view.inboxUnread - view.messagesInDb,
+                    )}
+                  />
+                  {view.bodyState === "no-sweep" && (
+                    <SampleMessages samples={view.samples} />
+                  )}
                 </>
               )}
               {view.bodyState === "running" && view.sweep && (
@@ -112,7 +137,10 @@ type View =
       summaries: BucketSummary[] | null;
       sweepCost: number;
       lifetimeCost: number;
-      bodyState: "no-sweep" | "running" | "done";
+      messagesInDb: number;
+      uncategorizedInDb: number;
+      gmailUnavailable: boolean;
+      bodyState: "no-sweep" | "running" | "done" | "failed-resumable";
     };
 
 async function loadView(): Promise<View> {
@@ -122,16 +150,49 @@ async function loadView(): Promise<View> {
   const sweep = await getLatestSweepRun();
   const active = isSweepActive(sweep);
   const done = isSweepDone(sweep);
+  const failedWithProgress =
+    sweep?.status === "failed" && (sweep.fetchedCount ?? 0) > 0;
 
-  const [profile, inboxUnread, samples, summaries, sweepCost, lifetimeCost] =
-    await Promise.all([
+  let gmailUnavailable = false;
+  let profile = { emailAddress: "—", messagesTotal: 0 };
+  let inboxUnread = 0;
+  let samples: SampleMessage[] = [];
+
+  try {
+    const [p, count] = await Promise.all([
       getProfile(client.gmail),
       getInboxUnreadCount(client.gmail),
-      done || active ? Promise.resolve([]) : listSampleMessages(client.gmail, 10),
-      done ? getBucketSummaries() : Promise.resolve(null),
-      getCurrentSweepCost(),
-      getLifetimeCost(),
     ]);
+    profile = p;
+    inboxUnread = count;
+    if (!active && !done && !failedWithProgress) {
+      try {
+        samples = await listSampleMessages(client.gmail, 10);
+      } catch {
+        samples = [];
+      }
+    }
+  } catch {
+    gmailUnavailable = true;
+    profile = { emailAddress: client.account.email, messagesTotal: 0 };
+  }
+
+  const [dbStats, summaries, sweepCost, lifetimeCost] = await Promise.all([
+    getDbStats(),
+    done ? getBucketSummaries() : Promise.resolve(null),
+    getCurrentSweepCost(),
+    getLifetimeCost(),
+  ]);
+
+  if (gmailUnavailable && inboxUnread === 0) {
+    inboxUnread = dbStats.uncategorized + dbStats.categorized;
+  }
+
+  let bodyState: "no-sweep" | "running" | "done" | "failed-resumable";
+  if (active) bodyState = "running";
+  else if (done) bodyState = "done";
+  else if (failedWithProgress) bodyState = "failed-resumable";
+  else bodyState = "no-sweep";
 
   return {
     kind: "connected",
@@ -142,8 +203,21 @@ async function loadView(): Promise<View> {
     summaries,
     sweepCost,
     lifetimeCost,
-    bodyState: active ? "running" : done ? "done" : "no-sweep",
+    messagesInDb: dbStats.uncategorized + dbStats.categorized,
+    uncategorizedInDb: dbStats.uncategorized,
+    gmailUnavailable,
+    bodyState,
   };
+}
+
+async function getDbStats(): Promise<{ uncategorized: number; categorized: number }> {
+  const rows = await db
+    .select({
+      uncategorized: sql<number>`count(*) filter (where category is null)::int`,
+      categorized: sql<number>`count(*) filter (where category is not null)::int`,
+    })
+    .from(schema.messages);
+  return rows[0] ?? { uncategorized: 0, categorized: 0 };
 }
 
 function TopBar({
@@ -221,11 +295,15 @@ function ConnectedShell({
   email,
   messagesTotal,
   inboxUnread,
+  messagesInDb,
+  uncategorizedInDb,
   children,
 }: {
   email: string;
   messagesTotal: number;
   inboxUnread: number;
+  messagesInDb: number;
+  uncategorizedInDb: number;
   children: React.ReactNode;
 }) {
   return (
@@ -234,10 +312,14 @@ function ConnectedShell({
         <p className="mb-4 text-xs font-bold uppercase tracking-[0.3em] text-[#5b9bd5]">
           Mailbox
         </p>
-        <dl className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <dl className="grid grid-cols-1 gap-6 sm:grid-cols-4">
           <Stat label="Account" value={email} />
           <Stat label="Total Messages" value={messagesTotal.toLocaleString()} />
           <Stat label="Inbox Unread" value={inboxUnread.toLocaleString()} />
+          <Stat
+            label="Fetched / Pending"
+            value={`${messagesInDb.toLocaleString()} / ${uncategorizedInDb.toLocaleString()}`}
+          />
         </dl>
       </div>
 
@@ -251,6 +333,33 @@ function ConnectedShell({
           Disconnect Gmail
         </button>
       </form>
+    </div>
+  );
+}
+
+function FailedSweepNote({
+  sweep,
+  uncategorizedInDb,
+}: {
+  sweep: SweepRun;
+  uncategorizedInDb: number;
+}) {
+  return (
+    <div className="rounded border border-yellow-500/40 bg-yellow-950/30 p-6">
+      <p className="mb-2 text-xs font-bold uppercase tracking-[0.3em] text-yellow-400">
+        Last Sweep Stopped
+      </p>
+      <p className="text-sm text-white/70">
+        Reached {sweep.fetchedCount.toLocaleString()} of{" "}
+        {(sweep.totalMessages ?? 0).toLocaleString()} fetched. {uncategorizedInDb.toLocaleString()}{" "}
+        messages are in the local DB awaiting classification. Resume to pick
+        up where the sweep left off — already-fetched messages are skipped.
+      </p>
+      {sweep.errorMessage && (
+        <p className="mt-3 text-xs text-yellow-300/80">
+          Reason: {sweep.errorMessage}
+        </p>
+      )}
     </div>
   );
 }

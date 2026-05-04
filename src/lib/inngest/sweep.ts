@@ -34,11 +34,22 @@ export const sweepRun = inngest.createFunction(
       const client = await getGmailClient();
       if (!client) throw new Error("No connected Gmail account");
       const all = await listAllUnreadInboxIds(client.gmail);
+
+      const existingRows = await db
+        .select({ id: schema.messages.gmailId })
+        .from(schema.messages);
+      const existingSet = new Set(existingRows.map((r) => r.id));
+      const newIds = all.filter((id) => !existingSet.has(id));
+
       await db
         .update(schema.sweepRuns)
-        .set({ totalMessages: all.length, status: "fetching" })
+        .set({
+          totalMessages: all.length,
+          fetchedCount: existingRows.length,
+          status: "fetching",
+        })
         .where(eq(schema.sweepRuns.id, sweepId));
-      return all;
+      return newIds;
     });
 
     for (let i = 0; i < ids.length; i += FETCH_BATCH_SIZE) {
