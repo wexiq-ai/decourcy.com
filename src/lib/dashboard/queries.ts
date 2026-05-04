@@ -1,0 +1,100 @@
+import { desc, eq, and, gte, isNotNull, sql } from "drizzle-orm";
+import { db, schema } from "@/lib/db/client";
+import { BUCKETS, type Bucket } from "@/lib/claude/classify";
+
+export type SweepRun = typeof schema.sweepRuns.$inferSelect;
+
+export async function getLatestSweepRun(): Promise<SweepRun | null> {
+  const rows = await db
+    .select()
+    .from(schema.sweepRuns)
+    .orderBy(desc(schema.sweepRuns.startedAt))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export type BucketSummary = {
+  bucket: Bucket;
+  count: number;
+  topSenders: { email: string; count: number }[];
+  sampleSubjects: string[];
+};
+
+export async function getBucketSummaries(): Promise<BucketSummary[]> {
+  const counts = await db
+    .select({
+      category: schema.messages.category,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(schema.messages)
+    .where(isNotNull(schema.messages.category))
+    .groupBy(schema.messages.category);
+
+  const summaries: BucketSummary[] = [];
+
+  for (const bucket of BUCKETS) {
+    const row = counts.find((c) => c.category === bucket);
+    const count = row?.count ?? 0;
+    if (count === 0) {
+      summaries.push({ bucket, count: 0, topSenders: [], sampleSubjects: [] });
+      continue;
+    }
+
+    const topSenders = await db
+      .select({
+        email: schema.messages.senderEmail,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(schema.messages)
+      .where(eq(schema.messages.category, bucket))
+      .groupBy(schema.messages.senderEmail)
+      .orderBy(sql`count(*) desc`)
+      .limit(3);
+
+    const subjects = await db
+      .select({ subject: schema.messages.subject })
+      .from(schema.messages)
+      .where(eq(schema.messages.category, bucket))
+      .orderBy(desc(schema.messages.internalDate))
+      .limit(3);
+
+    summaries.push({
+      bucket,
+      count,
+      topSenders: topSenders.map((t) => ({ email: t.email, count: t.count })),
+      sampleSubjects: subjects
+        .map((s) => s.subject)
+        .filter((s): s is string => Boolean(s)),
+    });
+  }
+
+  return summaries;
+}
+
+export async function getCurrentSweepCost(): Promise<number> {
+  const sweep = await getLatestSweepRun();
+  if (!sweep) return 0;
+  const rows = await db
+    .select({ sum: sql<number>`coalesce(sum(cost_usd), 0)::float` })
+    .from(schema.usageEvents)
+    .where(gte(schema.usageEvents.createdAt, sweep.startedAt));
+  return rows[0]?.sum ?? 0;
+}
+
+export async function getLifetimeCost(): Promise<number> {
+  const rows = await db
+    .select({ sum: sql<number>`coalesce(sum(cost_usd), 0)::float` })
+    .from(schema.usageEvents);
+  return rows[0]?.sum ?? 0;
+}
+
+export function isSweepActive(sweep: SweepRun | null): boolean {
+  if (!sweep) return false;
+  return ["pending", "fetching", "classifying", "sonnet-recheck"].includes(
+    sweep.status,
+  );
+}
+
+export function isSweepDone(sweep: SweepRun | null): boolean {
+  return sweep?.status === "done";
+}

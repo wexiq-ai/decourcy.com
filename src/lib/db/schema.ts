@@ -94,6 +94,22 @@ export const usageEvents = pgTable(
   ],
 );
 
+export const sweepRuns = pgTable(
+  "sweep_runs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    status: text("status").notNull(),
+    totalMessages: integer("total_messages"),
+    fetchedCount: integer("fetched_count").notNull().default(0),
+    classifiedCount: integer("classified_count").notNull().default(0),
+    sonnetRecheckCount: integer("sonnet_recheck_count").notNull().default(0),
+    startedAt: timestamp("started_at").defaultNow().notNull(),
+    finishedAt: timestamp("finished_at"),
+    errorMessage: text("error_message"),
+  },
+  (t) => [index("sweep_runs_started_idx").on(t.startedAt)],
+);
+
 export const rules = pgTable("rules", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
