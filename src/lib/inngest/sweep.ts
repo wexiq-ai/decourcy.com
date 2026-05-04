@@ -7,10 +7,13 @@ import {
   fetchMessageMetadata,
 } from "@/lib/gmail/fetch";
 import { classifyOne } from "@/lib/claude/classify";
+import { mapWithConcurrency } from "@/lib/util/concurrency";
 
-const FETCH_BATCH_SIZE = 200;
-const CLASSIFY_BATCH_SIZE = 40;
-const SONNET_BATCH_SIZE = 30;
+const FETCH_BATCH_SIZE = 100;
+const CLASSIFY_BATCH_SIZE = 30;
+const CLASSIFY_CONCURRENCY = 8;
+const SONNET_BATCH_SIZE = 15;
+const SONNET_CONCURRENCY = 4;
 const SONNET_CONFIDENCE_THRESHOLD = 0.75;
 
 type SweepEvent = {
@@ -104,8 +107,10 @@ export const sweepRun = inngest.createFunction(
     for (let i = 0; i < senders.length; i += CLASSIFY_BATCH_SIZE) {
       const batch = senders.slice(i, i + CLASSIFY_BATCH_SIZE);
       await step.run(`classify-haiku-${i}`, async () => {
-        const results = await Promise.all(
-          batch.map(async (s) => {
+        const results = await mapWithConcurrency(
+          batch,
+          CLASSIFY_CONCURRENCY,
+          async (s) => {
             try {
               const { result } = await classifyOne("claude-haiku-4-5-20251001", {
                 from: `${s.senderName ?? ""} <${s.senderEmail}>`.trim(),
@@ -120,7 +125,7 @@ export const sweepRun = inngest.createFunction(
                 confidence: 0,
               };
             }
-          }),
+          },
         );
         const now = new Date();
         for (const r of results) {
@@ -185,8 +190,10 @@ export const sweepRun = inngest.createFunction(
     for (let i = 0; i < uncertain.length; i += SONNET_BATCH_SIZE) {
       const batch = uncertain.slice(i, i + SONNET_BATCH_SIZE);
       await step.run(`classify-sonnet-${i}`, async () => {
-        const results = await Promise.all(
-          batch.map(async (s) => {
+        const results = await mapWithConcurrency(
+          batch,
+          SONNET_CONCURRENCY,
+          async (s) => {
             try {
               const { result } = await classifyOne("claude-sonnet-4-6", {
                 from: `${s.senderName ?? ""} <${s.senderEmail}>`.trim(),
@@ -197,7 +204,7 @@ export const sweepRun = inngest.createFunction(
             } catch {
               return null;
             }
-          }),
+          },
         );
         const now = new Date();
         for (const r of results) {
