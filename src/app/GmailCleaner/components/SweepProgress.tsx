@@ -23,16 +23,27 @@ export function SweepProgress({
   dbClassified: number;
   inboxUnreadEstimate: number;
 }) {
-  // Prefer live DB counts over sweep_runs counters (which can be stale due
-  // to Inngest step memoization across deploys).
-  const fetched = Math.max(sweep.fetchedCount, dbFetched);
-  const classified = Math.max(sweep.classifiedCount, dbClassified);
-  const total = Math.max(sweep.totalMessages ?? 0, fetched, inboxUnreadEstimate);
+  // For a re-sweep that's just starting, sweep.totalMessages is still null
+  // and sweep.fetchedCount is 0, but the DB already has 33k messages from
+  // the prior sweep. We treat this as "Initializing" rather than showing a
+  // misleadingly-full progress bar.
+  const initializing =
+    sweep.status === "pending" &&
+    sweep.totalMessages === null &&
+    sweep.fetchedCount === 0;
 
-  // Derive a more honest status label from observed work, falling back to
-  // sweep_runs.status when nothing has happened yet.
-  const derivedStage =
-    classified > 0
+  // For an active sweep, prefer the per-sweep counters over cumulative DB
+  // counts. Only fall back to dbFetched if the sweep_runs row appears
+  // stuck (matches the pre-deploy memoization edge case).
+  const isStaleCounter =
+    !initializing && sweep.fetchedCount === 0 && dbFetched > 0;
+  const fetched = isStaleCounter ? dbFetched : sweep.fetchedCount;
+  const classified = isStaleCounter ? dbClassified : sweep.classifiedCount;
+  const total = sweep.totalMessages ?? Math.max(fetched, inboxUnreadEstimate);
+
+  const derivedStage = initializing
+    ? "Initializing — Checking for New Messages"
+    : classified > 0
       ? "Classifying with Haiku"
       : fetched > 0
         ? "Fetching Metadata"
@@ -54,20 +65,30 @@ export function SweepProgress({
           </p>
         </div>
 
-        <ProgressBar
-          label="Metadata Fetched"
-          current={fetched}
-          total={total}
-          pct={fetchPct}
-        />
-        <div className="mt-6">
-          <ProgressBar
-            label="Classified"
-            current={classified}
-            total={total}
-            pct={classifyPct}
-          />
-        </div>
+        {initializing ? (
+          <p className="text-sm text-white/70">
+            Pulling the current unread inbox list from Gmail and comparing
+            against the {dbFetched.toLocaleString()} messages already
+            classified. Anything new will be fetched and routed to a bucket.
+          </p>
+        ) : (
+          <>
+            <ProgressBar
+              label="Metadata Fetched"
+              current={fetched}
+              total={total}
+              pct={fetchPct}
+            />
+            <div className="mt-6">
+              <ProgressBar
+                label="Classified"
+                current={classified}
+                total={total}
+                pct={classifyPct}
+              />
+            </div>
+          </>
+        )}
         {sweep.status === "sonnet-recheck" && (
           <p className="mt-6 text-xs text-white/60">
             Sonnet re-checking {sweep.sonnetRecheckCount.toLocaleString()}{" "}
