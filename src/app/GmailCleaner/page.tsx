@@ -168,14 +168,14 @@ async function loadView(): Promise<View> {
 
   const sweep = await getLatestSweepRun();
   const dbStats = await getDbStats();
-  // Effectively done: every message in the DB has been classified.
-  // Defends against sweep_runs.status getting stuck at "pending" or
-  // "classifying" due to Inngest step memoization across deploys.
+  // Active sweep_run wins. A re-sweep started after everything was
+  // classified should show progress, not stay on the bucket dashboard.
+  const active = isSweepActive(sweep);
   const effectivelyDone =
-    dbStats.uncategorized === 0 && dbStats.categorized > 0;
-  const done = isSweepDone(sweep) || effectivelyDone;
-  const active = !done && isSweepActive(sweep);
+    !active && dbStats.uncategorized === 0 && dbStats.categorized > 0;
+  const done = !active && (isSweepDone(sweep) || effectivelyDone);
   const failedWithProgress =
+    !active &&
     !done &&
     sweep?.status === "failed" &&
     (sweep.fetchedCount ?? 0) > 0;
