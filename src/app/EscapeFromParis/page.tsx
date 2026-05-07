@@ -26,30 +26,37 @@ const ART = {
             ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚══════╝`,
 
   eiffel: `
-                .
-               .|.
-              .|||.
-             .|||||.
-            .|||||||.
-           .|||||||||.
-          /     |     \\
-         /   ___|___   \\
-        /   /       \\   \\
-       /___/         \\___\\
-       |  |           |  |
-       |__|           |__|
-       |  |           |  |
-       |  |           |  |
-       |__|___________|__|
-       |                 |
-       |                 |
-       |_________________|
-       |                 |
-      _|_________________|_
-     |__|_____________|__|
-        |             |
-       _|_           _|_
-      |___|         |___|`,
+                  *
+                 /|\\
+                / | \\
+               /  |  \\
+              /   |   \\
+             /____|____\\
+             |    |    |
+            /     |     \\
+           /      |      \\
+          /_______|_______\\
+          |       |       |
+          |     [===]     |
+          |_______________|
+         /                 \\
+        /                   \\
+       /         |           \\
+      /__________|____________\\
+      |          |            |
+      |       2E ÉTAGE        |
+      |_______________________|
+     /                         \\
+    /                           \\
+   /_____________________________\\
+   |                             |
+   |        PARIS · 1889         |
+   |_____________________________|
+   ||                           ||
+   ||___________________________||
+    |                           |
+   _|_                         _|_
+  |___|                       |___|`,
 
   plane: `
                   ___
@@ -139,10 +146,10 @@ const ART = {
       [GUCCI LOAFERS]
       [HERMÈS SCARF]`,
 
-  saskia: `
+  michelle: `
         _______
        | -.-.- |
-       | o   o |  <- Saskia (wife)
+       | o   o |  <- Michelle (wife)
        |  \\_/  |  "He has not opened
         \\_____/    his laptop. Once.
         /|   |\\     In three days."
@@ -297,7 +304,7 @@ interface Stage {
 }
 
 interface GameEvent {
-  who: "ovi" | "saskia";
+  who: "ovi" | "michelle";
   text: string[];
   effects: Partial<Stats>;
 }
@@ -314,7 +321,7 @@ interface Stats {
   hair: number;
   suspicion: number;
   days: number;
-  saskiaPatience: number;
+  michellePatience: number;
 }
 
 const OVI_STATUSES = [
@@ -330,7 +337,7 @@ const OVI_STATUSES = [
   "Asking for the chef",
 ];
 
-const SASKIA_STATUSES = [
+const MICHELLE_STATUSES = [
   "Reading the receipts",
   "On the phone with her sister",
   "At the spa (alone)",
@@ -368,21 +375,25 @@ const OVI_EVENTS: GameEvent[] = [
       "a €4,200 cashmere coat 'for Switzerland.'",
       "He charges it to his AmeriLife corporate",
       "card. He files it under 'CLIENT MEETING",
-      "ATTIRE.' Saskia sees the receipt.",
+      "ATTIRE.' Michelle sees the receipt.",
     ],
-    effects: { euros: -4200, saskiaPatience: -10 },
+    effects: { euros: -4200, michellePatience: -10 },
   },
   {
     who: "ovi",
     text: [
       "** OVI EVENT **",
       "",
-      "The Paris humidity hits Ovi's blowout",
-      "at Place de la Concorde. His hair, once",
-      "a cathedral of Davines product, collapses.",
-      "He runs back to the hotel. He cancels",
-      "his afternoon. He weeps softly into a",
-      "complimentary bathrobe.",
+      "The Paris humidity hits Ovi's combover at",
+      "Place de la Concorde. The 14 wisps he had",
+      "negotiated across the top of his head this",
+      "morning separate, then revolt, then point at",
+      "the sky like an accusation. His scalp is, in",
+      "the afternoon light, a beacon. He runs back",
+      "to the hotel. He weeps into a Le Bristol",
+      "bathrobe. Michelle, in the next room, runs",
+      "her fingers through her own perfect hair and",
+      "does not say anything.",
     ],
     effects: { hair: -25, days: 1, pride: -8 },
   },
@@ -479,11 +490,11 @@ const OVI_EVENTS: GameEvent[] = [
       "Ovi 'invests' €600 with a man at Harry's",
       "New York Bar who claims he is launching a",
       "'curated mezcal subscription box.' The man",
-      "leaves through the back. Ovi tells Saskia",
+      "leaves through the back. Ovi tells Michelle",
       "it was a 'strategic capital deployment.'",
       "She nods. She is making a list.",
     ],
-    effects: { euros: -600, saskiaPatience: -8 },
+    effects: { euros: -600, michellePatience: -8 },
   },
   {
     who: "ovi",
@@ -513,7 +524,7 @@ const OVI_EVENTS: GameEvent[] = [
       "Nationale officer. He stops chewing.",
       "He puts down his fork. Slowly.",
     ],
-    effects: { suspicion: 25, saskiaPatience: -15 },
+    effects: { suspicion: 25, michellePatience: -15 },
   },
   {
     who: "ovi",
@@ -531,39 +542,39 @@ const OVI_EVENTS: GameEvent[] = [
   },
 ];
 
-const SASKIA_EVENTS: GameEvent[] = [
+const MICHELLE_EVENTS: GameEvent[] = [
   {
-    who: "saskia",
+    who: "michelle",
     text: [
-      "** SASKIA EVENT **",
+      "** MICHELLE EVENT **",
       "",
-      "Saskia notices Ovi has not opened his",
+      "Michelle notices Ovi has not opened his",
       "laptop. Not in three days. She has",
       "noticed. She does not say anything.",
       "She just notices. Her eyebrow does",
       "something subtle. Something terminal.",
     ],
-    effects: { saskiaPatience: -10 },
+    effects: { michellePatience: -10 },
   },
   {
-    who: "saskia",
+    who: "michelle",
     text: [
-      "** SASKIA EVENT **",
+      "** MICHELLE EVENT **",
       "",
-      "Saskia asks, casually, what city in",
+      "Michelle asks, casually, what city in",
       "Switzerland the meeting is in. Ovi says",
       "'Geneva.' Then 'Zurich.' Then 'one of",
       "those.' She nods. She googles 'AmeriLife",
       "Switzerland office.' There isn't one.",
     ],
-    effects: { saskiaPatience: -15, suspicion: 5 },
+    effects: { michellePatience: -15, suspicion: 5 },
   },
   {
-    who: "saskia",
+    who: "michelle",
     text: [
-      "** SASKIA EVENT **",
+      "** MICHELLE EVENT **",
       "",
-      "Saskia goes to the spa at Le Bristol",
+      "Michelle goes to the spa at Le Bristol",
       "without Ovi. She gets the €600 'Royal",
       "Renaissance' treatment. She charges it",
       "to the room. She tips in cash from his",
@@ -573,53 +584,53 @@ const SASKIA_EVENTS: GameEvent[] = [
     effects: { euros: -700 },
   },
   {
-    who: "saskia",
+    who: "michelle",
     text: [
-      "** SASKIA EVENT **",
+      "** MICHELLE EVENT **",
       "",
-      "Ovi catches Saskia laughing at her phone.",
+      "Ovi catches Michelle laughing at her phone.",
       "He asks who she's texting. She says,",
       "'My sister.' She is not texting her sister.",
       "She is texting a divorce attorney named",
       "Brad. Brad has reviewed the iCloud history.",
       "Brad has thoughts.",
     ],
-    effects: { saskiaPatience: -5 },
+    effects: { michellePatience: -5 },
   },
   {
-    who: "saskia",
+    who: "michelle",
     text: [
-      "** SASKIA EVENT **",
+      "** MICHELLE EVENT **",
       "",
-      "Saskia takes herself to lunch at Lipp on",
+      "Michelle takes herself to lunch at Lipp on",
       "Boulevard Saint-Germain. She orders the",
       "choucroute, a glass of Sancerre, and",
       "dessert. She eats slowly. She does not",
       "answer Ovi's calls. He calls 11 times.",
       "She watches the missed call counter rise.",
     ],
-    effects: { saskiaPatience: -3, euros: -180 },
+    effects: { michellePatience: -3, euros: -180 },
   },
   {
-    who: "saskia",
+    who: "michelle",
     text: [
-      "** SASKIA EVENT **",
+      "** MICHELLE EVENT **",
       "",
-      "Saskia opens his luggage 'looking for",
+      "Michelle opens his luggage 'looking for",
       "the iPad charger.' She finds three",
       "passports. None of them are hers. None",
       "of them are in his name. Two are in the",
       "name 'Owen Vasilescu.' One is Belgian.",
       "She takes a photograph. She closes the bag.",
     ],
-    effects: { suspicion: 20, saskiaPatience: -15 },
+    effects: { suspicion: 20, michellePatience: -15 },
   },
   {
-    who: "saskia",
+    who: "michelle",
     text: [
-      "** SASKIA EVENT **",
+      "** MICHELLE EVENT **",
       "",
-      "Saskia is now reading 'How to Freeze",
+      "Michelle is now reading 'How to Freeze",
       "Joint Accounts' on a hotel iPad. The",
       "browser history is set to private. The",
       "Wi-Fi log is not. The IT desk at AmeriLife",
@@ -629,17 +640,17 @@ const SASKIA_EVENTS: GameEvent[] = [
     effects: { suspicion: 10 },
   },
   {
-    who: "saskia",
+    who: "michelle",
     text: [
-      "** SASKIA EVENT **",
+      "** MICHELLE EVENT **",
       "",
-      "Saskia rebooks her return flight. Solo.",
+      "Michelle rebooks her return flight. Solo.",
       "Business class. She uses Ovi's miles. She",
       "does not mention it. The confirmation email",
       "goes to her secondary inbox. The seat is",
       "1A. The flight is in 36 hours.",
     ],
-    effects: { saskiaPatience: -20 },
+    effects: { michellePatience: -20 },
   },
 ];
 
@@ -656,7 +667,7 @@ const STAGES: Stage[] = [
       "than the seat. He has been awake for 14",
       "hours. He looks like a Pinterest board.",
       "",
-      "Behind him: his wife Saskia, dragging two",
+      "Behind him: his wife Michelle, dragging two",
       "Goyard trunks. She does not work at AmeriLife.",
       "She has never worked at AmeriLife. She is",
       "here because Ovi insisted, and because the",
@@ -672,7 +683,7 @@ const STAGES: Stage[] = [
         response: [
           "The RER B leaves CDG and immediately",
           "stops at Aulnay-sous-Bois. Then again at",
-          "La Plaine-Stade de France. Saskia clutches",
+          "La Plaine-Stade de France. Michelle clutches",
           "her Goyard. Ovi clutches his blowout.",
           "",
           "Across the aisle: a woman in a beret",
@@ -696,9 +707,9 @@ const STAGES: Stage[] = [
           "looks at the dollars. The driver looks",
           "at Ovi. The driver does not say merci.",
           "",
-          "Saskia: 'You don't tip in dollars in",
+          "Michelle: 'You don't tip in dollars in",
           "Paris, William.' Ovi: 'It's the gesture.'",
-          "Saskia: 'It is, in fact, the gesture.'",
+          "Michelle: 'It is, in fact, the gesture.'",
         ],
         effects: { euros: -180, days: 1 },
       },
@@ -710,9 +721,9 @@ const STAGES: Stage[] = [
           "is not. The driver demands payment up",
           "front in cash. The car is a Renault Clio.",
           "There is a baby seat. There is no baby.",
-          "Ovi pays. Saskia closes her eyes.",
+          "Ovi pays. Michelle closes her eyes.",
         ],
-        effects: { euros: -450, days: 1, saskiaPatience: -5 },
+        effects: { euros: -450, days: 1, michellePatience: -5 },
       },
     ],
   },
@@ -729,7 +740,7 @@ const STAGES: Stage[] = [
       "Ovi nearly cries. He overtips. The concierge",
       "is too professional to comment.",
       "",
-      "Saskia heads to the suite to rest. She has",
+      "Michelle heads to the suite to rest. She has",
       "questions about the trip. She is saving them.",
       "",
       "Ovi has the afternoon free. The 'meeting'",
@@ -789,7 +800,7 @@ const STAGES: Stage[] = [
     art: "eiffel",
     narrative: [
       "Day two. Ovi 'has to take a call.' He",
-      "leaves Saskia at the spa and heads to",
+      "leaves Michelle at the spa and heads to",
       "the Trocadéro for the Eiffel Tower view.",
       "",
       "The plaza is packed. Tourists. Vendors",
@@ -957,13 +968,13 @@ const STAGES: Stage[] = [
     title: "BACK AT THE BRISTOL",
     art: "hotel",
     narrative: [
-      "Ovi returns to the suite. Saskia is",
+      "Ovi returns to the suite. Michelle is",
       "wearing a robe and reading a Hermès",
       "catalogue. She does not look up.",
       "",
-      "Saskia: 'How was the meeting.'",
+      "Michelle: 'How was the meeting.'",
       "Ovi: 'Productive. Geneva is on hold.'",
-      "Saskia: 'Mm.'",
+      "Michelle: 'Mm.'",
       "",
       "He needs to get out of France. The",
       "embassy will take weeks. He has a wife,",
@@ -988,15 +999,15 @@ const STAGES: Stage[] = [
           "The clerk presses a button. A different,",
           "more permanent button than last time.",
           "",
-          "Saskia, somehow, will hear about this",
+          "Michelle, somehow, will hear about this",
           "by 6 PM. Brad's secretary places the call.",
         ],
-        effects: { saskiaPatience: -35, suspicion: 25, pride: -5 },
+        effects: { michellePatience: -35, suspicion: 25, pride: -5 },
       },
       {
-        label: "Pawn Saskia's wedding ring at a place in the 9ème",
+        label: "Pawn Michelle's wedding ring at a place in the 9ème",
         response: [
-          "Ovi takes Saskia's wedding ring while she",
+          "Ovi takes Michelle's wedding ring while she",
           "showers. He walks to a 'comptoir d'or'",
           "near Pigalle. The man at the counter",
           "offers €1,800. Ovi accepts.",
@@ -1005,15 +1016,15 @@ const STAGES: Stage[] = [
           "",
           "He puts on a fake band from a vending",
           "machine in the Métro. It turns her finger",
-          "green within 4 hours. Saskia notices. She",
+          "green within 4 hours. Michelle notices. She",
           "does not say anything.",
           "",
           "This is, statistically, the worst sign.",
         ],
-        effects: { euros: 1800, saskiaPatience: -30, suspicion: 5 },
+        effects: { euros: 1800, michellePatience: -30, suspicion: 5 },
       },
       {
-        label: "Offer to 'lend' Saskia's company to a 'fixer' for 24 hours",
+        label: "Offer to 'lend' Michelle's company to a 'fixer' for 24 hours",
         response: [
           "Ovi makes a phone call to a number a man",
           "at Harry's gave him. The man on the other",
@@ -1026,7 +1037,7 @@ const STAGES: Stage[] = [
           "The man hangs up. He calls back two minutes",
           "later — to insult him again — then hangs up.",
         ],
-        effects: { saskiaPatience: -40, pride: -15, suspicion: 10 },
+        effects: { michellePatience: -40, pride: -15, suspicion: 10 },
       },
     ],
   },
@@ -1179,7 +1190,7 @@ const STAGES: Stage[] = [
     title: "CALAIS — THE 'JUNGLE'",
     art: "calais",
     narrative: [
-      "Day eight. Saskia has stopped asking",
+      "Day eight. Michelle has stopped asking",
       "questions. AmeriLife has frozen the",
       "corporate card. The Bristol concierge has",
       "stopped using 'Monsieur.' He uses 'you.'",
@@ -1251,7 +1262,7 @@ const STAGES: Stage[] = [
           "",
           "He pays full price. They charge him extra.",
         ],
-        effects: { euros: -2200, saskiaPatience: -25, pride: -15, days: 1 },
+        effects: { euros: -2200, michellePatience: -25, pride: -15, days: 1 },
       },
       {
         label: "Try to stow away in a P&O freight lorry headed for Dover",
@@ -1528,7 +1539,7 @@ const STAGES: Stage[] = [
           "somehow, is here too. Cody is having an",
           "exceptional fiscal quarter.",
         ],
-        effects: { suspicion: 35, saskiaPatience: -15, pride: -10, days: 1 },
+        effects: { suspicion: 35, michellePatience: -15, pride: -10, days: 1 },
       },
     ],
   },
@@ -1718,7 +1729,7 @@ const STAGES: Stage[] = [
           "Burger King!' Three voices laugh. Major",
           "Whitfield closes a folder. 'Brig.'",
         ],
-        effects: { suspicion: 50, saskiaPatience: -10, pride: -25, days: 1 },
+        effects: { suspicion: 50, michellePatience: -10, pride: -25, days: 1 },
       },
     ],
   },
@@ -1742,7 +1753,7 @@ const DEATH_SCREENS: DeathScreen[] = [
       "about Ovi's expense reports. Pascal has",
       "made him a flowchart.",
       "",
-      "Saskia returned to Tampa on her solo flight.",
+      "Michelle returned to Tampa on her solo flight.",
       "She kept the apartment. She kept the dog.",
       "She kept the better lawyer. Brad won.",
       "",
@@ -1768,7 +1779,7 @@ const DEATH_SCREENS: DeathScreen[] = [
       "phrase she invented and is now considering",
       "publishing.",
       "",
-      "Saskia has not visited. Saskia has, however,",
+      "Michelle has not visited. Michelle has, however,",
       "very politely asked the consulate to inform",
       "her if he is ever transferred. He has not been",
       "transferred. The consulate has stopped",
@@ -1796,7 +1807,7 @@ const DEATH_SCREENS: DeathScreen[] = [
       "police escort that 'has been waiting a while'",
       "to meet Mr. Vasilescu.",
       "",
-      "Saskia has filed for divorce in absentia. The",
+      "Michelle has filed for divorce in absentia. The",
       "court accepted. The judge described the",
       "filing as 'one of the more compelling I have",
       "read this year.'",
@@ -1807,11 +1818,11 @@ const DEATH_SCREENS: DeathScreen[] = [
     ],
   },
   {
-    title: "SASKIA WINS",
+    title: "MICHELLE WINS",
     art: "tombstone",
     text: [
-      "Saskia did not need to be 'offered up.' Saskia",
-      "did not need a fixer. Saskia had Brad. Brad",
+      "Michelle did not need to be 'offered up.' Michelle",
+      "did not need a fixer. Michelle had Brad. Brad",
       "had a forensic accountant. The forensic",
       "accountant had a printer.",
       "",
@@ -1821,7 +1832,7 @@ const DEATH_SCREENS: DeathScreen[] = [
       "had been sold to a couple from Naples on a",
       "30-day close.",
       "",
-      "Saskia is now living in the Bristol suite,",
+      "Michelle is now living in the Bristol suite,",
       "billed to AmeriLife, who are themselves under",
       "investigation by the SEC for reasons unrelated",
       "to Ovi but very much accelerated by him.",
@@ -1874,7 +1885,7 @@ const DEATH_SCREENS: DeathScreen[] = [
       "fishing trawler. One — a small man in a",
       "single Loro Piana sock — was not.",
       "",
-      "Saskia received the news from a French",
+      "Michelle received the news from a French",
       "consular officer over the phone. She was",
       "in the back of a Range Rover heading to",
       "Lyon for the weekend. She thanked him. She",
@@ -1943,7 +1954,7 @@ const DEATH_SCREENS: DeathScreen[] = [
       "never understand. It is, Cody believes, the",
       "single funniest line of his entire career.",
       "",
-      "Saskia is in Provence. Brad is in Tampa.",
+      "Michelle is in Provence. Brad is in Tampa.",
       "AmeriLife is in receivership. The Bristol",
       "concierge is in a much better mood.",
       "",
@@ -1976,9 +1987,12 @@ const DEATH_SCREENS: DeathScreen[] = [
       "is fine. His hair was the only thing he ever",
       "really cared about anyway.",
       "",
-      "He recovers in the brig. He files a complaint",
-      "about the bedding. The complaint is logged",
-      "and laminated. Cody has it framed.",
+      "His remaining 14 wisps, mercifully, survived.",
+      "There weren't enough for the cold to take. A",
+      "perverse mercy. He recovers in the brig. He",
+      "files a complaint about the bedding. The",
+      "complaint is logged and laminated. Cody has",
+      "it framed.",
     ],
   },
 ];
@@ -1996,7 +2010,7 @@ interface GameState {
   choices: Choice[] | null;
   deathTitle: string | null;
   usedOviEvents: number[];
-  usedSaskiaEvents: number[];
+  usedMichelleEvents: number[];
   textKey: number;
 }
 
@@ -2014,48 +2028,48 @@ const INITIAL_STATS: Stats = {
   hair: 100,
   suspicion: 0,
   days: 0,
-  saskiaPatience: 60,
+  michellePatience: 60,
 };
 
 function pickRandomEvent(
   oviEvents: GameEvent[],
-  saskiaEvents: GameEvent[],
+  michelleEvents: GameEvent[],
   usedOvi: number[],
-  usedSaskia: number[],
-): { event: GameEvent; usedOvi: number[]; usedSaskia: number[] } {
+  usedMichelle: number[],
+): { event: GameEvent; usedOvi: number[]; usedMichelle: number[] } {
   const isOvi = Math.random() < 0.5;
   if (isOvi) {
     const available = oviEvents
       .map((e, i) => ({ e, i }))
       .filter(({ i }) => !usedOvi.includes(i));
     if (available.length === 0) {
-      const sAvail = saskiaEvents
+      const sAvail = michelleEvents
         .map((e, i) => ({ e, i }))
-        .filter(({ i }) => !usedSaskia.includes(i));
+        .filter(({ i }) => !usedMichelle.includes(i));
       if (sAvail.length === 0) {
-        return { event: oviEvents[0], usedOvi, usedSaskia };
+        return { event: oviEvents[0], usedOvi, usedMichelle };
       }
       const pick = sAvail[Math.floor(Math.random() * sAvail.length)];
-      return { event: pick.e, usedOvi, usedSaskia: [...usedSaskia, pick.i] };
+      return { event: pick.e, usedOvi, usedMichelle: [...usedMichelle, pick.i] };
     }
     const pick = available[Math.floor(Math.random() * available.length)];
-    return { event: pick.e, usedOvi: [...usedOvi, pick.i], usedSaskia };
+    return { event: pick.e, usedOvi: [...usedOvi, pick.i], usedMichelle };
   } else {
-    const available = saskiaEvents
+    const available = michelleEvents
       .map((e, i) => ({ e, i }))
-      .filter(({ i }) => !usedSaskia.includes(i));
+      .filter(({ i }) => !usedMichelle.includes(i));
     if (available.length === 0) {
       const oAvail = oviEvents
         .map((e, i) => ({ e, i }))
         .filter(({ i }) => !usedOvi.includes(i));
       if (oAvail.length === 0) {
-        return { event: saskiaEvents[0], usedOvi, usedSaskia };
+        return { event: michelleEvents[0], usedOvi, usedMichelle };
       }
       const pick = oAvail[Math.floor(Math.random() * oAvail.length)];
-      return { event: pick.e, usedOvi: [...usedOvi, pick.i], usedSaskia };
+      return { event: pick.e, usedOvi: [...usedOvi, pick.i], usedMichelle };
     }
     const pick = available[Math.floor(Math.random() * available.length)];
-    return { event: pick.e, usedOvi, usedSaskia: [...usedSaskia, pick.i] };
+    return { event: pick.e, usedOvi, usedMichelle: [...usedMichelle, pick.i] };
   }
 }
 
@@ -2066,15 +2080,15 @@ function applyEffects(stats: Stats, effects: Partial<Stats>): Stats {
     hair: Math.max(0, Math.min(100, stats.hair + (effects.hair ?? 0))),
     suspicion: Math.max(0, Math.min(100, stats.suspicion + (effects.suspicion ?? 0))),
     days: stats.days + (effects.days ?? 0),
-    saskiaPatience: Math.max(
+    michellePatience: Math.max(
       0,
-      Math.min(100, stats.saskiaPatience + (effects.saskiaPatience ?? 0)),
+      Math.min(100, stats.michellePatience + (effects.michellePatience ?? 0)),
     ),
   };
 }
 
 // Death screen indices:
-// 0=La Santé, 1=Sainte-Anne, 2=Romania, 3=Saskia wins, 4=18ème,
+// 0=La Santé, 1=Sainte-Anne, 2=Romania, 3=Michelle wins, 4=18ème,
 // 5=Channel drowning, 6=Belmarsh, 7=USAF brig, 8=Frozen stiff (Mildenhall morgue)
 
 function checkDeath(stats: Stats, stageIndex: number): DeathScreen | null {
@@ -2089,7 +2103,7 @@ function checkDeath(stats: Stats, stageIndex: number): DeathScreen | null {
       DEATH_SCREENS[6], // Belmarsh
       DEATH_SCREENS[7], // USAF brig
       DEATH_SCREENS[8], // Frozen stiff
-      DEATH_SCREENS[3], // Saskia wins
+      DEATH_SCREENS[3], // Michelle wins
     ];
     return ukPool[Math.floor(Math.random() * ukPool.length)];
   }
@@ -2100,8 +2114,8 @@ function checkDeath(stats: Stats, stageIndex: number): DeathScreen | null {
     if (isCalaisOrChannel) return DEATH_SCREENS[6]; // Belmarsh on UK arrival
     return DEATH_SCREENS[0]; // La Santé
   }
-  if (stats.saskiaPatience <= 0) {
-    return DEATH_SCREENS[3]; // Saskia wins (universal)
+  if (stats.michellePatience <= 0) {
+    return DEATH_SCREENS[3]; // Michelle wins (universal)
   }
   if (stats.euros <= 0) {
     if (isUK) return DEATH_SCREENS[6]; // Belmarsh
@@ -2130,9 +2144,18 @@ function gameReducer(state: GameState, action: Action): GameState {
           "",
           "You are a small man with a big watch and",
           "a bigger opinion of yourself. You sell",
-          "insurance for AmeriLife in Tampa. Your hair",
-          "is your single greatest asset and your",
-          "single greatest enemy.",
+          "insurance for AmeriLife in Tampa.",
+          "",
+          "You have, factually, very little hair. What",
+          "remains lives on the sides of your head and",
+          "is, every morning, painstakingly negotiated",
+          "across the top with three creams and a comb",
+          "owned by your barber's father. You believe",
+          "this is a secret. It is not a secret.",
+          "",
+          "Your wife Michelle, by contrast, has the",
+          "hair of a Lyon shampoo commercial. Hers is",
+          "the only hair the relationship can afford.",
           "",
           "You have informed AmeriLife that you must",
           "travel to Switzerland for a 'critical",
@@ -2141,7 +2164,7 @@ function gameReducer(state: GameState, action: Action): GameState {
           "night reservation at Le Bristol Paris and",
           "a spa package your wife is very interested in.",
           "",
-          "Your wife, Saskia, does not work at AmeriLife.",
+          "Your wife, Michelle, does not work at AmeriLife.",
           "She does not work in insurance. She does not,",
           "in fact, work. She is blond. You are bringing",
           "her on a 'work trip.' Nobody asked any",
@@ -2212,7 +2235,7 @@ function gameReducer(state: GameState, action: Action): GameState {
             `    Days stranded: ${state.stats.days}`,
             `    Euros remaining: €${state.stats.euros.toLocaleString()}`,
             `    Hair integrity: ${state.stats.hair}%`,
-            `    Saskia's patience: ${state.stats.saskiaPatience}%`,
+            `    Michelle's patience: ${state.stats.michellePatience}%`,
             `    Distance from Tampa: ~7,400 km`,
             "",
             "========================================",
@@ -2223,11 +2246,11 @@ function gameReducer(state: GameState, action: Action): GameState {
           textKey: state.textKey + 1,
         };
       }
-      const { event, usedOvi, usedSaskia } = pickRandomEvent(
+      const { event, usedOvi, usedMichelle } = pickRandomEvent(
         OVI_EVENTS,
-        SASKIA_EVENTS,
+        MICHELLE_EVENTS,
         state.usedOviEvents,
-        state.usedSaskiaEvents,
+        state.usedMichelleEvents,
       );
       const newStats = applyEffects(state.stats, event.effects);
       return {
@@ -2235,9 +2258,9 @@ function gameReducer(state: GameState, action: Action): GameState {
         phase: "event",
         stats: newStats,
         currentText: event.text,
-        currentArt: event.who === "ovi" ? "ovi" : "saskia",
+        currentArt: event.who === "ovi" ? "ovi" : "michelle",
         usedOviEvents: usedOvi,
-        usedSaskiaEvents: usedSaskia,
+        usedMichelleEvents: usedMichelle,
         textKey: state.textKey + 1,
       };
     }
@@ -2260,7 +2283,7 @@ function gameReducer(state: GameState, action: Action): GameState {
             `    Days stranded: ${state.stats.days}`,
             `    Euros remaining: €${state.stats.euros.toLocaleString()}`,
             `    Hair integrity: ${state.stats.hair}%`,
-            `    Saskia's patience: ${state.stats.saskiaPatience}%`,
+            `    Michelle's patience: ${state.stats.michellePatience}%`,
             `    Distance from Tampa: ~7,400 km`,
             "",
             "========================================",
@@ -2298,7 +2321,7 @@ function gameReducer(state: GameState, action: Action): GameState {
         choices: null,
         deathTitle: null,
         usedOviEvents: [],
-        usedSaskiaEvents: [],
+        usedMichelleEvents: [],
         textKey: state.textKey + 1,
       };
 
@@ -2399,14 +2422,14 @@ function StatusBar({ stats }: { stats: Stats }) {
   const suspicionColor =
     stats.suspicion < 30 ? "text-[#33ff33]" : stats.suspicion < 70 ? "text-yellow-400" : "text-red-400";
   const patienceColor =
-    stats.saskiaPatience > 40
+    stats.michellePatience > 40
       ? "text-[#33ff33]"
-      : stats.saskiaPatience > 20
+      : stats.michellePatience > 20
         ? "text-yellow-400"
         : "text-red-400";
 
   const oviStatus = OVI_STATUSES[Math.floor(Math.random() * OVI_STATUSES.length)];
-  const saskiaStatus = SASKIA_STATUSES[Math.floor(Math.random() * SASKIA_STATUSES.length)];
+  const michelleStatus = MICHELLE_STATUSES[Math.floor(Math.random() * MICHELLE_STATUSES.length)];
 
   return (
     <div
@@ -2430,12 +2453,12 @@ function StatusBar({ stats }: { stats: Stats }) {
           Heat: <span className={suspicionColor}>{stats.suspicion}%</span>
         </div>
         <div className="text-[#33ff33]/70">
-          Saskia: <span className={patienceColor}>{stats.saskiaPatience}%</span>
+          Michelle: <span className={patienceColor}>{stats.michellePatience}%</span>
         </div>
         <div className="text-[#33ff33]/70 truncate col-span-2 sm:col-span-3">
           Ovi: <span className="text-[#33ff33]/50">{oviStatus}</span>
           <span className="text-[#33ff33]/30"> · </span>
-          Saskia: <span className="text-[#33ff33]/50">{saskiaStatus}</span>
+          Michelle: <span className="text-[#33ff33]/50">{michelleStatus}</span>
         </div>
       </div>
     </div>
@@ -2466,7 +2489,7 @@ const initialState: GameState = {
   choices: null,
   deathTitle: null,
   usedOviEvents: [],
-  usedSaskiaEvents: [],
+  usedMichelleEvents: [],
   textKey: 0,
 };
 
