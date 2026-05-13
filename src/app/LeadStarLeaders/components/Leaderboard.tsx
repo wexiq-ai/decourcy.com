@@ -9,8 +9,7 @@ type Bucket = {
 
 export type ReportData = {
   range: string;
-  gte: string;
-  lt: string;
+  filter?: unknown;
   data: {
     groups?: Record<
       string,
@@ -143,16 +142,10 @@ function Medal({ color, label, title }: { color: string; label: string; title: s
 
 function displayName(b: Bucket): string {
   const md = b.metadata ?? {};
-  const first = pickString(md, ["participantList.firstName"]);
-  const last = pickString(md, ["participantList.lastName"]);
+  const first = pickString(md, ["agent.firstName", "participantList.firstName"]);
+  const last = pickString(md, ["agent.lastName", "participantList.lastName"]);
   if (first || last) return `${first ?? ""} ${last ?? ""}`.trim();
-  const full = pickString(md, [
-    "participantList.fullName",
-    "participantList.displayName",
-    "participantList.name",
-  ]);
-  if (full) return full;
-  const email = pickString(md, ["participantList.email"]);
+  const email = pickString(md, ["agent.email", "participantList.email"]);
   if (email) return email;
   return `Agent ${String(b.key).slice(0, 8)}`;
 }
