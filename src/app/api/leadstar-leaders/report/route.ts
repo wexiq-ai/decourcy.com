@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
   }
   const topN = Math.min(Math.max(body.topN ?? 10, 1), 50);
 
-  const { gte, lt } = computeRange(range, new Date());
+  const dateFilter = buildDateFilter(range, new Date());
 
   // totalSales is a *computed* metric (success + double + triple*2) so Elasticsearch
   // can't use it to order buckets. We order by totalResultSuccess (raw count of sale
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       },
     ],
     filter: {
-      createdAt: { gte, lt },
+      createdAt: dateFilter,
     },
     groups: [
       {
@@ -76,12 +76,10 @@ export async function POST(request: NextRequest) {
             orderBy: { metric: "totalResultSuccess", direction: "desc" },
             includeMetadata: {
               fields: [
-                "participantList.firstName",
-                "participantList.lastName",
-                "participantList.name",
-                "participantList.displayName",
-                "participantList.fullName",
-                "participantList.email",
+                "agent.firstName",
+                "agent.lastName",
+                "agent.email",
+                "agent.npn",
               ],
             },
           },
@@ -135,7 +133,7 @@ export async function POST(request: NextRequest) {
   // Re-rank the byAgent buckets by the true (computed) totalSales and slice to topN.
   const reranked = rerankByAgent(parsed, topN);
 
-  return NextResponse.json({ range, gte, lt, data: reranked });
+  return NextResponse.json({ range, filter: dateFilter, data: reranked });
 }
 
 type BucketLike = {
@@ -166,109 +164,103 @@ function rerankByAgent(parsed: unknown, topN: number): unknown {
   };
 }
 
-function computeRange(range: RangeKey, now: Date): { gte: string; lt: string } {
-  const parts = easternParts(now);
-  const todayStart = easternIso(parts.year, parts.month, parts.day, 0, 0, 0, now);
-  const tomorrowStart = addDaysEastern(parts.year, parts.month, parts.day, 1, now);
+type DateFilter =
+  | { range: "today"; timeZone: string }
+  | { range: "thisMonth"; timeZone: string }
+  | { range: "lastMonth"; timeZone: string }
+  | { range: "thisYear"; timeZone: string }
+  | { range: "custom"; start: string; end: string; timeZone: string };
 
-  if (range === "today") {
-    return { gte: todayStart, lt: tomorrowStart };
-  }
+// EnrollHere's reporting endpoint accepts a date filter object whose value is either
+// a named preset (e.g. { range: "today" }) or { range: "custom", start, end, timeZone }.
+// Named presets are honored where they line up with our tab labels; the rest fall
+// back to "custom" with start/end timestamps anchored to America/New_York.
+function buildDateFilter(range: RangeKey, now: Date): DateFilter {
+  const tz = TZ;
+
+  if (range === "today") return { range: "today", timeZone: tz };
+  if (range === "mtd") return { range: "thisMonth", timeZone: tz };
+  if (range === "lastMonth") return { range: "lastMonth", timeZone: tz };
+  if (range === "ytd") return { range: "thisYear", timeZone: tz };
+
+  const p = easternParts(now);
+  const dayStartTs = (y: number, m: number, d: number) => fmtTs(y, m, d, 0, 0, 0);
+  const dayEndTs = (y: number, m: number, d: number) => fmtTs(y, m, d, 23, 59, 59);
+  const todayEnd = dayEndTs(p.year, p.month, p.day);
 
   if (range === "wtd") {
-    const dow = easternDayOfWeek(parts.year, parts.month, parts.day);
-    const sundayStart = addDaysEastern(parts.year, parts.month, parts.day, -dow, now);
-    return { gte: sundayStart, lt: tomorrowStart };
-  }
-
-  if (range === "mtd") {
-    const monthStart = easternIso(parts.year, parts.month, 1, 0, 0, 0, now);
-    return { gte: monthStart, lt: tomorrowStart };
-  }
-
-  if (range === "lastMonth") {
-    // Full previous calendar month: gte = first day of (month - 1), lt = first day of current month.
-    const prev = prevMonth(parts.year, parts.month);
-    const start = easternIso(prev.year, prev.month, 1, 0, 0, 0, now);
-    const end = easternIso(parts.year, parts.month, 1, 0, 0, 0, now);
-    return { gte: start, lt: end };
+    const dow = easternDayOfWeek(p.year, p.month, p.day);
+    const sunday = shiftDate(p.year, p.month, p.day, -dow);
+    return {
+      range: "custom",
+      start: dayStartTs(sunday.year, sunday.month, sunday.day),
+      end: todayEnd,
+      timeZone: tz,
+    };
   }
 
   if (range === "qtd") {
-    const qStartMonth = parts.month - ((parts.month - 1) % 3);
-    const qStart = easternIso(parts.year, qStartMonth, 1, 0, 0, 0, now);
-    return { gte: qStart, lt: tomorrowStart };
+    const qStartMonth = p.month - ((p.month - 1) % 3);
+    return {
+      range: "custom",
+      start: dayStartTs(p.year, qStartMonth, 1),
+      end: todayEnd,
+      timeZone: tz,
+    };
   }
 
   if (range === "lastQuarter") {
-    // Full previous calendar quarter: gte = first day of prior quarter's first month,
-    // lt = first day of current quarter.
-    const currentQStartMonth = parts.month - ((parts.month - 1) % 3);
-    const prevQEnd = { year: parts.year, month: currentQStartMonth };
+    const currentQStartMonth = p.month - ((p.month - 1) % 3);
     const prevQStartMonthRaw = currentQStartMonth - 3;
     const prevQStart =
       prevQStartMonthRaw < 1
-        ? { year: parts.year - 1, month: prevQStartMonthRaw + 12 }
-        : { year: parts.year, month: prevQStartMonthRaw };
-    const start = easternIso(prevQStart.year, prevQStart.month, 1, 0, 0, 0, now);
-    const end = easternIso(prevQEnd.year, prevQEnd.month, 1, 0, 0, 0, now);
-    return { gte: start, lt: end };
+        ? { year: p.year - 1, month: prevQStartMonthRaw + 12 }
+        : { year: p.year, month: prevQStartMonthRaw };
+    // Last day of prev quarter = day before the current quarter's first day.
+    const dayBeforeCurrentQ = shiftDate(p.year, currentQStartMonth, 1, -1);
+    return {
+      range: "custom",
+      start: dayStartTs(prevQStart.year, prevQStart.month, 1),
+      end: dayEndTs(dayBeforeCurrentQ.year, dayBeforeCurrentQ.month, dayBeforeCurrentQ.day),
+      timeZone: tz,
+    };
   }
 
-  const yStart = easternIso(parts.year, 1, 1, 0, 0, 0, now);
-  return { gte: yStart, lt: tomorrowStart };
+  // exhaustive guard — type system enforces no other RangeKey reaches here
+  const _exhaustive: never = range;
+  void _exhaustive;
+  return { range: "today", timeZone: tz };
 }
 
-function easternParts(date: Date): { year: number; month: number; day: number; hour: number; minute: number; second: number } {
+function fmtTs(year: number, month: number, day: number, hour: number, minute: number, second: number): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${year}-${pad(month)}-${pad(day)} ${pad(hour)}:${pad(minute)}:${pad(second)}`;
+}
+
+function shiftDate(year: number, month: number, day: number, deltaDays: number): { year: number; month: number; day: number } {
+  // Use UTC noon to avoid any DST edge issues — we only care about Y/M/D.
+  const baseUtc = Date.UTC(year, month - 1, day, 12, 0, 0);
+  const shifted = new Date(baseUtc + deltaDays * 86_400_000);
+  return {
+    year: shifted.getUTCFullYear(),
+    month: shifted.getUTCMonth() + 1,
+    day: shifted.getUTCDate(),
+  };
+}
+
+function easternParts(date: Date): { year: number; month: number; day: number } {
   const fmt = new Intl.DateTimeFormat("en-US", {
     timeZone: TZ,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
   });
   const parts = fmt.formatToParts(date);
   const get = (t: string) => Number(parts.find((p) => p.type === t)?.value);
-  return {
-    year: get("year"),
-    month: get("month"),
-    day: get("day"),
-    hour: get("hour") % 24,
-    minute: get("minute"),
-    second: get("second"),
-  };
-}
-
-function easternOffsetString(reference: Date): string {
-  const fmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, timeZoneName: "longOffset" });
-  const part = fmt.formatToParts(reference).find((p) => p.type === "timeZoneName")?.value ?? "GMT-05:00";
-  return part.replace(/^GMT/, "") || "-05:00";
-}
-
-function easternIso(year: number, month: number, day: number, hour: number, minute: number, second: number, reference: Date): string {
-  const offset = easternOffsetString(reference);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}:${pad(second)}${offset}`;
-}
-
-function addDaysEastern(year: number, month: number, day: number, deltaDays: number, reference: Date): string {
-  const baseUtc = Date.UTC(year, month - 1, day, 12, 0, 0);
-  const shifted = new Date(baseUtc + deltaDays * 86_400_000);
-  const y = shifted.getUTCFullYear();
-  const m = shifted.getUTCMonth() + 1;
-  const d = shifted.getUTCDate();
-  return easternIso(y, m, d, 0, 0, 0, reference);
+  return { year: get("year"), month: get("month"), day: get("day") };
 }
 
 function easternDayOfWeek(year: number, month: number, day: number): number {
   const utc = Date.UTC(year, month - 1, day, 12, 0, 0);
   return new Date(utc).getUTCDay();
-}
-
-function prevMonth(year: number, month: number): { year: number; month: number } {
-  if (month === 1) return { year: year - 1, month: 12 };
-  return { year, month: month - 1 };
 }
