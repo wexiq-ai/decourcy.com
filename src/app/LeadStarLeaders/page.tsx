@@ -13,7 +13,9 @@ const RANGES = [
   { id: "today", label: "Today" },
   { id: "wtd", label: "Week-to-Date" },
   { id: "mtd", label: "Month-to-Date" },
+  { id: "lastMonth", label: "Last Month" },
   { id: "qtd", label: "Quarter-to-Date" },
+  { id: "lastQuarter", label: "Last Quarter" },
   { id: "ytd", label: "Year-to-Date" },
 ] as const;
 
@@ -27,17 +29,20 @@ type RangeState = {
 
 const emptyState: RangeState = { data: null, loading: false, error: null };
 
+const initialStates = (): Record<RangeId, RangeState> =>
+  RANGES.reduce(
+    (acc, r) => {
+      acc[r.id] = { ...emptyState };
+      return acc;
+    },
+    {} as Record<RangeId, RangeState>
+  );
+
 export default function LeadStarLeadersPage() {
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [active, setActive] = useState<RangeId>("today");
-  const [states, setStates] = useState<Record<RangeId, RangeState>>({
-    today: { ...emptyState },
-    wtd: { ...emptyState },
-    mtd: { ...emptyState },
-    qtd: { ...emptyState },
-    ytd: { ...emptyState },
-  });
+  const [states, setStates] = useState<Record<RangeId, RangeState>>(initialStates);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -122,13 +127,7 @@ export default function LeadStarLeadersPage() {
   const handleClearKey = () => {
     window.localStorage.removeItem(STORAGE_KEY);
     setApiKey(null);
-    setStates({
-      today: { ...emptyState },
-      wtd: { ...emptyState },
-      mtd: { ...emptyState },
-      qtd: { ...emptyState },
-      ytd: { ...emptyState },
-    });
+    setStates(initialStates());
     setLastRefreshed(null);
   };
 
