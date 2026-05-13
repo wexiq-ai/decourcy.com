@@ -4,7 +4,24 @@ const ENROLLHERE_URL = "https://api.enrollhere.com/v1/reporting/report";
 const TZ = "America/New_York";
 const INDEX = "lead-calls";
 
-type RangeKey = "today" | "wtd" | "mtd" | "qtd" | "ytd";
+type RangeKey =
+  | "today"
+  | "wtd"
+  | "mtd"
+  | "lastMonth"
+  | "qtd"
+  | "lastQuarter"
+  | "ytd";
+
+const VALID_RANGES: RangeKey[] = [
+  "today",
+  "wtd",
+  "mtd",
+  "lastMonth",
+  "qtd",
+  "lastQuarter",
+  "ytd",
+];
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +39,7 @@ export async function POST(request: NextRequest) {
   }
 
   const range = body.range;
-  if (!range || !["today", "wtd", "mtd", "qtd", "ytd"].includes(range)) {
+  if (!range || !VALID_RANGES.includes(range)) {
     return NextResponse.json({ error: "Invalid range" }, { status: 400 });
   }
   const topN = Math.min(Math.max(body.topN ?? 10, 1), 50);
@@ -169,10 +186,33 @@ function computeRange(range: RangeKey, now: Date): { gte: string; lt: string } {
     return { gte: monthStart, lt: tomorrowStart };
   }
 
+  if (range === "lastMonth") {
+    // Full previous calendar month: gte = first day of (month - 1), lt = first day of current month.
+    const prev = prevMonth(parts.year, parts.month);
+    const start = easternIso(prev.year, prev.month, 1, 0, 0, 0, now);
+    const end = easternIso(parts.year, parts.month, 1, 0, 0, 0, now);
+    return { gte: start, lt: end };
+  }
+
   if (range === "qtd") {
     const qStartMonth = parts.month - ((parts.month - 1) % 3);
     const qStart = easternIso(parts.year, qStartMonth, 1, 0, 0, 0, now);
     return { gte: qStart, lt: tomorrowStart };
+  }
+
+  if (range === "lastQuarter") {
+    // Full previous calendar quarter: gte = first day of prior quarter's first month,
+    // lt = first day of current quarter.
+    const currentQStartMonth = parts.month - ((parts.month - 1) % 3);
+    const prevQEnd = { year: parts.year, month: currentQStartMonth };
+    const prevQStartMonthRaw = currentQStartMonth - 3;
+    const prevQStart =
+      prevQStartMonthRaw < 1
+        ? { year: parts.year - 1, month: prevQStartMonthRaw + 12 }
+        : { year: parts.year, month: prevQStartMonthRaw };
+    const start = easternIso(prevQStart.year, prevQStart.month, 1, 0, 0, 0, now);
+    const end = easternIso(prevQEnd.year, prevQEnd.month, 1, 0, 0, 0, now);
+    return { gte: start, lt: end };
   }
 
   const yStart = easternIso(parts.year, 1, 1, 0, 0, 0, now);
@@ -226,4 +266,9 @@ function addDaysEastern(year: number, month: number, day: number, deltaDays: num
 function easternDayOfWeek(year: number, month: number, day: number): number {
   const utc = Date.UTC(year, month - 1, day, 12, 0, 0);
   return new Date(utc).getUTCDay();
+}
+
+function prevMonth(year: number, month: number): { year: number; month: number } {
+  if (month === 1) return { year: year - 1, month: 12 };
+  return { year, month: month - 1 };
 }
