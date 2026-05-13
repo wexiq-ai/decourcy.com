@@ -29,6 +29,12 @@ export async function POST(request: NextRequest) {
 
   const { gte, lt } = computeRange(range, new Date());
 
+  // totalSales is a *computed* metric (success + double + triple*2) so Elasticsearch
+  // can't use it to order buckets. We order by totalResultSuccess (raw count of sale
+  // events) which is a near-perfect proxy, fetch a wider pool, then re-rank the
+  // buckets server-side by the true totalSales value before slicing to topN.
+  const oversize = Math.max(topN * 3, 30);
+
   const payload = {
     sources: [
       {
@@ -49,8 +55,8 @@ export async function POST(request: NextRequest) {
         dimensions: [
           {
             field: "participantList.id",
-            size: topN,
-            orderBy: { metric: "totalSales", direction: "desc" },
+            size: oversize,
+            orderBy: { metric: "totalResultSuccess", direction: "desc" },
             includeMetadata: {
               fields: [
                 "participantList.firstName",
@@ -63,7 +69,12 @@ export async function POST(request: NextRequest) {
             },
           },
         ],
-        metrics: ["totalSales", "totalBillableSum", "costPerSale"],
+        metrics: [
+          "totalSales",
+          "totalResultSuccess",
+          "totalBillableSum",
+          "costPerSale",
+        ],
       },
     ],
   };
@@ -104,7 +115,38 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  return NextResponse.json({ range, gte, lt, data: parsed });
+  // Re-rank the byAgent buckets by the true (computed) totalSales and slice to topN.
+  const reranked = rerankByAgent(parsed, topN);
+
+  return NextResponse.json({ range, gte, lt, data: reranked });
+}
+
+type BucketLike = {
+  key: string | number;
+  metrics?: Record<string, number | null>;
+  metadata?: Record<string, unknown>;
+  doc_count?: number;
+};
+
+function rerankByAgent(parsed: unknown, topN: number): unknown {
+  if (!parsed || typeof parsed !== "object") return parsed;
+  const root = parsed as { groups?: Record<string, { buckets?: BucketLike[] }> };
+  const byAgent = root.groups?.byAgent;
+  if (!byAgent?.buckets || !Array.isArray(byAgent.buckets)) return parsed;
+
+  const sorted = [...byAgent.buckets].sort((a, b) => {
+    const sa = typeof a.metrics?.totalSales === "number" ? a.metrics.totalSales : 0;
+    const sb = typeof b.metrics?.totalSales === "number" ? b.metrics.totalSales : 0;
+    return sb - sa;
+  });
+
+  return {
+    ...root,
+    groups: {
+      ...root.groups,
+      byAgent: { ...byAgent, buckets: sorted.slice(0, topN) },
+    },
+  };
 }
 
 function computeRange(range: RangeKey, now: Date): { gte: string; lt: string } {
