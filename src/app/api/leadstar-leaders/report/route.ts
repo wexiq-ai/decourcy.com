@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const ENROLLHERE_URL = "https://api.enrollhere.com/v1/reporting/report";
+const AGENT_LOOKUP_URL = "https://api.enrollhere.com/v1/dialer/agents/performance";
 const TZ = "America/New_York";
 const INDEX = "lead-calls";
 
@@ -133,7 +134,78 @@ export async function POST(request: NextRequest) {
   // Re-rank the byAgent buckets by the true (computed) totalSales and slice to topN.
   const reranked = rerankByAgent(parsed, topN);
 
-  return NextResponse.json({ range, filter: dateFilter, data: reranked });
+  // The reporting endpoint's dimension metadata does not expose agent names on
+  // this index, so do a second lookup against /v1/dialer/agents/performance —
+  // which DOES return id + firstName + lastName — and merge the names into each
+  // bucket's metadata. Failures here degrade gracefully back to ID-only labels.
+  const enriched = await enrichAgentNames(reranked, apiKey);
+
+  return NextResponse.json({ range, filter: dateFilter, data: enriched });
+}
+
+async function enrichAgentNames(parsed: unknown, apiKey: string): Promise<unknown> {
+  if (!parsed || typeof parsed !== "object") return parsed;
+  const root = parsed as { groups?: Record<string, { buckets?: BucketLike[] }> };
+  const buckets = root.groups?.byAgent?.buckets;
+  if (!buckets || !Array.isArray(buckets) || buckets.length === 0) return parsed;
+
+  const ids = Array.from(
+    new Set(buckets.map((b) => String(b.key)).filter((k) => k && k !== "undefined"))
+  );
+  if (ids.length === 0) return parsed;
+
+  let nameMap: Record<string, { firstName?: string; lastName?: string; npn?: string }> = {};
+  try {
+    const lookupRes = await fetch(AGENT_LOOKUP_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `ApiKey ${apiKey}`,
+      },
+      body: JSON.stringify({
+        filter: {
+          date: { range: "last365days", timeZone: TZ },
+          agent: { ids },
+        },
+      }),
+      cache: "no-store",
+    });
+    if (lookupRes.ok) {
+      const json = (await lookupRes.json()) as {
+        agents?: Array<{ id?: string; firstName?: string; lastName?: string; npn?: string }>;
+      };
+      for (const a of json.agents ?? []) {
+        if (a.id) {
+          nameMap[a.id] = { firstName: a.firstName, lastName: a.lastName, npn: a.npn };
+        }
+      }
+    }
+  } catch {
+    // Swallow — name enrichment is best-effort.
+    nameMap = {};
+  }
+
+  const annotated = buckets.map((b) => {
+    const info = nameMap[String(b.key)];
+    if (!info) return b;
+    return {
+      ...b,
+      metadata: {
+        ...(b.metadata ?? {}),
+        "agent.firstName": info.firstName ?? b.metadata?.["agent.firstName"],
+        "agent.lastName": info.lastName ?? b.metadata?.["agent.lastName"],
+        "agent.npn": info.npn ?? b.metadata?.["agent.npn"],
+      },
+    };
+  });
+
+  return {
+    ...root,
+    groups: {
+      ...root.groups,
+      byAgent: { ...root.groups!.byAgent, buckets: annotated },
+    },
+  };
 }
 
 type BucketLike = {
