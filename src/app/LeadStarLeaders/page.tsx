@@ -70,7 +70,7 @@ export default function LeadStarLeadersPage() {
             "Content-Type": "application/json",
             "X-LeadStar-API-Key": key,
           },
-          body: JSON.stringify({ range, topN: 10 }),
+          body: JSON.stringify({ range, topN: 50 }),
         });
 
         const body = await res.json().catch(() => ({}));
@@ -183,7 +183,7 @@ export default function LeadStarLeadersPage() {
               }}
             />
             <p className="text-[0.6875rem] tracking-[0.22em] uppercase text-white/55 mt-3 font-medium">
-              Top 10 Agents by Sales · Eastern Time
+              Top 50 Agents by Sales · Eastern Time
             </p>
           </div>
         </header>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo, useState } from "react";
+
 type Bucket = {
   key: string | number;
   doc_count?: number;
@@ -21,7 +23,29 @@ export type ReportData = {
   };
 };
 
+// CPS below this threshold is flagged for further investigation —
+// unusually low cost-per-sale may indicate data issues, misattribution,
+// or an outlier worth a closer look.
+const CPS_INVESTIGATION_THRESHOLD = 50;
+
+type SortColumn = "rank" | "agent" | "sales" | "spend" | "cps";
+type SortDirection = "asc" | "desc";
+type SortState = { column: SortColumn; direction: SortDirection };
+
+const DEFAULT_SORT: SortState = { column: "rank", direction: "asc" };
+
+type EnrichedRow = {
+  bucket: Bucket;
+  salesRank: number;
+  name: string;
+  sales: number;
+  spend: number;
+  cps: number | null;
+};
+
 export function Leaderboard({ data }: { data: ReportData | null }) {
+  const [sort, setSort] = useState<SortState>(DEFAULT_SORT);
+
   if (!data) return null;
 
   const summary = data.data.groups?.summary?.metrics ?? {};
@@ -34,7 +58,7 @@ export function Leaderboard({ data }: { data: ReportData | null }) {
   return (
     <div className="flex flex-col gap-8">
       <KpiRow totalSales={totalSales} totalSpend={totalSpend} cps={cps} />
-      <Top10 buckets={buckets} />
+      <AgentTable buckets={buckets} sort={sort} onSort={setSort} />
     </div>
   );
 }
@@ -58,7 +82,39 @@ function Kpi({ label, value, accent = false }: { label: string; value: string; a
   );
 }
 
-function Top10({ buckets }: { buckets: Bucket[] }) {
+function AgentTable({
+  buckets,
+  sort,
+  onSort,
+}: {
+  buckets: Bucket[];
+  sort: SortState;
+  onSort: (next: SortState) => void;
+}) {
+  // Buckets come pre-sorted by sales desc from the server. Their position in
+  // that input order IS each agent's intrinsic sales rank — that's what drives
+  // the medals, regardless of the current display sort.
+  const rows: EnrichedRow[] = useMemo(
+    () =>
+      buckets.map((b, i) => {
+        const sales = numeric(b.metrics?.totalSales);
+        const spend = numeric(b.metrics?.totalBillableSum);
+        return {
+          bucket: b,
+          salesRank: i + 1,
+          name: displayName(b),
+          sales,
+          spend,
+          cps: sales > 0 ? spend / sales : null,
+        };
+      }),
+    [buckets]
+  );
+
+  const sortedRows = useMemo(() => sortRows(rows, sort), [rows, sort]);
+  const flagCount = sortedRows.filter((r) => isFlagged(r.cps)).length;
+  const isDefaultSort = sort.column === "rank" && sort.direction === "asc";
+
   if (buckets.length === 0) {
     return (
       <div className="rounded border border-[#eeb54e]/15 bg-[#1a1718] py-16 text-center text-white/50 tracking-[0.05em]">
@@ -68,49 +124,138 @@ function Top10({ buckets }: { buckets: Bucket[] }) {
   }
 
   return (
-    <div className="rounded border border-[#eeb54e]/15 bg-[#1a1718] overflow-hidden">
-      <div className="grid grid-cols-[3rem_1fr_8rem_8rem_8rem] gap-4 px-6 py-3 border-b border-[#eeb54e]/15 text-[0.625rem] tracking-[0.22em] uppercase text-white/55 font-medium">
-        <div>Rank</div>
-        <div>Agent</div>
-        <div className="text-right">Sales</div>
-        <div className="text-right">Spend</div>
-        <div className="text-right">CPS</div>
+    <div className="flex flex-col gap-3">
+      {flagCount > 0 && <FlagLegend count={flagCount} />}
+      <div className="rounded border border-[#eeb54e]/15 bg-[#1a1718] overflow-hidden">
+        <div className="grid grid-cols-[7rem_1fr_7rem_8rem_8rem] gap-4 px-6 py-3 border-b border-[#eeb54e]/15 text-[0.625rem] tracking-[0.22em] uppercase text-white/55 font-medium">
+          <HeaderCell column="rank" label="Rank by Total Sales" sort={sort} onSort={onSort} align="left" />
+          <HeaderCell column="agent" label="Agent" sort={sort} onSort={onSort} align="left" />
+          <HeaderCell column="sales" label="Sales" sort={sort} onSort={onSort} align="right" />
+          <HeaderCell column="spend" label="Spend" sort={sort} onSort={onSort} align="right" />
+          <HeaderCell column="cps" label="CPS" sort={sort} onSort={onSort} align="right" />
+        </div>
+        {sortedRows.map((row, visualIndex) => (
+          <Row
+            key={String(row.bucket.key)}
+            row={row}
+            isTopVisual={visualIndex === 0 && isDefaultSort}
+          />
+        ))}
       </div>
-      {buckets.map((b, i) => (
-        <Row key={String(b.key)} bucket={b} rank={i + 1} isTop={i === 0} />
-      ))}
     </div>
   );
 }
 
-function Row({ bucket, rank, isTop }: { bucket: Bucket; rank: number; isTop: boolean }) {
-  const name = displayName(bucket);
-  const sales = numeric(bucket.metrics?.totalSales);
-  const spend = numeric(bucket.metrics?.totalBillableSum);
-  const cps = sales > 0 ? spend / sales : null;
+function FlagLegend({ count }: { count: number }) {
+  return (
+    <div className="flex items-center gap-2 text-[0.6875rem] text-[#eeb54e]/85">
+      <FlagIcon />
+      <span className="tracking-[0.04em]">
+        {count} {count === 1 ? "agent has" : "agents have"} CPS under{" "}
+        {formatCurrency(CPS_INVESTIGATION_THRESHOLD)} — investigate.
+      </span>
+    </div>
+  );
+}
 
-  // Top agent: 20% larger
-  const baseText = isTop ? "text-xl" : "text-base";
-  const baseNum = isTop ? "text-xl" : "text-base";
+function HeaderCell({
+  column,
+  label,
+  sort,
+  onSort,
+  align,
+}: {
+  column: SortColumn;
+  label: string;
+  sort: SortState;
+  onSort: (next: SortState) => void;
+  align: "left" | "right";
+}) {
+  const isActive = sort.column === column;
+  const handleClick = () => {
+    if (isActive) {
+      onSort({ column, direction: sort.direction === "asc" ? "desc" : "asc" });
+    } else {
+      onSort({ column, direction: defaultDirectionFor(column) });
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className={`flex items-center gap-1.5 text-inherit uppercase tracking-[0.22em] font-medium transition-colors hover:text-[#eeb54e] ${
+        align === "right" ? "justify-end" : "justify-start"
+      } ${isActive ? "text-[#eeb54e]" : ""}`}
+      title={`Sort by ${label}`}
+    >
+      <span>{label}</span>
+      <SortArrow active={isActive} direction={sort.direction} />
+    </button>
+  );
+}
+
+function SortArrow({ active, direction }: { active: boolean; direction: SortDirection }) {
+  return (
+    <svg
+      width="9"
+      height="9"
+      viewBox="0 0 12 12"
+      className={active ? "opacity-100" : "opacity-25"}
+      aria-hidden
+    >
+      {direction === "asc" ? (
+        <polygon points="6,2 10,8 2,8" fill="currentColor" />
+      ) : (
+        <polygon points="6,10 10,4 2,4" fill="currentColor" />
+      )}
+    </svg>
+  );
+}
+
+function Row({ row, isTopVisual }: { row: EnrichedRow; isTopVisual: boolean }) {
+  const flagged = isFlagged(row.cps);
+
+  // Top agent (sales rank #1) gets a 20% font bump — but only when the table
+  // is in its canonical sales-rank order so the bumped row is always visually
+  // on top.
+  const enlarged = isTopVisual && row.salesRank === 1;
+  const baseText = enlarged ? "text-xl" : "text-base";
+  const baseNum = enlarged ? "text-xl" : "text-base";
 
   return (
     <div
-      className={`grid grid-cols-[3rem_1fr_8rem_8rem_8rem] gap-4 px-6 py-4 items-center border-b border-white/[0.04] last:border-b-0 ${
-        isTop ? "bg-[#eeb54e]/[0.04]" : ""
-      }`}
+      className={`grid grid-cols-[7rem_1fr_7rem_8rem_8rem] gap-4 px-6 py-4 items-center border-b border-white/[0.04] last:border-b-0 ${
+        enlarged ? "bg-[#eeb54e]/[0.04]" : ""
+      } ${flagged ? "ring-1 ring-inset ring-[#eeb54e]/15" : ""}`}
     >
       <div className="flex items-center justify-start">
-        <RankBadge rank={rank} />
+        <RankBadge rank={row.salesRank} />
       </div>
-      <div className={`font-medium tracking-[0.02em] ${baseText} ${isTop ? "text-[#eeb54e]" : "text-white"}`}>
-        {name}
+      <div className={`font-medium tracking-[0.02em] ${baseText} ${enlarged ? "text-[#eeb54e]" : "text-white"}`}>
+        {row.name}
       </div>
-      <div className={`text-right tabular-nums font-semibold ${baseNum} ${isTop ? "text-[#eeb54e]" : "text-white"}`}>
-        {formatNumber(sales)}
+      <div className={`text-right tabular-nums font-semibold ${baseNum} ${enlarged ? "text-[#eeb54e]" : "text-white"}`}>
+        {formatNumber(row.sales)}
       </div>
-      <div className={`text-right tabular-nums ${baseNum} text-white/70`}>{formatCurrency(spend)}</div>
-      <div className={`text-right tabular-nums ${baseNum} text-white/70`}>{cps === null ? "—" : formatCurrency(cps)}</div>
+      <div className={`text-right tabular-nums ${baseNum} text-white/70`}>{formatCurrency(row.spend)}</div>
+      <div className={`text-right tabular-nums ${baseNum} ${flagged ? "text-[#eeb54e]" : "text-white/70"}`}>
+        <span className="inline-flex items-center justify-end gap-1.5">
+          {row.cps === null ? "—" : formatCurrency(row.cps)}
+          {flagged && <FlagIcon title={`CPS below ${formatCurrency(CPS_INVESTIGATION_THRESHOLD)} — investigate`} />}
+        </span>
+      </div>
     </div>
+  );
+}
+
+function FlagIcon({ title }: { title?: string }) {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-label={title}>
+      {title && <title>{title}</title>}
+      <path d="M12 9v4" />
+      <path d="M12 17h.01" />
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+    </svg>
   );
 }
 
@@ -138,6 +283,49 @@ function Medal({ color, label, title }: { color: string; label: string; title: s
       </svg>
     </div>
   );
+}
+
+function sortRows(rows: EnrichedRow[], { column, direction }: SortState): EnrichedRow[] {
+  const sign = direction === "asc" ? 1 : -1;
+  const copy = [...rows];
+
+  if (column === "rank") {
+    copy.sort((a, b) => sign * (a.salesRank - b.salesRank));
+    return copy;
+  }
+
+  if (column === "agent") {
+    copy.sort((a, b) => sign * a.name.localeCompare(b.name, "en-US", { sensitivity: "base" }));
+    return copy;
+  }
+
+  const accessor: (r: EnrichedRow) => number | null =
+    column === "sales" ? (r) => r.sales : column === "spend" ? (r) => r.spend : (r) => r.cps;
+
+  copy.sort((a, b) => {
+    const av = accessor(a);
+    const bv = accessor(b);
+    // Nulls always sort to the bottom regardless of direction — agents with
+    // no sales (and therefore no CPS) shouldn't crowd the top of any view.
+    if (av === null && bv === null) return a.salesRank - b.salesRank;
+    if (av === null) return 1;
+    if (bv === null) return -1;
+    if (av === bv) return a.salesRank - b.salesRank;
+    return sign * (av - bv);
+  });
+  return copy;
+}
+
+function defaultDirectionFor(column: SortColumn): SortDirection {
+  // Numerical columns default to descending (biggest first) — what people
+  // usually want from a leaderboard. Names default ascending (A→Z). Rank
+  // default ascending puts the gold medalist on top.
+  if (column === "agent" || column === "rank") return "asc";
+  return "desc";
+}
+
+function isFlagged(cps: number | null): boolean {
+  return cps !== null && cps < CPS_INVESTIGATION_THRESHOLD;
 }
 
 function displayName(b: Bucket): string {
